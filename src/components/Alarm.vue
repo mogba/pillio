@@ -1,94 +1,61 @@
 <template>
-  <q-page class="q-pa-md">
-    <q-card-section>
-      <div class="text-h4">Meus alarmes</div>
-    </q-card-section>
-    <q-list style="max-width: 600px;">
-      <q-item v-for="contact in contacts" :key="contact.id">
-        <q-item-section avatar>
-          <q-avatar color="primary" text-color="white">
-            {{ contact.letter }}
-          </q-avatar>
-        </q-item-section>
+    <q-item-section avatar>
+      <q-icon name="medication" size="md" color="grey" />
+    </q-item-section>
 
-        <q-item-section>
-          <q-item-label>{{ contact.name }}</q-item-label>
-          <q-item-label caption lines="1">{{ contact.email }}</q-item-label>
-        </q-item-section>
+    <q-item-section>
+      <q-item-label
+        style="overflow: hidden; text-overflow: ellipsis;"
+      >
+        {{ alarmData.medicineName }}
+      </q-item-label>
+      <q-item-label caption>{{ messages.treatmentStart(alarmData) }}</q-item-label>
+      <q-item-label caption>{{ messages.repetition(alarmData) }}</q-item-label>
+    </q-item-section>
 
-        <q-item-section side>
-          <q-icon name="chat_bubble" color="green" />
-        </q-item-section>
-      </q-item>
-
-      <q-separator />
-      <q-item-label header>Offline</q-item-label>
-
-      <q-item v-for="contact in offline" :key="contact.id" class="q-mb-sm" clickable v-ripple>
-        <q-item-section avatar>
-          <q-avatar>
-            <img :src="`https://cdn.quasar.dev/img/${contact.avatar}`">
-          </q-avatar>
-        </q-item-section>
-
-        <q-item-section>
-          <q-item-label>{{ contact.name }}</q-item-label>
-          <q-item-label caption lines="1">{{ contact.email }}</q-item-label>
-        </q-item-section>
-
-        <q-item-section side>
-          <q-icon name="chat_bubble" color="grey" />
-        </q-item-section>
-      </q-item>
-    </q-list>
-  </q-page>
+    <q-item-section side>
+      <span v-if="isDeleteMode">Is delete mode</span>
+      <q-toggle v-else v-model="alarmData.isActive" val="{{ alarmData.isActive }}" />
+    </q-item-section>
 </template>
 
 <script>
 import { ref } from '@vue/reactivity'
+import { defineComponent } from '@vue/runtime-core';
 
-const contacts = [ {
-  id: 1,
-  name: 'Ruddy Jedrzej',
-  email: 'rjedrzej0@discuz.net',
-  letter: 'R'
-}, {
-  id: 2,
-  name: 'Mallorie Alessandrini',
-  email: 'malessandrini1@marketwatch.com',
-  letter: 'M'
-}, {
-  id: 3,
-  name: 'Elisabetta Wicklen',
-  email: 'ewicklen2@microsoft.com',
-  letter: 'E'
-}, {
-  id: 4,
-  name: 'Seka Fawdrey',
-  email: 'sfawdrey3@wired.com',
-  letter: 'S'
-} ]
+const messages = {
+  treatmentStart: (alarm) => 
+    `Início em ${alarm.startDate} ${alarm.startTime}`,
+  repetition: (alarm) => {
+    const appendInterval = alarm.repetitionIntervalInHours < 2
+      ? '1 hora' 
+      : `${alarm.repetitionIntervalInHours} horas`;
 
-const offline = [ {
-  id: 5,
-  name: 'Brunhilde Panswick',
-  email: 'bpanswick4@csmonitor.com',
-  avatar: 'avatar2.jpg'
-}, {
-  id: 6,
-  name: 'Winfield Stapforth',
-  email: 'wstapforth5@pcworld.com',
-  avatar: 'avatar6.jpg'
-} ]
+    return `Repetir a cada ${appendInterval}`;
+  }
+}
 
-export default {
+export default defineComponent({
   name: "Alarm",
-  setup() {
+  props: {
+    alarm: {
+      id: Number,
+      medicineName: String,
+      timesToRepeat: Number,
+      repetitionIntervalInHours: Number,
+      startDate: String,
+      startTime: String,
+      isActive: Boolean,
+    },
+    isDeleteMode: Boolean,
+  },
+  setup(props) {
+    const alarmData = ref(props.alarm);
+
     return {
-      dados: ["Webcam", "Whiskey", "Controle", "Mesa", "Pipoca"],
-      contacts,
-      offline
+      messages,
+      alarmData,
     }
   },
-}
+})
 </script>

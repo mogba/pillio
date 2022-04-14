@@ -10,7 +10,11 @@ const routes = [
       {
         path: "add-alarm",
         component: () => import("pages/AddAlarm.vue")
-      }
+      },
+      {
+        path: "alarm-history",
+        component: () => import("pages/AlarmHistory.vue")
+      },
     ],
   },
 

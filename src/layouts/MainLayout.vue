@@ -17,10 +17,10 @@
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+        <q-item-label header> Menu </q-item-label>
 
         <EssentialLink
-          v-for="link in essentialLinks"
+          v-for="link in linksList"
           :key="link.title"
           v-bind="link"
         />
@@ -47,8 +47,14 @@ const linksList = [
     title: "Adicionar alarme",
     caption: "Adicionar um alarme para um remédio",
     icon: "add_alarm",
-    link: "#/add-alarm"
-  }
+    link: "#/add-alarm",
+  },
+  {
+    title: "Histórico de alarmes",
+    caption: "Visualizar histórico de alarmes",
+    icon: "history",
+    link: "#/alarm-history",
+  },
 ];
 
 import { defineComponent, ref } from "vue";
@@ -64,7 +70,7 @@ export default defineComponent({
     const leftDrawerOpen = ref(false);
 
     return {
-      essentialLinks: linksList,
+      linksList,
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
