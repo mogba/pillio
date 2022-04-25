@@ -1,31 +1,31 @@
 <template>
   <q-page class="q-pa-md">
     <q-card-section>
-      <div class="text-h4">Meus alarmes</div>
+      <div class="text-h4">
+        Meus alarmes
+      </div>
     </q-card-section>
-    <q-list style="max-width: 600px; margin-bottom: 70px;">
-      <!-- <q-item v-for="contact in offline" :key="contact.id" class="q-mb-sm" clickable v-ripple>
-        <q-item-section avatar>
-          <q-avatar>
-            <img :src="`https://cdn.quasar.dev/img/${contact.avatar}`">
-          </q-avatar>
-        </q-item-section>
-
-        <q-item-section>
-          <q-item-label>{{ contact.name }}</q-item-label>
-          <q-item-label caption lines="1">{{ contact.email }}</q-item-label>
-        </q-item-section>
-
-        <q-item-section side>
-          <q-icon name="chat_bubble" color="grey" />
-        </q-item-section>
-      </q-item> -->
-      <q-item v-for="alarm in alarms" :key="alarm.id" class="q-mb-sm" clickable v-ripple>
-        <Alarm :alarm="alarm" :isDeleteMode="isDeleteMode" />
+    
+    <q-list style="margin-bottom: 70px;">
+      <q-item
+        class="q-mb-sm"
+        clickable
+        v-ripple
+        v-for="alarm in alarms"
+        :key="alarm.id"
+        @click="handleAlarmSelect(alarm)"
+      >
+        <!-- to="edit-alarm" -->
+        <Alarm :alarm="alarm">
+          <q-item-section side>
+            <q-checkbox v-if="isDeleteMode" v-model="alarm.toDelete" val="{{ alarm.toDelete }}" />
+            <q-toggle v-else v-model="alarm.isActive" val="{{ alarm.isActive }}" />
+          </q-item-section>
+        </Alarm>
       </q-item>
     </q-list>
 
-    <div>
+    <div style="position: fixed;">
       <q-page-sticky
         v-if="isDeleteMode"
         position="bottom"
@@ -37,7 +37,7 @@
             no-caps
             class="full-width"
             label="Cancelar exclusão"
-            color="secondary"
+            color="primary"
             :size="'lg'"
             @click="handleChangeDeleteMode"
           />
@@ -83,20 +83,58 @@
             label="Excluir alarmes" 
             label-position="left" 
             icon="delete_forever" 
-            color="secondary"
+            color="primary"
             @click="handleChangeDeleteMode"
           />
         </q-fab>
       </q-page-sticky>
     </div>
+
+    <q-dialog v-model="showAlarmDeleteConfirmationDialog">
+      <q-card style="width: 700px; max-width: 80vw;">
+        <div v-if="alarms.filter(x => x.toDelete)?.length > 0">
+          <q-card-section class="q-mx-sm">
+            <div class="text-h6">Os seguintes alarmes serão excluídos</div>
+          </q-card-section>
+
+          <q-card-section>
+            <q-list>
+              <q-item
+                v-for="alarm in alarms.filter(x => x.toDelete)"
+                :key="alarm.id"
+              >
+                <Alarm :alarm="alarm" />
+              </q-item>
+            </q-list>
+          </q-card-section>
+
+          <q-card-actions class="q-mx-md" align="right">
+            <q-btn flat label="Cancelar" v-close-popup />
+            <q-btn flat negative color="negative" label="OK" v-close-popup @click="() => {}" />
+          </q-card-actions>
+        </div>
+
+        <div v-else>
+          <q-card-section class="q-mx-sm">
+            <div class="text-h6">Nenhum alarme foi selecionado para exclusão</div>
+          </q-card-section>
+
+          <q-card-actions class="q-mx-md" align="right">
+            <q-btn flat label="OK" v-close-popup />
+          </q-card-actions>
+        </div>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
-import Alarm from "components/Alarm.vue";
-import { ref } from "vue";
+import { reactive, ref } from 'vue';
+import { useRoute } from 'vue-router';
+// import route from 'src/router';
+import Alarm from 'components/Alarm.vue';
 
-const alarms = ref([
+const alarms = reactive([
   {
     id: 1,
     medicineName: "Roacutan",
@@ -104,7 +142,8 @@ const alarms = ref([
     repetitionIntervalInHours: 1,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: true
+    isActive: true,
+    toDelete: false,
   },
   {
     id: 2,
@@ -113,7 +152,8 @@ const alarms = ref([
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: true
+    isActive: true,
+    toDelete: false,
   },
   {
     id: 3,
@@ -122,16 +162,18 @@ const alarms = ref([
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: true
+    isActive: true,
+    toDelete: false,
   },
   {
     id: 4,
-    medicineName: "Escitalopram",
+    medicineName: "Escitalopramaaaaaaaaaaaaaaaaaaaaaaaaa",
     timesToRepeat: 10,
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: false
+    isActive: false,
+    toDelete: false,
   },
   {
     id: 5,
@@ -140,7 +182,8 @@ const alarms = ref([
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: false
+    isActive: false,
+    toDelete: false,
   },
   {
     id: 4,
@@ -149,7 +192,8 @@ const alarms = ref([
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: false
+    isActive: false,
+    toDelete: false,
   },
   {
     id: 5,
@@ -158,7 +202,8 @@ const alarms = ref([
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: false
+    isActive: false,
+    toDelete: false,
   },
   {
     id: 4,
@@ -167,7 +212,8 @@ const alarms = ref([
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: false
+    isActive: false,
+    toDelete: false,
   },
   {
     id: 5,
@@ -176,7 +222,8 @@ const alarms = ref([
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: false
+    isActive: false,
+    toDelete: false,
   },
   {
     id: 4,
@@ -185,7 +232,8 @@ const alarms = ref([
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: false
+    isActive: false,
+    toDelete: false,
   },
   {
     id: 5,
@@ -194,23 +242,60 @@ const alarms = ref([
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
-    isActive: false
+    isActive: false,
+    toDelete: false,
   },
 ]);
 
 const isDeleteMode = ref(false);
+const showAlarmDeleteConfirmationDialog = ref(false);
+
+function handleAlarmSelect(alarm) {
+  if (isDeleteMode.value) {
+    alarm.toDelete = !alarm.toDelete;
+  }
+  else {
+    // go to alarm edit page
+    // let Router = route();
+    // console.log(Router);
+    const router = useRoute();
+    router.push({ name: "edit-alarm", })
+  }
+}
 
 function handleChangeDeleteMode() {
   isDeleteMode.value = !isDeleteMode.value;
 
-  console.log(isDeleteMode.value);
-  // if (isDeleteMode.value) {
-
-  // }
+  if (!isDeleteMode.value) {
+    alarms.forEach(x => x.toDelete = false);
+  }
 }
 
 function handleDeleteAlarms() {
-  alert('Alarmes excluídos!');
+  // const alarmsToDelete = alarms.filter(x => x.toDelete);
+
+  // if (alarmsToDelete?.length < 1) {
+  //   $q.dialog({
+  //     title: "",
+  //     message: 'Nenhum alarme foi selecionado para exclusão.',
+  //     persistent: true,
+  //   });
+
+  //   return;
+  // }
+
+  // const deleteMessage = `\n`
+
+  // $q.dialog({
+  //   title: "",
+  //   message: "Os seguintes alarmes serão excluídos:",
+  //   cancel: true,
+  //   persistent: true,
+  // }).onOk(() => {
+  //   // delete alarms
+  // });
+
+  showAlarmDeleteConfirmationDialog.value = true;
 }
 
 export default {
@@ -222,8 +307,13 @@ export default {
     return {
       alarms,
       isDeleteMode,
+      showAlarmDeleteConfirmationDialog,
+      handleAlarmSelect,
       handleChangeDeleteMode,
       handleDeleteAlarms,
+      teste: () => {
+        console.log('valor mudou')
+      }
     }
   },
 }

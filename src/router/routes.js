@@ -9,7 +9,11 @@ const routes = [
       },
       {
         path: "add-alarm",
-        component: () => import("pages/AddAlarm.vue")
+        component: () => import("pages/EditAlarm.vue")
+      },
+      {
+        path: "edit-alarm",
+        component: () => import("pages/EditAlarm.vue")
       },
       {
         path: "alarm-history",

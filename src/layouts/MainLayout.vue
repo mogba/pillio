@@ -27,8 +27,11 @@
       </q-list>
     </q-drawer>
 
-    <q-page-container>
-      <router-view />
+    <q-page-container
+      class="relative-position row flex-center"
+      style="width: 100%"
+    >
+      <router-view class="col-xs-8 col-xl-8" />
     </q-page-container>
   </q-layout>
 </template>

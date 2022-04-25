@@ -1,5 +1,5 @@
 <template>
-    <q-item-section avatar>
+  <q-item-section avatar>
       <q-icon name="medication" size="md" color="grey" />
     </q-item-section>
 
@@ -13,19 +13,17 @@
         {{ treatmentStartMessage(alarmData) }}
       </q-item-label>
       <q-item-label caption>
-        {{ repetitionIntervalMessage(alarmData) }}
+        {{ treatmentEndMessage(alarmData) }}
       </q-item-label>
     </q-item-section>
-    <slot />
 </template>
 
 <script>
-import { ref } from '@vue/reactivity'
-import { defineComponent } from '@vue/runtime-core';
-import { repetitionIntervalMessage, treatmentStartMessage } from "src/helper/date-helper";
+import { ref } from "vue";
+import { treatmentStartMessage, treatmentEndMessage } from "src/helper/date-helper";
 
-export default defineComponent({
-  name: "Alarm",
+export default {
+  name: "AlarmHistoryItem",
   props: {
     alarm: {
       id: Number,
@@ -42,10 +40,10 @@ export default defineComponent({
     const alarmData = ref(props.alarm);
 
     return {
-      repetitionIntervalMessage,
-      treatmentStartMessage,
       alarmData,
-    }
+      treatmentStartMessage,
+      treatmentEndMessage,
+    };
   },
-})
+};
 </script>

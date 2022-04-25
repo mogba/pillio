@@ -10,7 +10,7 @@
           class="col-xs-12 col-xl-12"
           standout="bg-primary text-white" 
           label="Qual o nome do remédio?"
-          v-model="newAlarm.medicineName"
+          v-model="alarmData.medicineName"
           clearable
         >
           <template>
@@ -22,7 +22,7 @@
           class="col-xs-12 col-md-6"
           standout="bg-primary text-white" 
           label="Quantas doses do remédio serão tomadas?"
-          v-model="newAlarm.timesToRepeat"
+          v-model="alarmData.timesToRepeat"
           mask="##"
           clearable
         >
@@ -36,7 +36,7 @@
           standout="bg-primary text-white" 
           label="Quantas horas entre cada dose?"
           required
-          v-model="newAlarm.repetitionIntervalInHours"
+          v-model="alarmData.repetitionIntervalInHours"
           mask="##"
           clearable
         >
@@ -50,7 +50,7 @@
           standout="bg-primary text-white" 
           label="Que dia começará o tratamento?"
           required
-          v-model="newAlarm.startDate"
+          v-model="alarmData.startDate"
           mask="##/##/####"
           clearable
         >
@@ -62,7 +62,7 @@
                 transition-show="scale"
                 transition-hide="hide"
               >
-                <q-date v-model="newAlarm.startDate" mask="DD/MM/YYYY">
+                <q-date v-model="alarmData.startDate" mask="DD/MM/YYYY">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Fechar" color="primary" flat />
                   </div>
@@ -81,7 +81,7 @@
           standout="bg-primary text-white" 
           label="Que hora começará o tratamento?"
           required
-          v-model="newAlarm.startTime"
+          v-model="alarmData.startTime"
           clearable
         >
           <template v-slot:prepend>
@@ -92,7 +92,7 @@
                 transition-show="scale"
                 transition-hide="hide"
               >
-                <q-time v-model="newAlarm.startTime">
+                <q-time v-model="alarmData.startTime">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Fechar" color="primary" flat />
                   </div>
@@ -144,27 +144,40 @@ import { reactive } from "vue";
 // startDate
 // startTime
 
-const newAlarm = reactive({});
-
-function handleSaveAlarm(e, go) {
-  e.preventDefault();
-  
-  // Connect to API and save data
-  console.log(newAlarm);
-  // alert('Alarm saved!');
-
-  handleGoToAlarmsScreen(e, go); // Remover essa chamada
-}
-
 function handleGoToAlarmsScreen(e, go) {
   go();
 }
 
 export default {
-  name: "AddAlarm",
-  setup() {
+  name: "EditAlarm",
+  props: {
+    alarm: {
+      default: {},
+      id: Number,
+      medicineName: String,
+      timesToRepeat: Number,
+      repetitionIntervalInHours: Number,
+      startDate: String,
+      startTime: String,
+      isActive: Boolean,
+      toDelete: Boolean,
+    },
+  },
+  setup(props) {
+    const alarmData = reactive(props.alarm);
+
+    function handleSaveAlarm(e, go) {
+      e.preventDefault();
+      
+      // Connect to API and save data
+      console.log(alarmData);
+      // alert('Alarm saved!');
+
+      handleGoToAlarmsScreen(e, go); // Remover essa chamada
+    }
+
     return {
-      newAlarm,
+      alarmData,
       handleSaveAlarm,
       handleGoToAlarmsScreen,
     }
