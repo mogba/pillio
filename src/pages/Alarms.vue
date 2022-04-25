@@ -16,6 +16,7 @@
         @click="handleAlarmSelect(alarm)"
       >
         <!-- to="edit-alarm" -->
+        <!-- to="edit-alarm" -->
         <Alarm :alarm="alarm">
           <q-item-section side>
             <q-checkbox v-if="isDeleteMode" v-model="alarm.toDelete" val="{{ alarm.toDelete }}" />
