@@ -132,7 +132,7 @@
 import { reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
 // import route from 'src/router';
-import Alarm from 'components/Alarm.vue';
+import Alarm from 'src/components/AlarmItem.vue';
 
 const alarms = reactive([
   {

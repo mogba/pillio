@@ -21,11 +21,10 @@
 
 <script>
 import { ref } from '@vue/reactivity'
-import { defineComponent } from '@vue/runtime-core';
-import { repetitionIntervalMessage, treatmentStartMessage } from "src/helper/date-helper";
+import { repetitionIntervalMessage, treatmentStartMessage } from "src/helpers/date-helper";
 
-export default defineComponent({
-  name: "Alarm",
+export default {
+  name: "AlarmItem",
   props: {
     alarm: {
       id: Number,
@@ -42,10 +41,10 @@ export default defineComponent({
     const alarmData = ref(props.alarm);
 
     return {
-      repetitionIntervalMessage,
-      treatmentStartMessage,
       alarmData,
-    }
+      treatmentStartMessage,
+      repetitionIntervalMessage,
+    };
   },
-})
+};
 </script>

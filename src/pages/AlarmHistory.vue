@@ -15,6 +15,20 @@
         :key="alarm.id"
       >
         <AlarmHistoryItem :alarm="alarm">
+          <q-item-section side>
+            <div v-if="isMobile()">
+              <q-icon v-if="alarm.tookMedicine" name="check_circle" color="positive" size="2rem" />
+              <q-icon v-else name="warning" color="negative" size="2rem" />
+            </div>
+            <div v-else>
+              <q-chip v-if="alarm.tookMedicine" square color="positive" text-color="white" icon-right="check_circle">
+                Tomou o remédio
+              </q-chip>
+              <q-chip v-else square color="negative" text-color="white" icon-right="warning">
+                Não tomou o remédio
+              </q-chip>
+            </div>
+          </q-item-section>
         </AlarmHistoryItem>
       </q-item>
     </q-list>
@@ -23,6 +37,7 @@
 
 <script>
 import { reactive } from 'vue';
+import { isMobile } from "../helpers/media-helper";
 import AlarmHistoryItem from 'src/components/AlarmHistoryItem.vue';
 
 const alarms = reactive([
@@ -35,6 +50,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: true,
     toDelete: false,
+    tookMedicine: true,
   },
   {
     id: 2,
@@ -45,6 +61,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: true,
     toDelete: false,
+    tookMedicine: true,
   },
   {
     id: 3,
@@ -55,6 +72,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: true,
     toDelete: false,
+    tookMedicine: false,
   },
   {
     id: 4,
@@ -65,6 +83,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: false,
     toDelete: false,
+    tookMedicine: true,
   },
   {
     id: 5,
@@ -75,6 +94,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: false,
     toDelete: false,
+    tookMedicine: false,
   },
   {
     id: 4,
@@ -85,6 +105,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: false,
     toDelete: false,
+    tookMedicine: true,
   },
   {
     id: 5,
@@ -95,6 +116,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: false,
     toDelete: false,
+    tookMedicine: false,
   },
   {
     id: 4,
@@ -105,6 +127,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: false,
     toDelete: false,
+    tookMedicine: false,
   },
   {
     id: 5,
@@ -115,6 +138,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: false,
     toDelete: false,
+    tookMedicine: false,
   },
   {
     id: 4,
@@ -125,6 +149,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: false,
     toDelete: false,
+    tookMedicine: false,
   },
   {
     id: 5,
@@ -135,6 +160,7 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: false,
     toDelete: false,
+    tookMedicine: true,
   },
 ]);
 
@@ -146,6 +172,7 @@ export default {
   setup() {
     return {
       alarms,
+      isMobile,
     };
   },
 };
