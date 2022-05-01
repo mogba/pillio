@@ -6,7 +6,7 @@
       </div>
     </q-card-section>
 
-    <q-list style="max-width: 600px; margin-bottom: 70px;">
+    <q-list style="margin-bottom: 70px;">
       <q-item
         class="q-mb-sm"
         clickable

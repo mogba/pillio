@@ -7,22 +7,44 @@
     </q-card-section>
     
     <q-list style="margin-bottom: 70px;">
-      <q-item
-        class="q-mb-sm"
-        clickable
-        v-ripple
-        v-for="alarm in alarms"
-        :key="alarm.id"
-        @click="handleAlarmSelect(alarm)"
-      >
-        <!-- to="edit-alarm" -->
-        <Alarm :alarm="alarm">
-          <q-item-section side>
-            <q-checkbox v-if="isDeleteMode" v-model="alarm.toDelete" val="{{ alarm.toDelete }}" />
-            <q-toggle v-else v-model="alarm.isActive" val="{{ alarm.isActive }}" />
-          </q-item-section>
-        </Alarm>
-      </q-item>
+      
+      <div v-if="isDeleteMode">
+        <q-item
+          class="q-mb-sm"
+          clickable
+          v-ripple
+          v-for="alarm in alarms"
+          :key="alarm.id"
+          @click="() => alarm.toDelete = !alarm.toDelete"
+        >
+          <Alarm :alarm="alarm">
+            <q-item-section side>
+              <q-checkbox v-model="alarm.toDelete" val="{{ alarm.toDelete }}" />
+            </q-item-section>
+          </Alarm>
+        </q-item>
+      </div>
+      <div v-else>
+        <q-item
+          class="q-mb-sm"
+          clickable
+          v-ripple
+          v-for="alarm in alarms"
+          :key="alarm.id"
+          :to="{
+            name: 'edit-alarm',
+            params: {
+              ...alarm,
+            },
+          }"
+        >
+          <Alarm :alarm="alarm">
+            <q-item-section side>
+              <q-toggle v-model="alarm.isActive" val="{{ alarm.isActive }}" />
+            </q-item-section>
+          </Alarm>
+        </q-item>
+      </div>
     </q-list>
 
     <div style="position: fixed;">
@@ -49,7 +71,7 @@
             label="Excluir"
             color="negative"
             :size="'lg'"
-            @click="handleDeleteAlarms"
+            @click="() => showAlarmDeleteConfirmationDialog = true"
           />
         </div>
         </div>
@@ -130,8 +152,6 @@
 
 <script>
 import { reactive, ref } from 'vue';
-import { useRoute } from 'vue-router';
-// import route from 'src/router';
 import Alarm from 'src/components/AlarmItem.vue';
 
 const alarms = reactive([
@@ -250,52 +270,12 @@ const alarms = reactive([
 const isDeleteMode = ref(false);
 const showAlarmDeleteConfirmationDialog = ref(false);
 
-function handleAlarmSelect(alarm) {
-  if (isDeleteMode.value) {
-    alarm.toDelete = !alarm.toDelete;
-  }
-  else {
-    // go to alarm edit page
-    // let Router = route();
-    // console.log(Router);
-    const router = useRoute();
-    router.push({ name: "edit-alarm", })
-  }
-}
-
 function handleChangeDeleteMode() {
   isDeleteMode.value = !isDeleteMode.value;
 
   if (!isDeleteMode.value) {
     alarms.forEach(x => x.toDelete = false);
   }
-}
-
-function handleDeleteAlarms() {
-  // const alarmsToDelete = alarms.filter(x => x.toDelete);
-
-  // if (alarmsToDelete?.length < 1) {
-  //   $q.dialog({
-  //     title: "",
-  //     message: 'Nenhum alarme foi selecionado para exclusão.',
-  //     persistent: true,
-  //   });
-
-  //   return;
-  // }
-
-  // const deleteMessage = `\n`
-
-  // $q.dialog({
-  //   title: "",
-  //   message: "Os seguintes alarmes serão excluídos:",
-  //   cancel: true,
-  //   persistent: true,
-  // }).onOk(() => {
-  //   // delete alarms
-  // });
-
-  showAlarmDeleteConfirmationDialog.value = true;
 }
 
 export default {
@@ -308,9 +288,7 @@ export default {
       alarms,
       isDeleteMode,
       showAlarmDeleteConfirmationDialog,
-      handleAlarmSelect,
       handleChangeDeleteMode,
-      handleDeleteAlarms,
       teste: () => {
         console.log('valor mudou')
       }

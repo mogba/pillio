@@ -1,7 +1,9 @@
 <template>
   <q-page class="q-pa-md">
     <q-card-section>
-      <div class="text-h4">Adicionar alarme</div>
+      <div class="text-h4">
+        {{!alarmData.id ? "Adicionar alarme" : "Editar alarme"}}
+      </div>
     </q-card-section>
 
     <q-card-section>
@@ -136,13 +138,7 @@
 </template>
 
 <script>
-import { reactive } from "vue";
-
-// medicineName
-// timesToRepeat
-// repetitionIntervalInHours
-// startDate
-// startTime
+import { ref } from "vue";
 
 function handleGoToAlarmsScreen(e, go) {
   go();
@@ -164,7 +160,7 @@ export default {
     },
   },
   setup(props) {
-    const alarmData = reactive(props.alarm);
+    const alarmData = ref(props.alarm);
 
     function handleSaveAlarm(e, go) {
       e.preventDefault();
