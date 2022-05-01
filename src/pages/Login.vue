@@ -1,25 +1,27 @@
 <template>
   <div>
-    <h1>Login</h1>
-
-    <div class="q-pa-md row q-gutter-md">
-      <q-card
-        flat
-        bordered
-        class="absolute-center full-width"
+    <div class="q-pa-md row q-gutter-md" style="min-height: 500px;">
+      <div
+        class="row absolute-center full-width"
         style="max-width: 1000px;"
       >
-        <q-card-section horizontal class="row" style="height: 60vh;">
           <q-card-section
             class="col-0 col-md-6 flex justify-center content-center"
           >
-            <img class="responsive" src="~/assets/elderly-woman.png" alt="Uma senhora de idade lendo um livro">
+            <img
+              class="responsive"
+              src="~/assets/elderly-woman.png"
+              alt="Uma senhora de idade lendo um livro"
+            >
           </q-card-section>
 
           <q-card-section
-            class="col-12 col-md-6"
-            style="background-color: #EEEEEE; position: relative;"
+            class="col-12 col-md-6 right-side-card-form"
           >
+          <div class="text-h4 q-mt-md" style="text-align: center;">
+            Pilli-o
+          </div>
+
           <div class="column absolute-center full-width">
             <q-card-section
               class="column content-center justify-center full-width"
@@ -43,7 +45,7 @@
             </q-card-section>
 
             <q-card-section
-              class="full-width"
+              class="full-width q-px-xl"
             >
               <div
                 v-if="selectedTab === TABS.login"
@@ -106,10 +108,9 @@
                 </div>
               </div>
             </q-card-section>
-            </div>
-          </q-card-section>
+          </div>
         </q-card-section>
-      </q-card>
+      </div>
     </div>
   </div>
 </template>
@@ -157,10 +158,24 @@ export default {
       tabsDefinition,
       selectedTab,
       handleChangeTab,
-
       formData,
-      lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     };
   },
 };
 </script>
+
+<style>
+.right-side-card-form {
+  background-color: #EEEEEE;
+  position: relative;
+  border-radius: 5px;
+  min-height: 500px;
+}
+
+@media screen and (max-width: 1024px) {
+  .right-side-card-form {
+    height: 100%;
+    background-color: white;
+  }
+}
+</style>
