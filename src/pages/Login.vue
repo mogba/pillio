@@ -10,7 +10,7 @@
           >
             <img
               class="responsive"
-              src="~/assets/elderly-woman.png"
+              src="~/assets/undraw_medical_care_movn.svg"
               alt="Uma senhora de idade lendo um livro"
             >
           </q-card-section>
@@ -18,7 +18,7 @@
           <q-card-section
             class="col-12 col-md-6 right-side-card-form"
           >
-          <div class="text-h4 q-mt-md" style="text-align: center;">
+          <div class="app-name text-h4 q-mt-md">
             Pilli-o
           </div>
 
@@ -172,10 +172,20 @@ export default {
   min-height: 500px;
 }
 
+.app-name {
+  text-align: center;
+  color: #1976d2;
+  font-weight: 500;
+}
+
 @media screen and (max-width: 1024px) {
   .right-side-card-form {
     height: 100%;
     background-color: white;
+  }
+
+  .app-name {
+    transform: translateY(-50%);
   }
 }
 </style>
