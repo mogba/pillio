@@ -5,84 +5,116 @@
         class="row absolute-center full-width"
         style="max-width: 1000px;"
       >
-          <q-card-section
-            class="col-0 col-md-6 flex justify-center content-center"
+        <q-card-section
+          class="col-0 col-md-6 flex justify-center content-center"
+        >
+          <img
+            class="responsive"
+            src="~/assets/undraw_medical_care_movn.svg"
+            alt="Duas mulheres profissionais de saúde em torno de um frasco de remédios"
           >
-            <img
-              class="responsive"
-              src="~/assets/undraw_medical_care_movn.svg"
-              alt="Uma senhora de idade lendo um livro"
-            >
-          </q-card-section>
+        </q-card-section>
 
-          <q-card-section
-            class="col-12 col-md-6 right-side-card-form"
-          >
+        <q-card-section
+          class="col-12 col-md-6 right-side-card-form"
+        >
           <div class="app-name text-h4 q-mt-md">
             Pilli-o
           </div>
 
           <div class="column absolute-center full-width">
-            <q-card-section
-              class="column content-center justify-center full-width"
-            >
-              <q-tabs
-                class="text-primary"
-                inline-label
-                shrink
-                stretch
-                narrow-indicator
-                v-model="selectedTab"
+            <div v-if="registerStep === 1">
+              <q-card-section
+                class="column content-center justify-center full-width"
               >
-                <q-tab
-                  :ripple="false"
-                  v-for="tab in tabsDefinition"
-                  :key="tab.name"
-                  v-bind="tab"
-                  @click="handleChangeTab(tab)"
-                />
-              </q-tabs>
-            </q-card-section>
-
-            <q-card-section
-              class="full-width q-px-xl"
-            >
-              <div
-                v-if="selectedTab === TABS.login"
-                class="full-width q-gutter-y-sm"
-              >
-                <TextInput
-                  label="E-mail"
-                  v-model="formData.email"
-                />
-                <PasswordInput
-                  label="Senha"
-                  v-model="formData.password"
-                />
-              
-                <div
-                  class="full-width"
-                  style="height: 56px;"
+                <q-tabs
+                  class="text-primary"
+                  inline-label
+                  shrink
+                  stretch
+                  narrow-indicator
+                  v-model="selectedTab"
                 >
-                  <q-btn
-                    no-caps
-                    class="full-width q-mt-lg"
-                    style="height: 100%; width: 100%"
-                    label="Entrar"
-                    color="primary"
-                    :size="'lg'"
-                    to="/"
+                  <q-tab
+                    :ripple="false"
+                    v-for="tab in tabsDefinition"
+                    :key="tab.name"
+                    v-bind="tab"
+                    @click="handleChangeTab(tab)"
                   />
-                </div>
-              </div>
-              <div
-                v-else
-                class="full-width q-gutter-y-sm"
+                </q-tabs>
+              </q-card-section>
+
+              <q-card-section
+                class="full-width q-px-xl"
               >
-                <TextInput
-                  label="Telefone"
-                  v-model="formData.phoneNumber"
-                />
+                <div
+                  v-if="selectedTab === TABS.login"
+                  class="full-width q-gutter-y-sm"
+                >
+                  <TextInput
+                    label="E-mail"
+                    v-model="formData.email"
+                  />
+                  <PasswordInput
+                    label="Senha"
+                    v-model="formData.password"
+                  />
+                
+                  <div
+                    class="full-width q-mt-lg"
+                    style="height: 56px;"
+                  >
+                    <q-btn
+                      no-caps
+                      class="full-width"
+                      style="height: 100%; width: 100%"
+                      label="Entrar"
+                      color="primary"
+                      :size="'lg'"
+                      to="/"
+                    />
+                  </div>
+                </div>
+                <div
+                  v-else
+                  class="full-width q-gutter-y-sm"
+                >
+                  <TextInput
+                    label="Como você se chama?"
+                    v-model="formData.name"
+                  />
+                
+                  <div
+                    class="full-width q-mt-lg"
+                    style="height: 56px;"
+                  >
+                    <q-btn
+                      no-caps
+                      class="full-width"
+                      style="height: 100%; width: 100%"
+                      label="Iniciar cadastro"
+                      color="primary"
+                      :size="'lg'"
+                      @click="registerStep += 1"
+                    />
+                  </div>
+                </div>
+              </q-card-section>
+            </div>
+
+            <div v-else>
+              <q-card-section
+                class="full-width q-px-xl q-gutter-y-sm q-mt-lg"
+              >
+                <div class="text-h6 text-center q-mb-md">
+                  Olá, {{formData.name}}!
+                  <br>
+                  Agora você só precisa informar seu
+                  <br>
+                  e-mail e uma senha para sua conta
+                </div>
+              
                 <TextInput
                   label="E-mail"
                   v-model="formData.email"
@@ -91,7 +123,7 @@
                   label="Senha"
                   v-model="formData.password"
                 />
-              
+
                 <div
                   class="full-width q-mt-lg"
                   style="height: 56px;"
@@ -106,8 +138,26 @@
                     to="/"
                   />
                 </div>
-              </div>
-            </q-card-section>
+
+                <div
+                  class="full-width"
+                  style="height: 56px;"
+                >
+                  <q-btn
+                    no-caps
+                    class="full-width"
+                    style="height: 100%; width: 100%"
+                    label="Voltar à tela de login"
+                    color="secondary"
+                    :size="'lg'"
+                    @click="() => {
+                      registerStep = 1;
+                      selectedTab = TABS.login;
+                    }"
+                  />
+                </div>
+              </q-card-section>
+            </div>
           </div>
         </q-card-section>
       </div>
@@ -132,19 +182,23 @@ const tabsDefinition = [
 
 const selectedTab = ref(TABS.login);
 
-const formData = reactive({
-  email: "",
-  password: "",
-  phoneNumber: "",
-});
+const formData = reactive(newFormData());
+
+function newFormData() {
+  return {
+    name: "",
+    email: "",
+    password: "",
+  };
+}
 
 function handleChangeTab(tab) {
   if (selectedTab.value !== tab.name) {
-    formData.email = "";
-    formData.password = "";
-    formData.phoneNumber = "";
+    Object.assign(formData, newFormData())
   }
 }
+
+const registerStep = ref(2);
 
 export default {
   name: "Login",
@@ -159,6 +213,7 @@ export default {
       selectedTab,
       handleChangeTab,
       formData,
+      registerStep,
     };
   },
 };

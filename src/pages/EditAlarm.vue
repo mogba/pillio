@@ -114,22 +114,21 @@
           <q-btn
             no-caps
             class="full-width"
-            label="Voltar para meus alarmes"
-            color="secondary"
+            label="Salvar"
+            color="primary"
             :size="'lg'"
             to="/"
-            @click="handleGoToAlarmsScreen"
+            @click="handleSaveAlarm"
           />
         </div>
         <div class="col-xs-12 col-md-6">
           <q-btn
             no-caps
             class="full-width"
-            label="Salvar"
-            color="primary"
+            label="Voltar para meus alarmes"
+            color="secondary"
             :size="'lg'"
             to="/"
-            @click="handleSaveAlarm"
           />
         </div>
       </div>
@@ -139,10 +138,6 @@
 
 <script>
 import { ref } from "vue";
-
-function handleGoToAlarmsScreen(e, go) {
-  go();
-}
 
 export default {
   name: "EditAlarm",
@@ -168,14 +163,11 @@ export default {
       // Connect to API and save data
       console.log(alarmData);
       // alert('Alarm saved!');
-
-      handleGoToAlarmsScreen(e, go); // Remover essa chamada
     }
 
     return {
       alarmData,
       handleSaveAlarm,
-      handleGoToAlarmsScreen,
     }
   },
 };
