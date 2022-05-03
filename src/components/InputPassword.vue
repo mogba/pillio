@@ -20,7 +20,7 @@
 import { ref } from 'vue';
 
 export default {
-  name: "PasswordInput",
+  name: "InputPassword",
   setup() {
     return {
       isPassword: ref(true),

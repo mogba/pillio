@@ -52,11 +52,11 @@
                   v-if="selectedTab === TABS.login"
                   class="full-width q-gutter-y-sm"
                 >
-                  <TextInput
+                  <InputText
                     label="E-mail"
                     v-model="formData.email"
                   />
-                  <PasswordInput
+                  <InputPassword
                     label="Senha"
                     v-model="formData.password"
                   />
@@ -65,22 +65,27 @@
                     class="full-width q-mt-lg"
                     style="height: 56px;"
                   >
-                    <q-btn
-                      no-caps
-                      class="full-width"
-                      style="height: 100%; width: 100%"
-                      label="Entrar"
-                      color="primary"
-                      :size="'lg'"
+                    <router-link 
+                      style="text-decoration: none;"
                       to="/"
-                    />
+                    >
+                      <q-btn
+                        no-caps
+                        class="full-width"
+                        style="height: 100%; width: 100%"
+                        label="Entrar"
+                        color="primary"
+                        :size="'lg'"
+                        @click="handleAuthenticate"
+                      />
+                    </router-link>
                   </div>
                 </div>
                 <div
                   v-else
                   class="full-width q-gutter-y-sm"
                 >
-                  <TextInput
+                  <InputText
                     label="Como você se chama?"
                     v-model="formData.name"
                   />
@@ -115,11 +120,11 @@
                   e-mail e uma senha para sua conta
                 </div>
               
-                <TextInput
+                <InputText
                   label="E-mail"
                   v-model="formData.email"
                 />
-                <PasswordInput
+                <InputPassword
                   label="Senha"
                   v-model="formData.password"
                 />
@@ -128,15 +133,20 @@
                   class="full-width q-mt-lg"
                   style="height: 56px;"
                 >
-                  <q-btn
-                    no-caps
-                    class="full-width"
-                    style="height: 100%; width: 100%"
-                    label="Criar cadastro"
-                    color="primary"
-                    :size="'lg'"
+                  <router-link 
+                    style="text-decoration: none;"
                     to="/"
-                  />
+                  >
+                    <q-btn
+                      no-caps
+                      class="full-width"
+                      style="height: 100%; width: 100%"
+                      label="Criar cadastro"
+                      color="primary"
+                      :size="'lg'"
+                      @click="handleAuthenticate"
+                    />
+                  </router-link>
                 </div>
 
                 <div
@@ -167,8 +177,8 @@
 
 <script>
 import { reactive, ref } from "vue";
-import TextInput from "src/components/TextInput.vue";
-import PasswordInput from "src/components/PasswordInput.vue";
+import InputText from "src/components/InputText.vue";
+import InputPassword from "src/components/InputPassword.vue";
 
 const TABS = Object.freeze({
   register: "register",
@@ -182,9 +192,9 @@ const tabsDefinition = [
 
 const selectedTab = ref(TABS.login);
 
-const formData = reactive(newFormData());
+const formData = reactive(resetFormData());
 
-function newFormData() {
+function resetFormData() {
   return {
     name: "",
     email: "",
@@ -194,17 +204,21 @@ function newFormData() {
 
 function handleChangeTab(tab) {
   if (selectedTab.value !== tab.name) {
-    Object.assign(formData, newFormData())
+    Object.assign(formData, resetFormData())
   }
 }
 
-const registerStep = ref(2);
+const registerStep = ref(1);
+
+function handleAuthenticate() {
+  sessionStorage.isLoggedIn = true;
+}
 
 export default {
   name: "Login",
   components: {
-    TextInput,
-    PasswordInput,
+    InputText,
+    InputPassword,
   },
   setup() {
     return {
@@ -212,8 +226,11 @@ export default {
       tabsDefinition,
       selectedTab,
       handleChangeTab,
-      formData,
+
       registerStep,
+      formData,
+
+      handleAuthenticate,
     };
   },
 };

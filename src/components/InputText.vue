@@ -12,6 +12,6 @@
 
 <script>
 export default {
-  name: "TextInput",
+  name: "InputText",
 };
 </script>

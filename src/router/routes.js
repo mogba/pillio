@@ -21,16 +21,26 @@ const routes = [
         path: "alarm-history",
         component: () => import("pages/AlarmHistory.vue"),
       },
+      
+      
+      
+      // REMOVER DEPOIS
+      {
+        path: "ic",
+        component: () => import("pages/InitialConfiguration.vue"),
+      },
     ],
   },
 
   {
     path: "/login",
     component: () => import("pages/Login.vue"),
+    meta: {
+      authNotRequired: true,
+    }
   },
 
-  // Always leave this as last one,
-  // but you can also remove it
+  // Always leave this as last one
   {
     path: "/:catchAll(.*)*",
     component: () => import("pages/Error404.vue"),

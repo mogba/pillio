@@ -114,21 +114,21 @@
           <q-btn
             no-caps
             class="full-width"
-            label="Salvar"
-            color="primary"
+            label="Voltar para meus alarmes"
+            color="secondary"
             :size="'lg'"
             to="/"
-            @click="handleSaveAlarm"
           />
         </div>
         <div class="col-xs-12 col-md-6">
           <q-btn
             no-caps
             class="full-width"
-            label="Voltar para meus alarmes"
-            color="secondary"
+            label="Salvar"
+            color="primary"
             :size="'lg'"
             to="/"
+            @click="handleSaveAlarm"
           />
         </div>
       </div>
