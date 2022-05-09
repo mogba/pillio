@@ -113,38 +113,42 @@
     </div>
 
     <q-dialog v-model="showAlarmDeleteConfirmationDialog">
-      <q-card style="width: 700px; max-width: 80vw;">
-        <div v-if="alarms.filter(x => x.toDelete)?.length > 0">
-          <q-card-section class="q-mx-sm">
-            <div class="text-h6">Os seguintes alarmes serão excluídos</div>
-          </q-card-section>
+      <q-card
+        style="width: 700px; max-width: 80vw;"
+        v-if="alarms.filter(x => x.toDelete)?.length > 0"
+      >
+        <q-card-section class="q-mx-sm">
+          <div class="text-h6">Os seguintes alarmes serão excluídos</div>
+        </q-card-section>
 
-          <q-card-section>
-            <q-list>
-              <q-item
-                v-for="alarm in alarms.filter(x => x.toDelete)"
-                :key="alarm.id"
-              >
-                <Alarm :alarm="alarm" />
-              </q-item>
-            </q-list>
-          </q-card-section>
+        <q-card-section>
+          <q-list>
+            <q-item
+              v-for="alarm in alarms.filter(x => x.toDelete)"
+              :key="alarm.id"
+            >
+              <Alarm :alarm="alarm" />
+            </q-item>
+          </q-list>
+        </q-card-section>
 
-          <q-card-actions class="q-mx-md" align="right">
-            <q-btn flat label="Cancelar" v-close-popup />
-            <q-btn flat negative color="negative" label="OK" v-close-popup @click="() => {}" />
-          </q-card-actions>
-        </div>
+        <q-card-actions align="right">
+          <q-btn flat color="primary" label="Cancelar" v-close-popup />
+          <q-btn flat color="negative" label="OK" v-close-popup @click="() => {}" />
+        </q-card-actions>
+      </q-card>
 
-        <div v-else>
-          <q-card-section class="q-mx-sm">
-            <div class="text-h6">Nenhum alarme foi selecionado para exclusão</div>
-          </q-card-section>
+      <q-card
+        style="width: 700px; max-width: 80vw;"
+        v-else
+      >
+        <q-card-section class="q-mx-sm">
+          <div class="text-h6">Nenhum alarme foi selecionado para exclusão</div>
+        </q-card-section>
 
-          <q-card-actions class="q-mx-md" align="right">
-            <q-btn flat label="OK" v-close-popup />
-          </q-card-actions>
-        </div>
+        <q-card-actions align="right">
+          <q-btn flat label="OK" v-close-popup />
+        </q-card-actions>
       </q-card>
     </q-dialog>
   </q-page>
