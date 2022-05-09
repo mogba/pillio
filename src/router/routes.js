@@ -21,15 +21,15 @@ const routes = [
         path: "alarm-history",
         component: () => import("pages/AlarmHistory.vue"),
       },
-      
-      
-      
-      // REMOVER DEPOIS
-      {
-        path: "ic",
-        component: () => import("pages/InitialConfiguration.vue"),
-      },
     ],
+  },
+      
+      
+      
+  // REMOVER DEPOIS
+  {
+    path: "/ic",
+    component: () => import("pages/InitialConfiguration.vue"),
   },
 
   {
