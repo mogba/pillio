@@ -21,10 +21,22 @@
               <q-icon v-else name="warning" color="negative" size="2rem" />
             </div>
             <div v-else>
-              <q-chip v-if="alarm.medicineTaken" square color="positive" text-color="white" icon-right="check_circle">
+              <q-chip
+                v-if="alarm.medicineTaken"
+                square
+                color="positive"
+                text-color="white"
+                icon-right="check_circle"
+              >
                 Tomou o remédio
               </q-chip>
-              <q-chip v-else square color="negative" text-color="white" icon-right="warning">
+              <q-chip
+                v-else
+                square
+                color="negative"
+                text-color="white"
+                icon-right="warning"
+              >
                 Não tomou o remédio
               </q-chip>
             </div>
