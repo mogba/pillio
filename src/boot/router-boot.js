@@ -1,13 +1,11 @@
-import { boot } from "quasar/wrappers";
-
-export default boot(({ router }) => {
+export default ({ router }) => {
   router.beforeEach((to, from, next) => {
-    if (to.matched.some(record => !record.meta.authNotRequired) &&
-        !sessionStorage.isLoggedIn) {
+    if (!to.meta.authNotRequired &&
+        sessionStorage.isLoggedIn !== "true") {
       next({ path: "/login" });
     }
     else {
       next();
     }
   });
-});
+};
