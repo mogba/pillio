@@ -17,7 +17,6 @@
           <div class="text-h6 text-center q-pb-md">
             Olá, {{ userData.name }}!
             <br>
-            <!-- Clique abaixo no botão que corresponde com seu perfil -->
             Você vai usar este sistema para administrar 
             <br>
             seus próprios remédios ou será responsável
@@ -288,11 +287,76 @@
               <q-btn
                 no-caps
                 class="full-width"
-                label="Concluir configuração"
+                label="Avançar"
                 color="primary"
                 :size="'lg'"
                 @click="() => {
-                  //alert('NOT IMPLEMENTED EXCEPTION!!!');
+                  configurationStep = 5;
+                }"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-else-if="configurationStep === 5"
+          class="full-width"
+        >
+          <div class="text-h6 text-center">
+            Muito bem!
+            <br>
+            Agora você já pode começar a usar o sistema.
+            <!-- <br>
+            Caso precise administrar os remédios de mais de uma pessoa,
+            <br>
+            basta tocar no campo "Cadastrar outra pessoa". -->
+          </div>
+
+          <div class="row q-px-lg q-pt-lg q-gutter-lg content-center justify-center">
+            <div
+              class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
+              style="height: 56px;"
+            >
+              <q-btn
+                no-caps
+                class="full-width"
+                style="height: 100%; width: 100%"
+                label="Começar"
+                color="primary"
+                :size="'lg'"
+                to="/"
+              />
+            </div>
+
+            <!-- <div
+              class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
+              style="height: 56px;"
+            >
+              <q-btn
+                no-caps
+                class="full-width"
+                style="height: 100%; width: 100%"
+                label="Cadastrar outra pessoa"
+                color="primary"
+                :size="'lg'"
+                @click="() => {
+                }"
+              />
+            </div> -->
+
+            <div
+              class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
+              style="height: 56px;"
+            >
+              <q-btn
+                no-caps
+                class="full-width"
+                style="height: 100%; width: 100%"
+                label="Voltar"
+                color="secondary"
+                :size="'lg'"
+                @click="() => {
+                  configurationStep = 4;
                 }"
               />
             </div>
@@ -459,7 +523,7 @@ const NETWORK_SIGNAL_QUALITY_ICONS = Object.freeze({
 });
 
 const selectedUserRole = ref(null);
-const configurationStep = ref(4);
+const configurationStep = ref(5);
 
 const elderlies = ref([]);
 const newElderly = ref(resetNewElderlyData());
@@ -533,6 +597,7 @@ function connectToNetwork(network) {
     showNetworkConnectedWarning.value = !showNetworkConnectionLoading.value;
     callbackSetConnectedNetwork();
   };
+
   if (showDispenserConnectionDialog.value) {
     const callback = () => {
       if (showNetworkConnectedWarning.value) {
@@ -547,7 +612,13 @@ function connectToNetwork(network) {
       if (showNetworkConnectedWarning.value) {
         connectedWifiNetwork.value = selectedWifiNetwork.value;
       }
+
+      // Aqui, depois que o dispenser for conectado a rede wi-fi,
+      // o celular do usuário deve ser conectado à rede wi-fi
+      // a qual estava conectado inicialmente, ou seja, antes de
+      // ser conectado à rede do dispenser.
     }
+
     alternateLoadingNetworkConnection(callback);
     setTimeout(() => alternateLoadingNetworkConnection(callback), 5000);
   }

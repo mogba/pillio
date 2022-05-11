@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <q-card-section>
       <div class="text-h4">
-        Meus alarmes
+        Alarmes
       </div>
     </q-card-section>
     

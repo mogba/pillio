@@ -13,7 +13,7 @@
         text-color="blue"
         unelevated
         to="/"
-        label="Voltar para meus horários"
+        label="Voltar para os alarmes"
         no-caps
       />
     </div>

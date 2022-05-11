@@ -27,8 +27,8 @@
 <script>
 const linksList = [
   {
-    title: "Meus alarmes",
-    caption: "Quando devo tomar meu próximo remédio?",
+    title: "Alarmes",
+    caption: "Quando deve ser tomado o próximo remédio?",
     icon: "access_alarm",
     link: "#/",
   },

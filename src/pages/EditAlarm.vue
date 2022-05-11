@@ -114,7 +114,7 @@
           <q-btn
             no-caps
             class="full-width"
-            label="Voltar para meus alarmes"
+            label="Voltar para os alarmes"
             color="secondary"
             :size="'lg'"
             to="/"
