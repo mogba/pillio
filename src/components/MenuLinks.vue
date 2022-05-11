@@ -37,7 +37,7 @@
             href="/"
             v-for="item in link.items"
             :key="item.id"
-            inset-level="1"
+            :inset-level="1"
           >
             <q-item-section avatar>
               <q-icon name="face" size="md" color="primary" />
