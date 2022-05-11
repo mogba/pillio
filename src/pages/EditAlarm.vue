@@ -118,18 +118,21 @@
             <br>
             Este número equivale a quantidade de 
             vezes que o alarme vai tocar, e cada dose do medicamento deve 
-            ocupar um compartimento do Pilli-o Dispenser. Por exemplo: se o 
-            alarme vai tocar 5 vezes, então devem ser preenchidos 5 
-            compartimentos do Dispenser, cada um com uma dose do medicamento.
+            ocupar um compartimento do Pilli-o Dispenser.
+            <br>
+            Por exemplo: Se o alarme vai tocar 5 vezes, então devem ser 
+            preenchidos 5 compartimentos do Dispenser, cada um com uma 
+            dose do medicamento.
           </p>
         </div>
         <div class="col-md-6">
           <p>
             <strong>O que é uma dose?</strong>
             <br>
-            Uma dose pode conter mais de um comprimido. Por exemplo: Se é 
-            necessário tomar 2 comprimidos por vez, então cada dose terá 2 
-            comprimidos, e cada compartimento do Dispenser deve ser 
+            Uma dose pode conter mais de um comprimido.
+            <br>Por exemplo: Se é 
+            necessário tomar 2 comprimidos por vez, então cada dose terá 
+            2 comprimidos, e cada compartimento do Dispenser deve ser 
             preenchido com 2 comprimidos.
           </p>
         </div>
