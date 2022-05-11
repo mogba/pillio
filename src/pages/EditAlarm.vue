@@ -108,8 +108,34 @@
           </template>
         </q-input>
       </div>
+
+      <div
+        class="row full-width justify-center q-col-gutter-md q-px-lg q-mt-lg"
+      >
+        <div class="col-md-6">
+          <p>
+            <strong>Quantas doses do remédio serão tomadas?</strong>
+            <br>
+            Este número equivale a quantidade de 
+            vezes que o alarme vai tocar, e cada dose do medicamento deve 
+            ocupar um compartimento do Pilli-o Dispenser. Por exemplo: se o 
+            alarme vai tocar 5 vezes, então devem ser preenchidos 5 
+            compartimentos do Dispenser, cada um com uma dose do medicamento.
+          </p>
+        </div>
+        <div class="col-md-6">
+          <p>
+            <strong>O que é uma dose?</strong>
+            <br>
+            Uma dose pode conter mais de um comprimido. Por exemplo: Se é 
+            necessário tomar 2 comprimidos por vez, então cada dose terá 2 
+            comprimidos, e cada compartimento do Dispenser deve ser 
+            preenchido com 2 comprimidos.
+          </p>
+        </div>
+      </div>
       
-      <div class="row q-px-lg q-pt-xl q-col-gutter-lg">
+      <div class="row q-px-lg q-pt-lg q-col-gutter-lg">
         <div class="col-xs-12 col-md-6">
           <q-btn
             no-caps
