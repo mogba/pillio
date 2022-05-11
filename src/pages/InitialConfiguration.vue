@@ -121,7 +121,7 @@
           class="full-width"
         >
           <div class="text-h6 text-center">
-            Agora é hora de conectar seu Pilli-o Dispenser.
+            É hora de conectar seu Pilli-o Dispenser ao seu smartphone.
             <br>
             Coloque seu dispositivo Pilli-o Dispenser em modo de 
             configuração pressionando o botão por 10 segundos.
@@ -214,8 +214,15 @@
           class="full-width"
         >
           <div class="text-h6 text-center">
-            Agora é hora de conectar seu Pilli-o Dispenser.
+            Agora seu Pilli-o Dispenser está conectado.
             <br>
+            Por último, precisamos configurar a rede wi-fi
+            <br>
+            onde seu dispositivo Pilli-o Dispenser será conectado.
+            <br>
+            Toque em uma das redes wi-fi
+            <br>
+            exibidas abaixo para realizar a conexão.
           </div>
 
           <div
@@ -235,8 +242,8 @@
                     v-for="wifiNetwork in availableWifiNetworks"
                     :key="wifiNetwork.name"
                     @click="() => {
-                      selectedDispenserNetwork = resetSelectedNetwork(wifiNetwork)
-                      showDispenserConnectionDialog = true;
+                      selectedWifiNetwork = resetSelectedNetwork(wifiNetwork)
+                      showWifiNetworkConnectionDialog = true;
                     }"
                   >
                     <q-item-section>
@@ -245,7 +252,7 @@
                     <q-item-section side>
                       <div class="row items-center q-gutter-md">
                         <div
-                          v-if="wifiNetwork.name === connectedDispenserNetwork.name"
+                          v-if="wifiNetwork.name === connectedWifiNetwork.name"
                         >
                           Conectado
                         </div>
@@ -302,7 +309,7 @@
         <q-card-section class="column items-center" style="min-width: 30vw;">
           <div
             class="q-mx-md q-mt-md"
-            v-if="!showLoadingNetworkConnection && !showNetworkConnectedWarning"
+            v-if="!showNetworkConnectionLoading && !showNetworkConnectedWarning"
           >
             <span>
               Deseja conectar-se a {{ selectedDispenserNetwork.name }}?
@@ -311,10 +318,10 @@
 
           <div
             class="row items-center q-mx-md q-mt-sm q-gutter-md"
-            v-if="showLoadingNetworkConnection"
+            v-if="showNetworkConnectionLoading"
           >
             <span>
-              Conectando, por favor aguarde
+              Conectando, por favor aguarde.
             </span>
             <q-spinner-puff color="primary" size="3em" />
           </div>
@@ -338,7 +345,7 @@
             color="primary"
             @click="() => {
               showNetworkConnectedWarning = false;
-              showLoadingNetworkConnection = false;
+              showNetworkConnectionLoading = false;
               showDispenserConnectionDialog = false;
             }"
           />
@@ -349,7 +356,7 @@
             @click="() => {
               if (showNetworkConnectedWarning) {
                 showNetworkConnectedWarning = false;
-                showLoadingNetworkConnection = false;
+                showNetworkConnectionLoading = false;
                 showDispenserConnectionDialog = false;
               }
               else {
@@ -367,29 +374,67 @@
     >
       <q-card>
         <q-card-section class="column items-center" style="min-width: 30vw;">
-          <span class="q-mx-md q-mt-md">
-            Informe a senha para conectar-se a {{ selectedDispenserNetwork.name }}.
-          </span>
+          <div	
+            class="q-mx-md q-mt-md"	
+            v-if="!showNetworkConnectionLoading && !showNetworkConnectedWarning"	
+          >	
+            <span>	
+              Informe a senha para conectar-se a {{ selectedWifiNetwork.name }}.
+            </span>	
 
-          <InputPassword
-            class="q-mt-lg"
-            label="Senha"
-            v-model="selectedDispenserNetwork.password"
-          />
+            <InputPassword
+              class="q-mt-lg"
+              label="Senha"
+              v-model="selectedWifiNetwork.password"
+            />
+          </div>
 
-          <div class="row q-mt-lg q-gutter-md items-center">
-            <span class="text-center">
-              Conectando, por favor aguarde
+          <div
+            class="row items-center q-mx-md q-mt-sm q-gutter-md"
+            v-if="showNetworkConnectionLoading"
+          >
+            <span>
+              Conectando, por favor aguarde.
             </span>
-
             <q-spinner-puff color="primary" size="3em" />
+          </div>
+
+          <div
+            class="row items-center q-mx-md q-mt-sm q-gutter-md"
+            v-if="showNetworkConnectedWarning"
+          >
+            <span>
+              {{ selectedWifiNetwork.name }} conectada!
+            </span>
+            <q-icon name="check_circle" size="3em" color="primary" />
           </div>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Cancelar" color="primary" v-close-popup />
-          <q-btn flat label="OK" color="primary" @click="() => {
-
+          <q-btn
+            v-if="!showNetworkConnectedWarning"
+            flat
+            label="Cancelar"
+            color="primary"
+            @click="() => {
+              showNetworkConnectedWarning = false;
+              showNetworkConnectionLoading = false;
+              showWifiNetworkConnectionDialog = false;
+            }"
+          />
+          <q-btn
+            flat
+            label="OK"
+            color="primary"
+            @click="() => {
+              if (showNetworkConnectedWarning) {
+                showNetworkConnectedWarning = false;
+                showNetworkConnectionLoading = false;
+                showWifiNetworkConnectionDialog = false;
+              }
+              else {
+                connectToNetwork(selectedWifiNetwork);
+              }
             }"
           />
         </q-card-actions>
@@ -459,8 +504,12 @@ const availableWifiNetworks = ref([
 const selectedDispenserNetwork = ref(resetSelectedNetwork());
 const connectedDispenserNetwork = ref(resetSelectedNetwork());
 const showDispenserConnectionDialog = ref(false);
+
+const selectedWifiNetwork = ref(resetSelectedNetwork());
+const connectedWifiNetwork = ref(resetSelectedNetwork());
 const showWifiNetworkConnectionDialog = ref(false);
-const showLoadingNetworkConnection = ref(false);
+
+const showNetworkConnectionLoading = ref(false);
 const showNetworkConnectedWarning = ref(false);
 
 function resetNewElderlyData() {
@@ -479,15 +528,30 @@ function resetSelectedNetwork(network) {
 
 function connectToNetwork(network) {
   // CÓDIGO PROVISÓRIO
-  const alternateLoadingNetworkConnection = () => {
-    showLoadingNetworkConnection.value = !showLoadingNetworkConnection.value;
-    showNetworkConnectedWarning.value = !showLoadingNetworkConnection.value;
-    if (showNetworkConnectedWarning.value) {
-      connectedDispenserNetwork.value = selectedDispenserNetwork.value;
-    }
+  const alternateLoadingNetworkConnection = (callbackSetConnectedNetwork) => {
+    showNetworkConnectionLoading.value = !showNetworkConnectionLoading.value;
+    showNetworkConnectedWarning.value = !showNetworkConnectionLoading.value;
+    callbackSetConnectedNetwork();
   };
-  alternateLoadingNetworkConnection();
-  setTimeout(alternateLoadingNetworkConnection, 5000);
+  if (showDispenserConnectionDialog.value) {
+    const callback = () => {
+      if (showNetworkConnectedWarning.value) {
+        connectedDispenserNetwork.value = selectedDispenserNetwork.value;
+      }
+    }
+    alternateLoadingNetworkConnection(callback);
+    setTimeout(() => alternateLoadingNetworkConnection(callback), 5000);
+  }
+  if (showWifiNetworkConnectionDialog.value) {
+    const callback = () => {
+      if (showNetworkConnectedWarning.value) {
+        connectedWifiNetwork.value = selectedWifiNetwork.value;
+      }
+    }
+    alternateLoadingNetworkConnection(callback);
+    setTimeout(() => alternateLoadingNetworkConnection(callback), 5000);
+  }
+
 
   // Tentar conectar o celular ao dispenser
   // Tirar o loading no callback. Funcionará como o setTimeout.
@@ -510,11 +574,13 @@ export default {
       dispenserConfigurationModeNetworks,
       availableWifiNetworks,
       resetSelectedNetwork,
-      showDispenserConnectionDialog,
       selectedDispenserNetwork,
       connectedDispenserNetwork,
+      showDispenserConnectionDialog,
+      selectedWifiNetwork,
+      connectedWifiNetwork,
       showWifiNetworkConnectionDialog,
-      showLoadingNetworkConnection,
+      showNetworkConnectionLoading,
       showNetworkConnectedWarning,
       connectToNetwork,
     };
