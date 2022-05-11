@@ -67,7 +67,7 @@
                   >
                     <router-link 
                       style="text-decoration: none;"
-                      to="/"
+                      :to="redirectToAfterAuthentication"
                     >
                       <q-btn
                         no-caps
@@ -135,7 +135,7 @@
                 >
                   <router-link 
                     style="text-decoration: none;"
-                    to="/"
+                    :to="redirectToAfterAuthentication"
                   >
                     <q-btn
                       no-caps
@@ -190,8 +190,9 @@ const tabsDefinition = [
   { name: TABS.login, label: "Faça login" },
 ];
 
+const registerStep = ref(1);
 const selectedTab = ref(TABS.login);
-
+const redirectToAfterAuthentication = ref("/");
 const formData = reactive(resetFormData());
 
 function resetFormData() {
@@ -208,10 +209,15 @@ function handleChangeTab(tab) {
   }
 }
 
-const registerStep = ref(1);
-
 function handleAuthenticate() {
   sessionStorage.isLoggedIn = true;
+
+  if (true) {
+    // Verificar se o usuário já configurou algum idoso ou dispenser.
+    // Caso ainda não tenha configurado, deve ser redirecionado para
+    // a tela de configurações iniciais.
+    redirectToAfterAuthentication.value = "/ic";
+  }
 }
 
 export default {
@@ -230,6 +236,7 @@ export default {
       registerStep,
       formData,
 
+      redirectToAfterAuthentication,
       handleAuthenticate,
     };
   },

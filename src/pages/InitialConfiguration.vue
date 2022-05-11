@@ -523,7 +523,7 @@ const NETWORK_SIGNAL_QUALITY_ICONS = Object.freeze({
 });
 
 const selectedUserRole = ref(null);
-const configurationStep = ref(5);
+const configurationStep = ref(1);
 
 const elderlies = ref([]);
 const newElderly = ref(resetNewElderlyData());
