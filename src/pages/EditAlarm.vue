@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <q-card-section>
       <div class="text-h4">
-        {{!alarmData.id ? "Adicionar alarme" : "Editar alarme"}}
+        {{!alarmRef.id ? "Adicionar alarme" : "Editar alarme"}}
       </div>
     </q-card-section>
 
@@ -12,47 +12,20 @@
           class="col-xs-12 col-xl-12"
           standout="bg-primary text-white" 
           label="Qual o nome do remédio?"
-          v-model="alarmData.medicineName"
+          v-model="alarmRef.medicineName"
           clearable
         >
           <template>
             <div class="self-center full-width no-outline" tabindex="0"></div>
           </template>
         </q-input>
-
-        <q-input
-          class="col-xs-12 col-md-6"
-          standout="bg-primary text-white" 
-          label="Quantas doses do remédio serão tomadas?"
-          v-model="alarmData.timesToRepeat"
-          mask="##"
-          clearable
-        >
-          <template>
-            <div class="self-center full-width no-outline" tabindex="1"></div>
-          </template>
-        </q-input>
-
-        <q-input
-          class="col-xs-12 col-md-6"
-          standout="bg-primary text-white" 
-          label="Quantas horas entre cada dose?"
-          required
-          v-model="alarmData.repetitionIntervalInHours"
-          mask="##"
-          clearable
-        >
-          <template>
-            <div class="self-center full-width no-outline" tabindex="2"></div>
-          </template>
-        </q-input>
-
+        
         <q-input
           class="col-xs-12 col-md-6"
           standout="bg-primary text-white" 
           label="Que dia começará o tratamento?"
           required
-          v-model="alarmData.startDate"
+          v-model="alarmRef.startDate"
           mask="##/##/####"
           clearable
         >
@@ -64,7 +37,7 @@
                 transition-show="scale"
                 transition-hide="hide"
               >
-                <q-date v-model="alarmData.startDate" mask="DD/MM/YYYY">
+                <q-date v-model="alarmRef.startDate" mask="DD/MM/YYYY">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Fechar" color="primary" flat />
                   </div>
@@ -74,7 +47,7 @@
           </template>
 
           <template>
-            <div class="self-center full-width no-outline" tabindex="3"></div>
+            <div class="self-center full-width no-outline" tabindex="1"></div>
           </template>
         </q-input>
 
@@ -83,7 +56,7 @@
           standout="bg-primary text-white" 
           label="Que hora começará o tratamento?"
           required
-          v-model="alarmData.startTime"
+          v-model="alarmRef.startTime"
           clearable
         >
           <template v-slot:prepend>
@@ -94,7 +67,7 @@
                 transition-show="scale"
                 transition-hide="hide"
               >
-                <q-time v-model="alarmData.startTime">
+                <q-time v-model="alarmRef.startTime">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Fechar" color="primary" flat />
                   </div>
@@ -104,9 +77,59 @@
           </template>
 
           <template>
+            <div class="self-center full-width no-outline" tabindex="2"></div>
+          </template>
+        </q-input>
+
+        <q-input
+          class="col-xs-12 col-md-6"
+          standout="bg-primary text-white" 
+          label="Quantas doses do remédio serão tomadas?"
+          v-model="alarmRef.timesToRepeat"
+          mask="##"
+          clearable
+        >
+          <template>
+            <div class="self-center full-width no-outline" tabindex="3"></div>
+          </template>
+        </q-input>
+
+        <q-input
+          class="col-xs-12 col-md-6"
+          standout="bg-primary text-white" 
+          label="Quantas horas entre cada dose?"
+          required
+          v-model="alarmRef.repetitionIntervalInHours"
+          mask="##"
+          clearable
+        >
+          <template>
             <div class="self-center full-width no-outline" tabindex="4"></div>
           </template>
         </q-input>
+
+        <q-select
+          class="col-xs-12 col-md-12"
+          standout="bg-primary text-white"
+          popup-content-class="rounded-borders limit-visible-area scroll"
+          multiple
+          use-chips
+          label="Compartimentos usados no Dispenser"
+          :options="options"
+          v-model="usedDispenserSlotsRef"
+        >
+          <template v-slot:pop></template>
+          <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
+            <q-item v-bind="itemProps">
+              <q-item-section side>
+                <q-checkbox :model-value="selected" @update:model-value="toggleOption(opt)" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label v-html="opt.label" />
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
       </div>
 
       <div
@@ -167,6 +190,7 @@
 
 <script>
 import { ref } from "vue";
+import { SessionStorage } from "quasar";
 
 export default {
   name: "EditAlarm",
@@ -181,23 +205,47 @@ export default {
       startTime: String,
       isActive: Boolean,
       toDelete: Boolean,
+      usedDispenserSlots: Array,
     },
   },
   setup(props) {
-    const alarmData = ref(props.alarm);
+    const alarmRef = ref(props.alarm);
+    const usedDispenserSlotsRef = ref(
+      (props.alarm.usedDispenserSlots || []).map(x =>
+        ({ label: x.toString(), value: Number(x) })
+      )
+    )
 
     function handleSaveAlarm(e, go) {
       e.preventDefault();
       
       // Connect to API and save data
-      console.log(alarmData);
+      console.log(alarmRef);
       // alert('Alarm saved!');
     }
 
     return {
-      alarmData,
+      alarmRef,
+      usedDispenserSlotsRef,
       handleSaveAlarm,
+
+      options: SessionStorage.getItem("dispenserSlots") || [
+        { label: "1", value: 1 },
+        { label: "2", value: 2 },
+        { label: "3", value: 3 },
+        { label: "4", value: 4 },
+        { label: "5", value: 5 },
+        { label: "6", value: 6 },
+        { label: "7", value: 7 },
+        { label: "8", value: 8 },
+      ],
     }
   },
 };
 </script>
+
+<style>
+.limit-visible-area {
+  max-height: 33vh;
+}
+</style>

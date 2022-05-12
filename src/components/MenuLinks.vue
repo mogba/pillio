@@ -30,7 +30,10 @@
                       TESTAR COM ROUTER-VIEW
         -->
 
-        <q-list>
+        <q-list
+          style="max-height: 23vh"
+          class="scroll"
+        >
           <q-item
             tag="a"
             target="_self"
@@ -85,7 +88,7 @@ const elderlies = ref([
   },
   {
     id: 2,
-    name: "Ozzy Osbourne",
+    name: "Ozzy",
   },
   {
     id: 3,

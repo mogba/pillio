@@ -155,62 +155,40 @@
 </template>
 
 <script>
-import { reactive, ref } from 'vue';
-import Alarm from 'src/components/AlarmItem.vue';
+import { reactive, ref } from "vue";
+import { SessionStorage } from "quasar";
+import Alarm from "src/components/AlarmItem.vue";
 
 const alarms = reactive([
   {
     id: 1,
-    medicineName: "Roacutan",
+    medicineName: "Hidroclorotiazida",
     timesToRepeat: 10,
     repetitionIntervalInHours: 1,
     startDate: "15/03/2022",
     startTime: "07:30",
     isActive: true,
     toDelete: false,
+    usedDispenserSlots: [
+      1, 2, 3, 4, 5,
+    ],
   },
+  
   {
     id: 2,
-    medicineName: "Anfetamina",
+    medicineName: "Metformina",
     timesToRepeat: 1,
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
     isActive: true,
     toDelete: false,
+    usedDispenserSlots: [
+      6, 7, 8, 9, 10, 11, 12,
+    ],
   },
   {
     id: 3,
-    medicineName: "Ácido",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: true,
-    toDelete: false,
-  },
-  {
-    id: 4,
-    medicineName: "Escitalopramaaaaaaaaaaaaaaaaaaaaaaaaa",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-  },
-  {
-    id: 5,
-    medicineName: "Dipirona",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-  },
-  {
-    id: 4,
     medicineName: "Escitalopram",
     timesToRepeat: 10,
     repetitionIntervalInHours: 8,
@@ -218,58 +196,60 @@ const alarms = reactive([
     startTime: "07:30",
     isActive: false,
     toDelete: false,
-  },
-  {
-    id: 5,
-    medicineName: "Dipirona",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
+    usedDispenserSlots: [],
   },
   {
     id: 4,
-    medicineName: "Escitalopram",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-  },
-  {
-    id: 5,
     medicineName: "Dipirona",
-    timesToRepeat: 10,
+    timesToRepeat: 3,
     repetitionIntervalInHours: 8,
     startDate: "15/03/2022",
     startTime: "07:30",
     isActive: false,
     toDelete: false,
-  },
-  {
-    id: 4,
-    medicineName: "Escitalopram",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-  },
-  {
-    id: 5,
-    medicineName: "Dipirona",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
+    usedDispenserSlots: [],
   },
 ]);
+
+// Os espaços do dispenser que estão disponíveis e ocupados devem 
+// ser definidos de acordo com o que os alarmes de uma pessoa estão
+// usando, ou seja, deve ser definido por pessoa/dispenser
+SessionStorage.set(
+  "dispenserSlots",
+  [
+    { label: "1", value: 1 },
+    { label: "2", value: 2 },
+    { label: "3", value: 3 },
+    { label: "4", value: 4 },
+    { label: "5", value: 5 },
+    { label: "6", value: 6 },
+    { label: "7", value: 7 },
+    { label: "8", value: 8 },
+    { label: "9", value: 9 },
+    { label: "10", value: 10 },
+    { label: "11", value: 11 },
+    { label: "12", value: 12 },
+    { label: "13", value: 13 },
+    { label: "14", value: 14 },
+    { label: "15", value: 15 },
+    { label: "16", value: 16 },
+  ],
+);
+
+// O "new Set" é para criar array com itens únicos,
+// porém no cenário real, os itens devem ser únicos
+// por padrão quando os espaços ocupados forem pegos
+// dos alarmes que estão ativos, ou seja, um alarme
+// ativo não pode estar usando os mesmos espaços 
+// que outro alarme
+SessionStorage.set(
+  "filledDispenserSlots",
+  [
+    ...(new Set(
+      alarms.filter(x => x.isActive).map(x => x.usedDispenserSlots).flat()
+    ))
+  ],
+);
 
 const isDeleteMode = ref(false);
 const showAlarmDeleteConfirmationDialog = ref(false);
