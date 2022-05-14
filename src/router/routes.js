@@ -1,21 +1,30 @@
+function handleProp(router, propName) {
+  console.log(["routes.js", router, propName]);
+  return {
+    [propName]: { ...router.params }
+  };
+}
+
 const routes = [
   {
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
       {
-        path: "", 
+        name: "alarms",
+        path: "",
         component: () => import("pages/Alarms.vue"),
+        props: router => handleProp(router, "elderly"),
       },
       {
         path: "add-alarm",
-        component: () => import("pages/EditAlarm.vue"),
+        component: () => import("pages/AddAlarm.vue"),
       },
       {
         name: "edit-alarm",
         path: "edit-alarm",
         component: () => import("pages/EditAlarm.vue"),
-        props: router => ({ alarm: { ...router.params } }),
+        props: router => handleProp(router, "alarm"),
       },
       {
         path: "alarm-history",
