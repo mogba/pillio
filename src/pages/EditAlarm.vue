@@ -57,6 +57,7 @@
           label="Que hora começará o tratamento?"
           required
           v-model="alarmRef.startTime"
+          mask="##:##"
           clearable
         >
           <template v-slot:prepend>
@@ -190,22 +191,8 @@
 </template>
 
 <script>
-const { ref } = require("vue");
-const { SessionStorage } = require("quasar");
-const { orderBy } = require("lodash");
-
-function getDispenserSlotOptions(usedDispenserSlotsValue) {
-  let options = (SessionStorage.getItem("dispenserSlots") || [])
-    .map(slot =>
-      usedDispenserSlotsValue.includes(slot.value)
-        ? (({ disable, ...slot }) => (slot))(slot)
-        : slot
-    );
-
-  options = orderBy(options, ["disable"], ["desc"]);
-
-  return options;
-}
+import { ref } from "vue";
+import { getDispenserSlotOptions } from "src/helpers/dispenser.helper";
 
 export default {
   name: "EditAlarm",
@@ -245,9 +232,8 @@ export default {
     return {
       alarmRef,
       usedDispenserSlotsRef,
-      handleSaveAlarm,
-
       dispenserSlotSelectOptions,
+      handleSaveAlarm,
     }
   },
 };
