@@ -115,14 +115,15 @@
           multiple
           use-chips
           label="Compartimentos usados no Dispenser"
-          :options="options"
+          :options="dispenserSlotSelectOptions"
           v-model="usedDispenserSlotsRef"
         >
           <template v-slot:pop></template>
           <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
             <q-item v-bind="itemProps">
               <q-item-section side>
-                <q-checkbox :model-value="selected" @update:model-value="toggleOption(opt)" />
+                <q-checkbox v-if="opt.disable" color="grey" toggle-indeterminate :model-value="null" />
+                <q-checkbox v-else :model-value="selected" @update:model-value="toggleOption(opt)" />
               </q-item-section>
               <q-item-section>
                 <q-item-label v-html="opt.label" />
@@ -189,8 +190,22 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { SessionStorage } from "quasar";
+const { ref } = require("vue");
+const { SessionStorage } = require("quasar");
+const { orderBy } = require("lodash");
+
+function getDispenserSlotOptions(usedDispenserSlotsValue) {
+  let options = (SessionStorage.getItem("dispenserSlots") || [])
+    .map(slot =>
+      usedDispenserSlotsValue.includes(slot.value)
+        ? (({ disable, ...slot }) => (slot))(slot)
+        : slot
+    );
+
+  options = orderBy(options, ["disable"], ["desc"]);
+
+  return options;
+}
 
 export default {
   name: "EditAlarm",
@@ -210,11 +225,14 @@ export default {
   },
   setup(props) {
     const alarmRef = ref(props.alarm);
-    const usedDispenserSlotsRef = ref(
-      (props.alarm.usedDispenserSlots || []).map(x =>
-        ({ label: x.toString(), value: Number(x) })
-      )
-    )
+
+    const usedDispenserSlotsValue = (props.alarm.usedDispenserSlots || [])
+      .map(slot => Number(slot));
+    const usedDispenserSlotsRef = ref(usedDispenserSlotsValue.map(slot =>
+      ({ label: slot.toString(), value: Number(slot) })
+    ))
+
+    const dispenserSlotSelectOptions = getDispenserSlotOptions(usedDispenserSlotsValue);
 
     function handleSaveAlarm(e, go) {
       e.preventDefault();
@@ -229,16 +247,7 @@ export default {
       usedDispenserSlotsRef,
       handleSaveAlarm,
 
-      options: SessionStorage.getItem("dispenserSlots") || [
-        { label: "1", value: 1 },
-        { label: "2", value: 2 },
-        { label: "3", value: 3 },
-        { label: "4", value: 4 },
-        { label: "5", value: 5 },
-        { label: "6", value: 6 },
-        { label: "7", value: 7 },
-        { label: "8", value: 8 },
-      ],
+      dispenserSlotSelectOptions,
     }
   },
 };

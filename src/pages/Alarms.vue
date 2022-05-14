@@ -211,6 +211,23 @@ const alarms = reactive([
   },
 ]);
 
+const filledDispenserSlots = [
+  ...(new Set(
+    alarms
+      .filter(x => x.isActive)
+      .map(x => x.usedDispenserSlots)
+      .flat()
+  ))
+];
+
+// O "new Set" é para criar array com itens únicos,
+// porém no cenário real, os itens devem ser únicos
+// por padrão quando os espaços ocupados forem pegos
+// dos alarmes que estão ativos, ou seja, um alarme
+// ativo não pode estar usando os mesmos espaços 
+// que outro alarme
+// SessionStorage.set("filledDispenserSlots", filledDispenserSlots);
+
 // Os espaços do dispenser que estão disponíveis e ocupados devem 
 // ser definidos de acordo com o que os alarmes de uma pessoa estão
 // usando, ou seja, deve ser definido por pessoa/dispenser
@@ -233,22 +250,12 @@ SessionStorage.set(
     { label: "14", value: 14 },
     { label: "15", value: 15 },
     { label: "16", value: 16 },
-  ],
-);
-
-// O "new Set" é para criar array com itens únicos,
-// porém no cenário real, os itens devem ser únicos
-// por padrão quando os espaços ocupados forem pegos
-// dos alarmes que estão ativos, ou seja, um alarme
-// ativo não pode estar usando os mesmos espaços 
-// que outro alarme
-SessionStorage.set(
-  "filledDispenserSlots",
-  [
-    ...(new Set(
-      alarms.filter(x => x.isActive).map(x => x.usedDispenserSlots).flat()
-    ))
-  ],
+  ]
+  .map(slot =>
+    filledDispenserSlots.includes(slot.value)
+      ? { ...slot, disable: true }
+      : slot
+  ),
 );
 
 const isDeleteMode = ref(false);
