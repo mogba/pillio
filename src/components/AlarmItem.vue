@@ -21,7 +21,7 @@
 
 <script>
 import { ref } from '@vue/reactivity'
-import { repetitionIntervalMessage, treatmentStartMessage } from "src/helpers/date-helper";
+import { repetitionIntervalMessage, treatmentStartMessage } from "src/helpers/date.helper";
 
 export default {
   name: "AlarmItem",

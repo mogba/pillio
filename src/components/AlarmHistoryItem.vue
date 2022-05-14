@@ -21,7 +21,7 @@
 
 <script>
 import { ref } from "vue";
-import { treatmentStartMessage, treatmentEndMessage } from "src/helpers/date-helper";
+import { treatmentStartMessage, treatmentEndMessage } from "src/helpers/date.helper";
 
 export default {
   name: "AlarmHistoryItem",

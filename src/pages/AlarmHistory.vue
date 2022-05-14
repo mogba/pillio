@@ -49,7 +49,7 @@
 
 <script>
 import { reactive } from 'vue';
-import { isMobile } from "../helpers/media-helper";
+import { isMobile } from "../helpers/media.helper";
 import AlarmHistoryItem from 'src/components/AlarmHistoryItem.vue';
 
 const alarms = reactive([
