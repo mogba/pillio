@@ -179,6 +179,7 @@
 import { reactive, ref } from "vue";
 import InputText from "src/components/InputText.vue";
 import InputPassword from "src/components/InputPassword.vue";
+import { SessionStorage } from 'quasar';
 
 const TABS = Object.freeze({
   register: "register",
@@ -210,9 +211,10 @@ function handleChangeTab(tab) {
 }
 
 function handleAuthenticate() {
-  sessionStorage.isLoggedIn = true;
+  // SessionStorage.set("isLoggedIn", true);
+  // Comando acima movido para o arquivo de boot "initialize-data-temp-file.boot.js"
 
-  if (true) {
+  if (SessionStorage.getItem("isNotConfiguredYet")) {
     // Verificar se o usuário já configurou algum idoso ou dispenser.
     // Caso ainda não tenha configurado, deve ser redirecionado para
     // a tela de configurações iniciais.
