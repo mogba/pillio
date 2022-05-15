@@ -16,8 +16,10 @@ const routes = [
         props: router => handleProp(router, "elderly"),
       },
       {
+        name: "add-alarm",
         path: "add-alarm",
         component: () => import("pages/AddAlarm.vue"),
+        props: router => handleProp(router, "elderly"),
       },
       {
         name: "edit-alarm",

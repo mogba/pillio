@@ -34,6 +34,8 @@
           :to="{
             name: 'edit-alarm',
             params: {
+              elderlyId: elderlyRef.id,
+              elderlyName: elderlyRef.name,
               ...alarm,
             },
           }"
@@ -91,7 +93,12 @@
           >
           <router-link 
             style="text-decoration: none;"
-            to="add-alarm"
+            :to="{
+              name: 'add-alarm',
+              params: {
+                ...elderlyRef,
+              },
+            }"
           >
             <q-fab-action 
               label="Adicionar alarme" 
@@ -188,13 +195,17 @@ export default {
     },
   },
   setup(props) {
-    const elderlyRef = ref(props.elderly);
+    const elderlyRef = ref({
+      id: Number(props.elderly.id),
+      name: props.elderly.name,
+    });
 
     if (!elderlyRef.value.id) {
       elderlyRef.value = SessionStorage.getItem("elderlies")[0];
-      alarmsRef.value = SessionStorage.getItem("alarms")
-        .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
     }
+
+    alarmsRef.value = SessionStorage.getItem("alarms")
+        .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
 
     onBeforeRouteUpdate((to, from) => {
       const newElderly = { id: Number(to.params.id), name: to.params.name };

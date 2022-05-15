@@ -8,6 +8,16 @@
 
     <q-card-section>
       <div class="row q-col-gutter-sm">
+        <q-select
+          class="col-xs-12 col-md-12"
+          standout="bg-primary text-white"
+          popup-content-class="rounded-borders limit-visible-area scroll"
+          label="Para quem o alarme será adicionado?"
+          :options="elderlySelectOptions"
+          v-model="selectedElderlyRef"
+          clearable
+        />
+
         <q-input
           class="col-xs-12 col-xl-12"
           standout="bg-primary text-white" 
@@ -171,7 +181,12 @@
             label="Voltar para os alarmes"
             color="secondary"
             :size="'lg'"
-            to="/"
+            :to="{
+              name: 'alarms',
+              params: {
+                ...elderlyRef,
+              },
+            }"
           />
         </div>
         <div class="col-xs-12 col-md-6">
@@ -191,12 +206,28 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { SessionStorage } from "quasar";
 import { getDispenserSlotOptions } from "src/helpers/dispenser.helper";
 
 export default {
   name: "AddAlarm",
-  setup() {
+  props: {
+    elderly: {
+      id: Number,
+      name: String,
+    },
+  },
+  setup(props) {
+    const elderlyRef = ref(props.elderly);
+    const selectedElderlyRef = ref(
+      props.elderly.id
+      ? {
+        label: props.elderly.name,
+        value: Number(props.elderly.id),
+      }
+      : null
+    );
     const alarmRef = ref({
       id: null,
       medicineName: null,
@@ -209,8 +240,17 @@ export default {
       usedDispenserSlots: [],
     });
 
+    watch(selectedElderlyRef, (value) => {
+      elderlyRef.value = {
+        id: value.value,
+        name: value.label,
+      };
+    });
+
     const usedDispenserSlotsRef = ref(alarmRef.value.usedDispenserSlots);
     const dispenserSlotSelectOptions = getDispenserSlotOptions(usedDispenserSlotsRef.value);
+    const elderlySelectOptions = SessionStorage.getItem("elderlies")
+      .map(elderly => ({ label: elderly.name, value: elderly.id }));
 
     function handleSaveAlarm(e, go) {
       e.preventDefault();
@@ -221,9 +261,12 @@ export default {
     }
 
     return {
+      elderlyRef,
+      selectedElderlyRef,
       alarmRef,
       usedDispenserSlotsRef,
       dispenserSlotSelectOptions,
+      elderlySelectOptions,
       handleSaveAlarm,
     }
   },

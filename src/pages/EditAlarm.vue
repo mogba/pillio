@@ -11,6 +11,19 @@
         <q-input
           class="col-xs-12 col-xl-12"
           standout="bg-primary text-white" 
+          label="Para quem o alarme será adicionado?"
+          v-model="alarmRef.elderlyName"
+          clearable
+          readonly
+        >
+          <template>
+            <div class="self-center full-width no-outline" tabindex="0"></div>
+          </template>
+        </q-input>
+
+        <q-input
+          class="col-xs-12 col-xl-12"
+          standout="bg-primary text-white" 
           label="Qual o nome do remédio?"
           v-model="alarmRef.medicineName"
           clearable
@@ -171,7 +184,13 @@
             label="Voltar para os alarmes"
             color="secondary"
             :size="'lg'"
-            to="/"
+            :to="{
+              name: 'alarms',
+              params: {
+                id: alarmRef.elderlyId,
+                name: alarmRef.elderlyName,
+              },
+            }"
           />
         </div>
         <div class="col-xs-12 col-md-6">
@@ -199,6 +218,8 @@ export default {
   props: {
     alarm: {
       default: {},
+      elderlyId: Number,
+      elderlyName: String,
       id: Number,
       medicineName: String,
       timesToRepeat: Number,
