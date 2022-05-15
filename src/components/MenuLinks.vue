@@ -25,22 +25,20 @@
         </q-item-section>
         </template>
 
-        <!--
-          ENVIAR O ID DO IDOSO VIA AO CLICAR NO ITEM ABAIXO
-                      TESTAR COM ROUTER-VIEW
-        -->
-
         <q-list
           style="max-height: 23vh"
           class="scroll"
         >
           <q-item
-            tag="a"
-            target="_self"
-            href="/"
+            :inset-level="1"
             v-for="item in link.items"
             :key="item.id"
-            :inset-level="1"
+            :to="{
+              name: 'alarms',
+              params: {
+                ...item
+              },
+            }"
           >
             <q-item-section avatar>
               <q-icon name="face" size="md" color="primary" />
@@ -79,26 +77,7 @@
 </template>
 
 <script>
-import { ref } from "vue";
-
-const elderlies = ref([
-  {
-    id: 1,
-    name: "Maria",
-  },
-  {
-    id: 2,
-    name: "Ozzy",
-  },
-  {
-    id: 3,
-    name: "Jorge",
-  },
-  {
-    id: 4,
-    name: "Camila",
-  },
-]);
+import { SessionStorage } from "quasar";
 
 // O usuário terá os idosos como "items" apenas se
 // for um cuidador. Isso deve ser tratado depois
@@ -114,7 +93,7 @@ const linksList = [
     icon: "access_alarm",
     link: "#/",
     expandable: true,
-    items: elderlies.value,
+    items: SessionStorage.getItem("elderlies"),
   },
   {
     title: "Adicionar alarme",

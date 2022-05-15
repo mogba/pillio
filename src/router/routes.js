@@ -1,5 +1,4 @@
 function handleProp(router, propName) {
-  console.log(["routes.js", router, propName]);
   return {
     [propName]: { ...router.params }
   };

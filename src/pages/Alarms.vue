@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <q-card-section>
       <div class="text-h4">
-        Alarmes
+        Alarmes {{ elderlyRef && elderlyRef.name ? `de ${elderlyRef.name}` : "" }}
       </div>
     </q-card-section>
     
@@ -13,7 +13,7 @@
           class="q-mb-sm"
           clickable
           v-ripple
-          v-for="alarm in alarms"
+          v-for="alarm in alarmsRef"
           :key="alarm.id"
           @click="() => alarm.toDelete = !alarm.toDelete"
         >
@@ -29,7 +29,7 @@
           class="q-mb-sm"
           clickable
           v-ripple
-          v-for="alarm in alarms"
+          v-for="alarm in alarmsRef"
           :key="alarm.id"
           :to="{
             name: 'edit-alarm',
@@ -83,9 +83,8 @@
         :offset="[18, 18]"
       >
         <q-fab 
-            label="Opções" 
             label-position="left" 
-            icon="keyboard_arrow_up" 
+            icon="more_vert" 
             direction="up" 
             vertical-actions-align="right" 
             color="purple"
@@ -115,7 +114,7 @@
     <q-dialog v-model="showAlarmDeleteConfirmationDialog">
       <q-card
         style="width: 700px; max-width: 80vw;"
-        v-if="alarms.filter(x => x.toDelete)?.length > 0"
+        v-if="alarmsRef.filter(x => x.toDelete)?.length > 0"
       >
         <q-card-section class="q-mx-sm">
           <div class="text-h6">Os seguintes alarmes serão excluídos</div>
@@ -124,7 +123,7 @@
         <q-card-section>
           <q-list>
             <q-item
-              v-for="alarm in alarms.filter(x => x.toDelete)"
+              v-for="alarm in alarmsRef.filter(x => x.toDelete)"
               :key="alarm.id"
             >
               <Alarm :alarm="alarm" />
@@ -155,108 +154,15 @@
 </template>
 
 <script>
-import { reactive, ref } from "vue";
+import { ref } from "vue";
+import { onBeforeRouteUpdate } from "vue-router";
 import { SessionStorage } from "quasar";
+import { setDispenserSlots } from "src/helpers/dispenser.helper";
 import Alarm from "src/components/AlarmItem.vue";
 
-const alarms = reactive([
-  {
-    id: 1,
-    medicineName: "Hidroclorotiazida",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 1,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: true,
-    toDelete: false,
-    usedDispenserSlots: [
-      1, 2, 3, 4, 5,
-    ],
-  },
-  
-  {
-    id: 2,
-    medicineName: "Metformina",
-    timesToRepeat: 1,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: true,
-    toDelete: false,
-    usedDispenserSlots: [
-      6, 7, 8, 9, 10, 11, 12,
-    ],
-  },
-  {
-    id: 3,
-    medicineName: "Escitalopram",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-    usedDispenserSlots: [],
-  },
-  {
-    id: 4,
-    medicineName: "Dipirona",
-    timesToRepeat: 3,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-    usedDispenserSlots: [],
-  },
-]);
+let alarmsRef = ref([]);
 
-const filledDispenserSlots = [
-  ...(new Set(
-    alarms
-      .filter(x => x.isActive)
-      .map(x => x.usedDispenserSlots)
-      .flat()
-  ))
-];
-
-// O "new Set" é para criar array com itens únicos,
-// porém no cenário real, os itens devem ser únicos
-// por padrão quando os espaços ocupados forem pegos
-// dos alarmes que estão ativos, ou seja, um alarme
-// ativo não pode estar usando os mesmos espaços 
-// que outro alarme
-// SessionStorage.set("filledDispenserSlots", filledDispenserSlots);
-
-// Os espaços do dispenser que estão disponíveis e ocupados devem 
-// ser definidos de acordo com o que os alarmes de uma pessoa estão
-// usando, ou seja, deve ser definido por pessoa/dispenser
-SessionStorage.set(
-  "dispenserSlots",
-  [
-    { label: "1", value: 1 },
-    { label: "2", value: 2 },
-    { label: "3", value: 3 },
-    { label: "4", value: 4 },
-    { label: "5", value: 5 },
-    { label: "6", value: 6 },
-    { label: "7", value: 7 },
-    { label: "8", value: 8 },
-    { label: "9", value: 9 },
-    { label: "10", value: 10 },
-    { label: "11", value: 11 },
-    { label: "12", value: 12 },
-    { label: "13", value: 13 },
-    { label: "14", value: 14 },
-    { label: "15", value: 15 },
-    { label: "16", value: 16 },
-  ]
-  .map(slot =>
-    filledDispenserSlots.includes(slot.value)
-      ? { ...slot, disable: true }
-      : slot
-  ),
-);
+setDispenserSlots(alarmsRef.value);
 
 const isDeleteMode = ref(false);
 const showAlarmDeleteConfirmationDialog = ref(false);
@@ -265,24 +171,48 @@ function handleChangeDeleteMode() {
   isDeleteMode.value = !isDeleteMode.value;
 
   if (!isDeleteMode.value) {
-    alarms.forEach(x => x.toDelete = false);
+    alarmsRef.value.forEach(x => x.toDelete = false);
   }
 }
 
 export default {
   name: "Alarms",
   components: {
-    Alarm
+    Alarm,
   },
-  setup() {
+  props: {
+    elderly: {
+      default: {},
+      id: Number,
+      name: String,
+    },
+  },
+  setup(props) {
+    const elderlyRef = ref(props.elderly);
+
+    if (!elderlyRef.value.id) {
+      elderlyRef.value = SessionStorage.getItem("elderlies")[0];
+      alarmsRef.value = SessionStorage.getItem("alarms")
+        .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
+    }
+
+    onBeforeRouteUpdate((to, from) => {
+      const newElderly = { id: Number(to.params.id), name: to.params.name };
+      elderlyRef.value = newElderly;
+      alarmsRef.value = SessionStorage.getItem("alarms")
+        .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
+
+      // Essa função é chamada ao clicar nos submenus de idosos no menu lateral,
+      // mais precisamente, somente quando um idoso diferente é selecionado.
+      // Atualizar aqui todos os dados da tela para condizerem com o novo idoso.
+    });
+
     return {
-      alarms,
+      elderlyRef,
+      alarmsRef,
       isDeleteMode,
       showAlarmDeleteConfirmationDialog,
       handleChangeDeleteMode,
-      teste: () => {
-        console.log('valor mudou')
-      }
     }
   },
 }

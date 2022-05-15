@@ -211,10 +211,10 @@ function handleChangeTab(tab) {
 }
 
 function handleAuthenticate() {
-  // SessionStorage.set("isLoggedIn", true);
+  // SessionStorage.set("user", { id: -1, isLoggedIn: true, isNotConfiguredYet: false });
   // Comando acima movido para o arquivo de boot "initialize-data-temp-file.boot.js"
 
-  if (SessionStorage.getItem("isNotConfiguredYet")) {
+  if (SessionStorage.getItem("user").isNotConfiguredYet) {
     // Verificar se o usuário já configurou algum idoso ou dispenser.
     // Caso ainda não tenha configurado, deve ser redirecionado para
     // a tela de configurações iniciais.
