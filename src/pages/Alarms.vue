@@ -7,7 +7,6 @@
     </q-card-section>
     
     <q-list style="margin-bottom: 70px;">
-      
       <div v-if="isDeleteMode">
         <q-item
           class="q-mb-sm"
@@ -17,11 +16,11 @@
           :key="alarm.id"
           @click="() => alarm.toDelete = !alarm.toDelete"
         >
-          <Alarm :alarm="alarm">
+          <AlarmItem :alarm="alarm">
             <q-item-section side>
               <q-checkbox v-model="alarm.toDelete" val="{{ alarm.toDelete }}" />
             </q-item-section>
-          </Alarm>
+          </AlarmItem>
         </q-item>
       </div>
       <div v-else>
@@ -40,11 +39,11 @@
             },
           }"
         >
-          <Alarm :alarm="alarm">
+          <AlarmItem :alarm="alarm">
             <q-item-section side>
               <q-toggle v-model="alarm.isActive" val="{{ alarm.isActive }}" />
             </q-item-section>
-          </Alarm>
+          </AlarmItem>
         </q-item>
       </div>
     </q-list>
@@ -133,7 +132,7 @@
               v-for="alarm in alarmsRef.filter(x => x.toDelete)"
               :key="alarm.id"
             >
-              <Alarm :alarm="alarm" />
+              <AlarmItem :alarm="alarm" />
             </q-item>
           </q-list>
         </q-card-section>
@@ -165,11 +164,9 @@ import { ref } from "vue";
 import { onBeforeRouteUpdate } from "vue-router";
 import { SessionStorage } from "quasar";
 import { setDispenserSlots } from "src/helpers/dispenser.helper";
-import Alarm from "src/components/AlarmItem.vue";
+import AlarmItem from "src/components/AlarmItem.vue";
 
-let alarmsRef = ref([]);
-
-setDispenserSlots(alarmsRef.value);
+const alarmsRef = ref([]);
 
 const isDeleteMode = ref(false);
 const showAlarmDeleteConfirmationDialog = ref(false);
@@ -185,7 +182,7 @@ function handleChangeDeleteMode() {
 export default {
   name: "Alarms",
   components: {
-    Alarm,
+    AlarmItem,
   },
   props: {
     elderly: {
@@ -205,7 +202,9 @@ export default {
     }
 
     alarmsRef.value = SessionStorage.getItem("alarms")
-        .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
+      .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
+
+    setDispenserSlots(alarmsRef.value);
 
     onBeforeRouteUpdate((to, from) => {
       const newElderly = { id: Number(to.params.id), name: to.params.name };

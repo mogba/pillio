@@ -2,13 +2,13 @@
   <q-page class="q-pa-md">
     <q-card-section>
       <div class="text-h4">
-        {{!alarmRef.id ? "Adicionar alarme" : "Editar alarme"}}
+        Editar alarme {{ alarmRef.elderlyName ? `para ${alarmRef.elderlyName}` : "" }}
       </div>
     </q-card-section>
 
     <q-card-section>
       <div class="row q-col-gutter-sm">
-        <q-input
+        <!-- <q-input
           class="col-xs-12 col-xl-12"
           standout="bg-primary text-white" 
           label="Para quem o alarme será adicionado?"
@@ -19,7 +19,7 @@
           <template>
             <div class="self-center full-width no-outline" tabindex="0"></div>
           </template>
-        </q-input>
+        </q-input> -->
 
         <q-input
           class="col-xs-12 col-xl-12"
@@ -122,29 +122,11 @@
           </template>
         </q-input>
 
-        <q-select
-          class="col-xs-12 col-md-12"
-          standout="bg-primary text-white"
-          popup-content-class="rounded-borders limit-visible-area scroll"
-          multiple
-          use-chips
-          label="Compartimentos usados no Dispenser"
+        <InputSelectMultiple
+          :label="'Compartimentos usados no Dispenser'"
           :options="dispenserSlotSelectOptions"
-          v-model="usedDispenserSlotsRef"
-        >
-          <template v-slot:pop></template>
-          <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
-            <q-item v-bind="itemProps">
-              <q-item-section side>
-                <q-checkbox v-if="opt.disable" color="grey" toggle-indeterminate :model-value="null" />
-                <q-checkbox v-else :model-value="selected" @update:model-value="toggleOption(opt)" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label v-html="opt.label" />
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select>
+          :values="usedDispenserSlotsRef"
+        />
       </div>
 
       <div
@@ -212,9 +194,13 @@
 <script>
 import { ref } from "vue";
 import { getDispenserSlotOptions } from "src/helpers/dispenser.helper";
+import InputSelectMultiple from "src/components/InputSelectMultiple.vue";
 
 export default {
   name: "EditAlarm",
+  components: {
+    InputSelectMultiple,
+  },
   props: {
     alarm: {
       default: {},

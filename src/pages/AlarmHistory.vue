@@ -7,184 +7,217 @@
     </q-card-section>
 
     <q-list style="margin-bottom: 70px;">
-      <q-item
-        class="q-mb-sm"
-        clickable
-        v-ripple
-        v-for="alarm in alarms"
+      <!-- clickable v-ripple -->
+      <q-expansion-item
+        class="full-width q-mb-sm"
+        group="group"
+        v-for="alarm in alarmsRef"
         :key="alarm.id"
       >
-        <AlarmHistoryItem :alarm="alarm">
-          <q-item-section side>
-            <div v-if="isMobile()">
-              <q-icon v-if="alarm.medicineTaken" name="check_circle" color="positive" size="2rem" />
-              <q-icon v-else name="warning" color="negative" size="2rem" />
-            </div>
-            <div v-else>
-              <q-chip
-                v-if="alarm.medicineTaken"
-                square
-                color="positive"
-                text-color="white"
-                icon-right="check_circle"
-              >
-                Tomou o remédio
-              </q-chip>
-              <q-chip
-                v-else
-                square
-                color="negative"
-                text-color="white"
-                icon-right="warning"
-              >
-                Não tomou o remédio
-              </q-chip>
-            </div>
-          </q-item-section>
-        </AlarmHistoryItem>
-      </q-item>
+        <template v-slot:header>
+          <AlarmHistoryItem :alarm="alarm">
+            <q-item-section side>
+              <div v-if="isMobile()">
+                <q-icon v-if="alarm.medicineTaken" name="check_circle" color="positive" size="2rem" />
+                <q-icon v-else name="warning" color="negative" size="2rem" />
+              </div>
+              <div v-else>
+                <q-chip
+                  v-if="alarm.medicineTaken"
+                  square
+                  color="positive"
+                  text-color="white"
+                  icon-right="check_circle"
+                >
+                  Tomou o remédio
+                </q-chip>
+                <q-chip
+                  v-else
+                  square
+                  color="negative"
+                  text-color="white"
+                  icon-right="warning"
+                >
+                  Não tomou o remédio
+                </q-chip>
+              </div>
+            </q-item-section>
+          </AlarmHistoryItem>
+        </template>
+
+        <q-table
+          :columns="alarmTriggersGridColumns"
+          :rows="mapAlarmTriggersIntoGridRows(alarm.triggers)"
+          row-key="id"
+        >
+          <template v-slot:body-cell-status="props">
+            <q-td :props="props">
+              <div v-if="isMobile()">
+                <!-- <q-icon v-if="alarm.medicineTaken" name="check_circle" color="positive" size="2rem" />
+                <q-icon v-else name="warning" color="negative" size="2rem" /> -->
+                <q-icon
+                  :name="triggerMedicineStatusStyle[props.row.status].icon"
+                  :color="triggerMedicineStatusStyle[props.row.status].color"
+                  size="2rem"
+                />
+              </div>
+              <div v-else>
+                <!-- <q-chip
+                  v-if="alarm.medicineTaken"
+                  square
+                  color="positive"
+                  text-color="white"
+                  icon-right="check_circle"
+                >
+                  Tomou o remédio
+                </q-chip>
+                <q-chip
+                  v-else
+                  square
+                  color="negative"
+                  text-color="white"
+                  icon-right="warning"
+                >
+                  Não tomou o remédio
+                </q-chip> -->
+                <q-chip
+                  square
+                  text-color="white"
+                  :icon-right="triggerMedicineStatusStyle[props.row.status].icon"
+                  :color="triggerMedicineStatusStyle[props.row.status].color"
+                >
+                  {{ triggerMedicineStatusStyle[props.row.status].label }}
+                </q-chip>
+              </div>
+            </q-td>
+          </template>
+        </q-table>
+<!-- 
+        <q-list
+          style="max-height: 46vh"
+          class="scroll rounded-borders q-ma-md"
+          separator
+          bordered
+        >
+          <q-item
+            v-for="trigger in alarm.triggers"
+            :key="trigger.date"
+          >
+            <q-item-section avatar>
+              <q-icon name="access_alarm" size="md" color="grey" />
+            </q-item-section>
+
+            <q-item-section>
+              {{ `${trigger.dateString} ${trigger.timeString}` }}
+            </q-item-section>
+          </q-item>
+        </q-list> -->
+      </q-expansion-item>
     </q-list>
   </q-page>
 </template>
 
 <script>
-import { reactive } from 'vue';
-import { isMobile } from "../helpers/media.helper";
-import AlarmHistoryItem from 'src/components/AlarmHistoryItem.vue';
+import { ref } from "vue";
+import { onBeforeRouteUpdate } from "vue-router";
+import { SessionStorage } from "quasar";
+import { isMobile } from "src/helpers/media.helper";
+import { TRIGGER_MEDICINE_STATUS, mapAlarmsWithTriggersForElderly } from "src/helpers/alarm.helper";
+import AlarmHistoryItem from "src/components/AlarmHistoryItem.vue";
 
-const alarms = reactive([
+const triggerMedicineStatusStyle = {
+  [TRIGGER_MEDICINE_STATUS.done]: {
+    icon: "check_circle",
+    color: "positive",
+    label: "Tomou o remédio",
+  },
+  [TRIGGER_MEDICINE_STATUS.ongoing]: {
+    icon: "check_circle",
+    color: "gray",
+    label: "Próximo disparo",
+  },
+  [TRIGGER_MEDICINE_STATUS.pending]: {
+    icon: "warning",
+    color: "negative",
+    label: "Não tomou o remédio",
+  },
+};
+
+const alarmTriggersGridColumns = [
   {
-    id: 1,
-    medicineName: "Roacutan",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 1,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: true,
-    toDelete: false,
-    medicineTaken: true,
+    name: "date",
+    field: "date",
+    label: "Data",
+    align: "center",
+    sortable: true,
   },
   {
-    id: 2,
-    medicineName: "Anfetamina",
-    timesToRepeat: 1,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: true,
-    toDelete: false,
-    medicineTaken: true,
+    name: "time",
+    field: "time",
+    label: "Hora",
+    align: "center",
+    sortable: true,
   },
   {
-    id: 3,
-    medicineName: "Ácido",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: true,
-    toDelete: false,
-    medicineTaken: false,
+    name: "status",
+    field: "status",
+    label: "Situação",
+    align: "center",
+    sortable: true,
   },
-  {
-    id: 4,
-    medicineName: "Escitalopramaaaaaaaaaaaaaaaaaaaaaaaaa",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-    medicineTaken: true,
-  },
-  {
-    id: 5,
-    medicineName: "Dipirona",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-    medicineTaken: false,
-  },
-  {
-    id: 4,
-    medicineName: "Escitalopram",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-    medicineTaken: true,
-  },
-  {
-    id: 5,
-    medicineName: "Dipirona",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-    medicineTaken: false,
-  },
-  {
-    id: 4,
-    medicineName: "Escitalopram",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-    medicineTaken: false,
-  },
-  {
-    id: 5,
-    medicineName: "Dipirona",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-    medicineTaken: false,
-  },
-  {
-    id: 4,
-    medicineName: "Escitalopram",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-    medicineTaken: false,
-  },
-  {
-    id: 5,
-    medicineName: "Dipirona",
-    timesToRepeat: 10,
-    repetitionIntervalInHours: 8,
-    startDate: "15/03/2022",
-    startTime: "07:30",
-    isActive: false,
-    toDelete: false,
-    medicineTaken: true,
-  },
-]);
+];
+
+function mapAlarmTriggersIntoGridRows(triggers) {
+  return triggers.map(trigger => ({
+    date: trigger.dateString,
+    time: trigger.timeString,
+    status: trigger.status,
+  }));
+}
 
 export default {
   name: "AlarmHistory",
   components: {
     AlarmHistoryItem,
   },
-  setup() {
+  props: {
+    elderly: {
+      default: {},
+      id: Number,
+      name: String,
+    },
+  },
+  setup(props) {
+    const elderlyRef = ref({
+      id: Number(props.elderly.id),
+      name: props.elderly.name,
+    });
+
+    if (!elderlyRef.value.id) {
+      elderlyRef.value = SessionStorage.getItem("elderlies")[0];
+    }
+
+    const alarmsRef = ref(SessionStorage.getItem("alarms"));
+    
+    mapAlarmsWithTriggersForElderly(alarmsRef, elderlyRef.value.id);
+
+    onBeforeRouteUpdate((to, from) => {
+      const newElderly = { id: Number(to.params.id), name: to.params.name };
+      elderlyRef.value = newElderly;
+      alarmsRef.value = SessionStorage.getItem("alarms");
+      mapAlarmsWithTriggersForElderly(alarmsRef, elderlyRef.value.id);
+
+      // Essa função é chamada ao clicar nos submenus de idosos no menu lateral,
+      // mais precisamente, somente quando um idoso diferente é selecionado.
+      // Atualizar aqui todos os dados da tela para condizerem com o novo idoso.
+    });
+
     return {
-      alarms,
       isMobile,
+      triggerMedicineStatusStyle,
+      alarmTriggersGridColumns,
+      mapAlarmTriggersIntoGridRows,
+      alarmsRef,
     };
   },
 };

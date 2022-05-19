@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <q-card-section>
       <div class="text-h4">
-        {{!alarmRef.id ? "Adicionar alarme" : "Editar alarme"}}
+        Adicionar alarme
       </div>
     </q-card-section>
 

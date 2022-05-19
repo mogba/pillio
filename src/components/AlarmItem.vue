@@ -7,20 +7,20 @@
       <q-item-label
         style="overflow: hidden; text-overflow: ellipsis;"
       >
-        {{ alarmData.medicineName }}
+        {{ alarmRef.medicineName }}
       </q-item-label>
       <q-item-label caption>
-        {{ treatmentStartMessage(alarmData) }}
+        {{ treatmentStartMessage(alarmRef) }}
       </q-item-label>
       <q-item-label caption>
-        {{ repetitionIntervalMessage(alarmData) }}
+        {{ repetitionIntervalMessage(alarmRef) }}
       </q-item-label>
     </q-item-section>
     <slot />
 </template>
 
 <script>
-import { ref } from '@vue/reactivity'
+import { ref } from "vue";
 import { repetitionIntervalMessage, treatmentStartMessage } from "src/helpers/date.helper";
 
 export default {
@@ -38,10 +38,10 @@ export default {
     },
   },
   setup(props) {
-    const alarmData = ref(props.alarm);
+    const alarmRef = ref(props.alarm);
 
     return {
-      alarmData,
+      alarmRef,
       treatmentStartMessage,
       repetitionIntervalMessage,
     };

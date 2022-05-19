@@ -12,13 +12,11 @@ function treatmentStartMessage(alarm) {
 
 function treatmentEndMessage(alarm) {
   const end = treatmentEndDate(alarm);
-  const day = end.getDate().toString().padStart(2, '0');
-  const month = end.getMonth().toString().padStart(2, '0');
-  const endTime = `${end.getHours()}:${end.getMinutes()}`
-  return `Conclusão em ${day}/${month}/${end.getFullYear()} ${endTime}`;
+  const { dateString, timeString } = formatDateToString(end);
+  return `Conclusão em ${dateString} ${timeString}`;
 }
 
-function treatmentStartDate (alarm) {
+function treatmentStartDate(alarm) {
   const startArr = 
     `${
       alarm.startDate.replaceAll('/', '-')
@@ -36,10 +34,26 @@ function treatmentStartDate (alarm) {
 function treatmentEndDate(alarm) {
   const start = treatmentStartDate(alarm);
   const intervalInMiliseconds = alarm.repetitionIntervalInHours * 3_600_000;
-  const end = new Date(
-    start.getTime() + (intervalInMiliseconds * alarm.timesToRepeat)
-  );
+  const end = nextDate(start, intervalInMiliseconds, alarm.timesToRepeat);
   return end;
+}
+
+function nextDate(fromDate, intervalInMiliseconds, multiplier) {
+  return new Date(
+    fromDate.getTime() + (intervalInMiliseconds * multiplier)
+  );
+}
+
+function formatDateToString(date) {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = date.getMonth().toString().padStart(2, '0');
+  const hour = date.getHours().toString().padStart(2, "0");
+  const minute = date.getMinutes().toString().padStart(2, "0");
+
+  return {
+    dateString: `${day}/${month}/${date.getFullYear()}`,
+    timeString: `${hour}:${minute}`,
+  };
 }
 
 export {
@@ -48,4 +62,6 @@ export {
   treatmentEndMessage,
   treatmentStartDate,
   treatmentEndDate,
+  nextDate,
+  formatDateToString,
 };

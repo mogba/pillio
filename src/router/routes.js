@@ -28,8 +28,10 @@ const routes = [
         props: router => handleProp(router, "alarm"),
       },
       {
+        name: "alarm-history",
         path: "alarm-history",
         component: () => import("pages/AlarmHistory.vue"),
+        props: router => handleProp(router, "elderly"),
       },
     ],
   },
