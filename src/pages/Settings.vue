@@ -17,6 +17,7 @@
           <div class="text-h6 text-center q-pb-md">
             Olá, {{ userData.name }}!
             <br>
+            <br>
             Você vai usar este sistema para administrar 
             <br>
             seus próprios remédios ou será responsável
@@ -120,12 +121,16 @@
           class="full-width"
         >
           <div class="text-h6 text-center">
-            É hora de conectar seu Pilli-o Dispenser ao seu smartphone.
+            É hora de conectar seu Pilli-o Dispenser ao seu dispositivo.
+            <br>
             <br>
             Coloque seu dispositivo Pilli-o Dispenser em modo de 
+            <br>
             configuração pressionando o botão por 10 segundos.
             <br>
+            <br>
             Abaixo serão exibidos os dispositivos Pilli-o Dispenser 
+            <br>
             que estão em modo de configuração.
             <br>
             Toque em um deles para realizar a conexão.
@@ -215,9 +220,11 @@
           <div class="text-h6 text-center">
             Agora seu Pilli-o Dispenser está conectado.
             <br>
+            <br>
             Por último, precisamos configurar a rede wi-fi
             <br>
             onde seu dispositivo Pilli-o Dispenser será conectado.
+            <br>
             <br>
             Toque em uma das redes wi-fi
             <br>
@@ -303,7 +310,8 @@
           class="full-width"
         >
           <div class="text-h6 text-center">
-            Muito bem!
+            Tudo pronto!
+            <br>
             <br>
             Agora você já pode começar a usar o sistema.
             <!-- <br>
@@ -522,60 +530,6 @@ const NETWORK_SIGNAL_QUALITY_ICONS = Object.freeze({
   bad: "network_wifi_1_bar",
 });
 
-const selectedUserRole = ref(null);
-const configurationStep = ref(1);
-
-const elderlies = ref([]);
-const newElderly = ref(resetNewElderlyData());
-
-const userData = ref({
-  name: "Usuário fictício",
-});
-
-const dispenserConfigurationModeNetworks = ref([
-  {
-    name: "Pilli-o Dispenser AAA001",
-    signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.good,
-  },
-  {
-    name: "Pilli-o Dispenser AAA002",
-    signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.avarage,
-  },
-]);
-const availableWifiNetworks = ref([
-  {
-    name: "Rede de casa",
-    openNetwork: true,
-    signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.good,
-  },
-  {
-    name: "Wi-fi 2.4GHz",
-    openNetwork: true,
-    signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.good,
-  },
-  {
-    name: "Vizinho",
-    openNetwork: true,
-    signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.avarage,
-  },
-  {
-    name: "#NET-CLARO-WIFI",
-    openNetwork: true,
-    signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.bad,
-  },
-]);
-
-const selectedDispenserNetwork = ref(resetSelectedNetwork());
-const connectedDispenserNetwork = ref(resetSelectedNetwork());
-const showDispenserConnectionDialog = ref(false);
-
-const selectedWifiNetwork = ref(resetSelectedNetwork());
-const connectedWifiNetwork = ref(resetSelectedNetwork());
-const showWifiNetworkConnectionDialog = ref(false);
-
-const showNetworkConnectionLoading = ref(false);
-const showNetworkConnectedWarning = ref(false);
-
 function resetNewElderlyData() {
   return {
     name: "",
@@ -590,52 +544,105 @@ function resetSelectedNetwork(network) {
   };
 }
 
-function connectToNetwork(network) {
-  // CÓDIGO PROVISÓRIO
-  const alternateLoadingNetworkConnection = (callbackSetConnectedNetwork) => {
-    showNetworkConnectionLoading.value = !showNetworkConnectionLoading.value;
-    showNetworkConnectedWarning.value = !showNetworkConnectionLoading.value;
-    callbackSetConnectedNetwork();
-  };
-
-  if (showDispenserConnectionDialog.value) {
-    const callback = () => {
-      if (showNetworkConnectedWarning.value) {
-        connectedDispenserNetwork.value = selectedDispenserNetwork.value;
-      }
-    }
-    alternateLoadingNetworkConnection(callback);
-    setTimeout(() => alternateLoadingNetworkConnection(callback), 5000);
-  }
-  if (showWifiNetworkConnectionDialog.value) {
-    const callback = () => {
-      if (showNetworkConnectedWarning.value) {
-        connectedWifiNetwork.value = selectedWifiNetwork.value;
-      }
-
-      // Aqui, depois que o dispenser for conectado a rede wi-fi,
-      // o celular do usuário deve ser conectado à rede wi-fi
-      // a qual estava conectado inicialmente, ou seja, antes de
-      // ser conectado à rede do dispenser.
-    }
-
-    alternateLoadingNetworkConnection(callback);
-    setTimeout(() => alternateLoadingNetworkConnection(callback), 5000);
-  }
-
-
-  // Tentar conectar o celular ao dispenser
-  // Tirar o loading no callback. Funcionará como o setTimeout.
-  // Quando o sistema verificar que está conectado, removerá o loading
-}
-
 export default {
-  name: "InitialConfiguration",
+  name: "Settings",
   components: {
     InputText,
     InputPassword,
   },
   setup() {
+    const selectedUserRole = ref(null);
+    const configurationStep = ref(1);
+
+    const elderlies = ref([]);
+    const newElderly = ref(resetNewElderlyData());
+
+    const userData = ref({
+      name: "Caroline",
+    });
+
+    const dispenserConfigurationModeNetworks = ref([
+      {
+        name: "Pilli-o Dispenser AAA001",
+        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.good,
+      },
+      {
+        name: "Pilli-o Dispenser AAA002",
+        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.avarage,
+      },
+    ]);
+    const availableWifiNetworks = ref([
+      {
+        name: "Rede de casa",
+        openNetwork: true,
+        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.good,
+      },
+      {
+        name: "Wi-fi 2.4GHz",
+        openNetwork: true,
+        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.good,
+      },
+      {
+        name: "Vizinho",
+        openNetwork: true,
+        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.avarage,
+      },
+      {
+        name: "#NET-CLARO-WIFI",
+        openNetwork: true,
+        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.bad,
+      },
+    ]);
+
+    const selectedDispenserNetwork = ref(resetSelectedNetwork());
+    const connectedDispenserNetwork = ref(resetSelectedNetwork());
+    const showDispenserConnectionDialog = ref(false);
+
+    const selectedWifiNetwork = ref(resetSelectedNetwork());
+    const connectedWifiNetwork = ref(resetSelectedNetwork());
+    const showWifiNetworkConnectionDialog = ref(false);
+
+    const showNetworkConnectionLoading = ref(false);
+    const showNetworkConnectedWarning = ref(false);
+
+    function connectToNetwork(network) {
+      // CÓDIGO PROVISÓRIO
+      const alternateLoadingNetworkConnection = (callbackSetConnectedNetwork) => {
+        showNetworkConnectionLoading.value = !showNetworkConnectionLoading.value;
+        showNetworkConnectedWarning.value = !showNetworkConnectionLoading.value;
+        callbackSetConnectedNetwork();
+      };
+
+      if (showDispenserConnectionDialog.value) {
+        const callback = () => {
+          if (showNetworkConnectedWarning.value) {
+            connectedDispenserNetwork.value = selectedDispenserNetwork.value;
+          }
+        }
+        alternateLoadingNetworkConnection(callback);
+        setTimeout(() => alternateLoadingNetworkConnection(callback), 5000);
+      }
+      if (showWifiNetworkConnectionDialog.value) {
+        const callback = () => {
+          if (showNetworkConnectedWarning.value) {
+            connectedWifiNetwork.value = selectedWifiNetwork.value;
+          }
+
+          // Aqui, depois que o dispenser for conectado a rede wi-fi,
+          // o celular do usuário deve ser conectado à rede wi-fi
+          // a qual estava conectado inicialmente, ou seja, antes de
+          // ser conectado à rede do dispenser.
+        }
+
+        alternateLoadingNetworkConnection(callback);
+        setTimeout(() => alternateLoadingNetworkConnection(callback), 5000);
+      }
+
+      // Tentar conectar o celular ao dispenser
+      // Tirar o loading no callback. Funcionará como o setTimeout.
+      // Quando o sistema verificar que está conectado, removerá o loading
+    }
+
     return {
       USER_ROLE,
       selectedUserRole,

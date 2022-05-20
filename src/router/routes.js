@@ -33,17 +33,16 @@ const routes = [
         component: () => import("pages/AlarmHistory.vue"),
         props: router => handleProp(router, "elderly"),
       },
+      {
+        path: "/settings",
+        component: () => import("src/pages/Settings.vue"),
+      },
     ],
   },
-      
-      
-      
-  // REMOVER DEPOIS
   {
-    path: "/ic",
-    component: () => import("pages/InitialConfiguration.vue"),
+    path: "/setup",
+    component: () => import("src/pages/Settings.vue"),
   },
-
   {
     path: "/login",
     component: () => import("pages/Login.vue"),

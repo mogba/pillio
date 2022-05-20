@@ -113,7 +113,7 @@
                 class="full-width q-px-xl q-gutter-y-sm q-mt-lg"
               >
                 <div class="text-h6 text-center q-mb-md">
-                  Olá, {{formData.name}}!
+                  Olá, {{ formData.name }}!
                   <br>
                   Agora você só precisa informar seu
                   <br>

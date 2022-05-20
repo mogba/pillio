@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <q-card-section>
       <div class="text-h4">
-        Histórico de alarmes
+        Histórico de alarmes {{ elderlyRef && elderlyRef.name ? `de ${elderlyRef.name}` : "" }}
       </div>
     </q-card-section>
 
@@ -209,6 +209,7 @@ export default {
       alarmTriggersGridColumns,
       mapAlarmTriggersIntoGridRows,
       alarmsRef,
+      elderlyRef,
     };
   },
 };

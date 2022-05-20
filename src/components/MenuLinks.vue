@@ -1,13 +1,14 @@
 <template>
   <q-list>
     <div
-      v-for="link in linksList"
+      v-for="(link, index) in linksList"
       :key="link.title"
     >
       <q-expansion-item
         v-if="link.expandable && link.children?.data.length > 0"
         expand-separator
         :default-opened="link.defaultOpened"
+        :disable="link.disable"
       >
         <template v-slot:header>
           <q-item-section avatar>
@@ -57,6 +58,7 @@
         tag="a"
         target="_self"
         :href="link.link"
+        :disable="link.disable"
       >
         <q-item-section v-if="link.icon" avatar>
           <q-icon :name="link.icon" size="md" color="primary" />
@@ -72,6 +74,8 @@
           </q-item-label>
         </q-item-section>
       </q-item>
+
+      <q-separator :key="'sep' + index"  v-if="link.separator" />
     </div>
   </q-list>
 </template>
@@ -123,6 +127,19 @@ export default {
           routeName: "alarm-history",
           data: elderliesRef.value,
         },
+        separator: true,
+      },
+      {
+        title: "Configurações",
+        caption: "Configurar pessoas ou dispositivos Pilli-o Dispenser",
+        icon: "manage_accounts",
+        link: "#/settings",
+        disable: true,
+      },
+      {
+        title: "Sair",
+        icon: "logout",
+        link: "#/login",
       },
     ];
 

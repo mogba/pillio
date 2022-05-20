@@ -80,7 +80,7 @@ export default (_) => {
     {
       id: 5,
       elderlyId: 2,
-      medicineName: "Xarelto",
+      medicineName: "Rivaroxabana",
       timesToRepeat: 7,
       repetitionIntervalInHours: 8,
       startDate: "15/03/2022",
