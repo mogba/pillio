@@ -17,7 +17,7 @@ function getExpectedAlarmTriggers(alarm) {
   let alarmTriggers = Array.from(Array(alarm.timesToRepeat)).map(
     (_, repetitionIndex) => {
       const date = nextDate(fromDate, intervalInMiliseconds, repetitionIndex);
-      const status = 
+      const status =
         ((repetitionIndex + 1) === alarm.timesToRepeat &&
         alarm.timesToRepeat > 1)
         ? TRIGGER_MEDICINE_STATUS.ongoing
@@ -33,25 +33,35 @@ function getExpectedAlarmTriggers(alarm) {
 
   alarmTriggers = alarmTriggers.reverse();
 
-  if (alarmTriggers[1]) {
-    alarmTriggers[1].status = TRIGGER_MEDICINE_STATUS.pending;
-  }
-
   return alarmTriggers;
 }
 
 function mapAlarmsWithTriggersForElderly(alarmsRef, elderlyId) {
-  alarmsRef.value = alarmsRef.value.reduce((acc, alarm) => (
-    alarm.elderlyId === elderlyId
-    ? [
-      ...acc,
-      {
-        ...alarm,
-        triggers: getExpectedAlarmTriggers(alarm),
-      },
-    ]
-    : acc
-  ), []);
+  alarmsRef.value = alarmsRef.value.reduce((acc, alarm, index) => {
+    let triggers = [];
+
+    if (elderlyId === 1 && (index === 1 || index === 2)) {
+      triggers = getExpectedAlarmTriggers(alarm);
+      triggers[3].status = TRIGGER_MEDICINE_STATUS.pending;
+    }
+    else if (elderlyId === 3) {
+      triggers = getExpectedAlarmTriggers(alarm);
+      triggers[1].status = TRIGGER_MEDICINE_STATUS.pending;
+    }
+    else {
+      triggers = getExpectedAlarmTriggers(alarm);
+    }
+
+    return (alarm.elderlyId === elderlyId
+      ? [
+        ...acc,
+        {
+          ...alarm,
+          triggers,
+        },
+      ]
+      : acc);
+  }, []);
 }
 
 export {
