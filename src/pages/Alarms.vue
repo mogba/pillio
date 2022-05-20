@@ -54,8 +54,8 @@
         position="bottom"
         :offset="[18, 18]"
       >
-      <div class="row q-col-gutter-md" style="width: 430px;">
-        <div class="col-xs-12 col-sm-6">
+      <div class="row q-col-gutter-md justify-center" style="width: 430px;">
+        <div class="col-xs-8 col-md-10">
           <q-btn
             no-caps
             class="full-width"
@@ -65,7 +65,7 @@
             @click="handleChangeDeleteMode"
           />
         </div>
-        <div class="col-xs-12 col-sm-6">
+        <div class="col-xs-8 col-md-10">
           <q-btn
             no-caps
             class="full-width"

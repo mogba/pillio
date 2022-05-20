@@ -5,7 +5,8 @@ export default (_) => {
   // para o funcionamento do sistema. Isso é temporário e deve ser
   // substituído pelos dados retornados do backend.
 
-  SessionStorage.set("user", { id: -1, isLoggedIn: true, isNotConfiguredYet: false });
+  // SessionStorage.set("user", { id: -1, isLoggedIn: true, isNotConfiguredYet: false });
+  SessionStorage.set("user", { id: -1, isLoggedIn: false, isNotConfiguredYet: true });
   SessionStorage.set("elderlies", [
     {
       id: 1,

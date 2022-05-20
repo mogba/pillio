@@ -76,7 +76,7 @@
                         label="Entrar"
                         color="primary"
                         :size="'lg'"
-                        @click="handleAuthenticate"
+                        @click="() => handleAuthenticate('login')"
                       />
                     </router-link>
                   </div>
@@ -144,7 +144,7 @@
                       label="Criar cadastro"
                       color="primary"
                       :size="'lg'"
-                      @click="handleAuthenticate"
+                      @click="() => handleAuthenticate('register')"
                     />
                   </router-link>
                 </div>
@@ -210,16 +210,20 @@ function handleChangeTab(tab) {
   }
 }
 
-function handleAuthenticate() {
-  // SessionStorage.set("user", { id: -1, isLoggedIn: true, isNotConfiguredYet: false });
-  // Comando acima movido para o arquivo de boot "initialize-data-temp-file.boot.js"
-
-  if (SessionStorage.getItem("user").isNotConfiguredYet) {
+function handleAuthenticate(type) {
+  if (type === "register") {
     // Verificar se o usuário já configurou algum idoso ou dispenser.
     // Caso ainda não tenha configurado, deve ser redirecionado para
     // a tela de configurações iniciais.
-    redirectToAfterAuthentication.value = "/ic";
+    redirectToAfterAuthentication.value = "/setup";
   }
+  else {
+    redirectToAfterAuthentication.value = "/";
+  }
+
+  // Comando abaixo movido para o arquivo de boot 
+  // "initialize-data-temp-file.boot.js" para desenvolvimento
+  SessionStorage.set("user", { id: -1, isLoggedIn: true, isNotConfiguredYet: false });
 }
 
 export default {
@@ -229,6 +233,8 @@ export default {
     InputPassword,
   },
   setup() {
+    SessionStorage.set("user", { id: -1, isLoggedIn: false, isNotConfiguredYet: true });
+
     return {
       TABS,
       tabsDefinition,

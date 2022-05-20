@@ -1,6 +1,6 @@
 <template>
   <div class="row q-pa-md full-width flex-center justify-center">
-    <div class="col-xs-12 col-md-8 col-lg-8">
+    <div class="col-xs-12 col-md-8 col-lg-6">
       <q-card-section>
         <div class="text-h4">
           Primeiros passos
@@ -8,7 +8,7 @@
       </q-card-section>
       
       <q-card-section
-        class="column q-px-xl q-gutter-y-sm q-mt-lg content-center justify-center"
+        class="column q-px-xs q-gutter-y-sm q-mt-lg content-center justify-center"
       >
         <div
           v-if="configurationStep === 1"
@@ -34,7 +34,7 @@
                 no-caps
                 class="full-width"
                 style="height: 100%; width: 100%"
-                label="Administrarei os remédios de outra pessoa"
+                label="De outra pessoa"
                 color="primary"
                 :size="'lg'"
                 @click="() => {
@@ -52,7 +52,7 @@
                 no-caps
                 class="full-width"
                 style="height: 100%; width: 100%"
-                label="Administrarei meus próprios remédios"
+                label="Os meus remédios"
                 color="primary"
                 :size="'lg'"
                 @click="() => {
