@@ -69,6 +69,7 @@
           >
             <template v-slot:body-cell-status="props">
               <q-td :props="props">
+                  {{ triggerMedicineStatusStyle[props.row.status].icon + " " + triggerMedicineStatusStyle[props.row.status].color }}
                 <div v-if="isMobile()">
                   <q-icon
                     :name="triggerMedicineStatusStyle[props.row.status].icon"
@@ -117,12 +118,12 @@ import AlarmHistoryItem from "src/components/AlarmHistoryItem.vue";
 
 const triggerMedicineStatusStyle = {
   [TRIGGER_MEDICINE_STATUS.done]: {
-    icon: "check_circle",
+    icon: "alarm_on",
     color: "positive",
     label: "Tomou o remédio",
   },
   [TRIGGER_MEDICINE_STATUS.ongoing]: {
-    icon: "check_circle",
+    icon: "alarm",
     color: "gray",
     label: "Próximo disparo",
   },
