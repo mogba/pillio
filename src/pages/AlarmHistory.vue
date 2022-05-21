@@ -69,7 +69,6 @@
           >
             <template v-slot:body-cell-status="props">
               <q-td :props="props">
-                  {{ triggerMedicineStatusStyle[props.row.status].icon + " " + triggerMedicineStatusStyle[props.row.status].color }}
                 <div v-if="isMobile()">
                   <q-icon
                     :name="triggerMedicineStatusStyle[props.row.status].icon"
