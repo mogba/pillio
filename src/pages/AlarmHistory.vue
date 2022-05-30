@@ -123,7 +123,7 @@ const triggerMedicineStatusStyle = {
   },
   [TRIGGER_MEDICINE_STATUS.ongoing]: {
     icon: "alarm",
-    color: "gray",
+    color: "grey",
     label: "Próximo disparo",
   },
   [TRIGGER_MEDICINE_STATUS.pending]: {

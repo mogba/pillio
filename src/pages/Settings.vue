@@ -1,6 +1,6 @@
 <template>
   <div class="row q-pa-md full-width flex-center justify-center">
-    <div class="col-xs-12 col-md-8 col-lg-6">
+    <div class="col-xs-12 col-md-8 col-lg-8">
       <q-card-section>
         <div class="text-h4">
           Primeiros passos
@@ -8,370 +8,513 @@
       </q-card-section>
       
       <q-card-section
-        class="column q-px-xs q-gutter-y-sm q-mt-lg content-center justify-center"
+        class="row q-px-xs q-gutter-y-sm q-mt-lg content-center justify-center"
       >
-        <div
-          v-if="configurationStep === 1"
-          class="full-width"
-        >
-          <div class="text-h6 text-center q-pb-md">
-            Olá, {{ userData.name }}!
-            <br>
-            <br>
-            Você vai usar este sistema para administrar 
-            <br>
-            seus próprios remédios ou será responsável
-            <br>
-            pelos remédios de outra pessoa?
-          </div>
-
-          <div class="row q-px-lg q-pt-lg q-gutter-lg content-center justify-center">
-            <div
-              class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
-              style="height: 56px;"
-            >
-              <q-btn
-                no-caps
-                class="full-width"
-                style="height: 100%; width: 100%"
-                label="De outra pessoa"
-                color="primary"
-                :size="'lg'"
-                @click="() => {
-                  selectedUserRole = USER_ROLE.responsible;
-                  configurationStep = 2;
-                }"
-              />
-            </div>
-
-            <div
-              class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
-              style="height: 56px;"
-            >
-              <q-btn
-                no-caps
-                class="full-width"
-                style="height: 100%; width: 100%"
-                label="Os meus remédios"
-                color="primary"
-                :size="'lg'"
-                @click="() => {
-                  selectedUserRole = USER_ROLE.elderly;
-                  configurationStep = 3;
-                }"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div
-          v-else-if="configurationStep === 2"
-          class="full-width"
-        >
-          <div class="text-h6 text-center">
-            Precisamos cadastrar a pessoa para
-            <br>
-            quem você administrará os remédios
-          </div>
-
-          <div class="column">
-            <InputText
-              class="q-mt-lg"
-              label="Nome da pessoa"
-              v-model="newElderly.name"
-            />
-            <InputText
-              class="q-mt-lg"
-              label="Telefone da pessoa"
-              v-model="newElderly.phoneNumber"
-            />
-          </div>
-
-          <div class="row q-px-lg q-pt-xl q-col-gutter-lg content-center justify-center">
-            <div class="col-xs-12 col-md-6">
-              <q-btn
-                no-caps
-                class="full-width"
-                label="Voltar"
-                color="secondary"
-                :size="'lg'"
-                @click="() => {
-                  selectedUserRole = null;
-                  configurationStep = 1;
-                }"
-              />
-            </div>
-            <div class="col-xs-12 col-md-6">
-              <q-btn
-                no-caps
-                class="full-width"
-                label="Avançar"
-                color="primary"
-                :size="'lg'"
-                @click="() => {
-                  configurationStep = 3;
-                }"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div
-          v-else-if="configurationStep === 3"
-          class="full-width"
-        >
-          <div class="text-h6 text-center">
-            É hora de conectar seu Pilli-o Dispenser ao seu dispositivo.
-            <br>
-            <br>
-            Coloque seu dispositivo Pilli-o Dispenser em modo de 
-            <br>
-            configuração pressionando o botão por 10 segundos.
-            <br>
-            <br>
-            Abaixo serão exibidos os dispositivos Pilli-o Dispenser 
-            <br>
-            que estão em modo de configuração.
-            <br>
-            Toque em um deles para realizar a conexão.
-          </div>
-
+        <div class="full-width">
           <div
-            class="column full-width content-center q-mt-md"
+            v-if="configurationStep === 1"
+            class="full-width q-px-md"
           >
-            <div class="col q-gutter-md full-width">
-              <div class="q-mx-lg">
-                <q-list
-                  separator
-                  bordered
-                  style="max-height: 30vh"
-                  class="scroll rounded-borders"
-                >
-                  <q-item
-                    class="full-width"
-                    clickable v-ripple
-                    v-for="dispenserNetwork in dispenserConfigurationModeNetworks"
-                    :key="dispenserNetwork.name"
-                    @click="() => {
-                      selectedDispenserNetwork = resetSelectedNetwork(dispenserNetwork)
-                      showDispenserConnectionDialog = true;
-                    }"
-                  >
-                    <q-item-section>
-                      <q-item-label>{{ dispenserNetwork.name }}</q-item-label>
-                    </q-item-section>
-                    <q-item-section side>
-                      <div class="row items-center q-gutter-md">
-                        <div
-                          v-if="dispenserNetwork.name === connectedDispenserNetwork.name"
-                        >
-                          Conectado
-                        </div>
-                        <div>
-                          <q-icon
-                            :name="dispenserNetwork.signalQuality"
-                            size="md"
-                            color="grey"
-                          />
-                        </div>
-                      </div>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
+            <div class="text-h6 text-body text-center q-px-md">
+              Olá, {{ userData.name }}!
+              <br>
+              <br>
+              Você vai administrar seus 
+              próprios remédios ou será 
+              responsável pelos remédios 
+              de outra pessoa?
+            </div>
+
+            <div class="row q-px-lg q-pt-lg q-pb-sm q-gutter-lg content-center justify-center" style="font-size: 19px;">
+              <q-radio size="lg" v-model="selectedUserRole" :val="USER_ROLE.elderly" label="Meus remédios" />
+              <q-radio size="lg" v-model="selectedUserRole" :val="USER_ROLE.responsible" label="De outra pessoa" />
+            </div>
+
+            <div class="row q-pt-lg q-col-gutter-lg content-center justify-center">
+              <div
+                class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
+                style="height: 56px;"
+              >
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  style="height: 100%; width: 100%"
+                  label="Avançar"
+                  color="primary"
+                  :size="'lg'"
+                  :disable="!selectedUserRole"
+                  @click="() => {
+                    configurationStep = selectedUserRole === USER_ROLE.elderly ? 3 : 2;
+                  }"
+                />
               </div>
             </div>
           </div>
-          
-          <div class="row q-px-lg q-pt-xl q-col-gutter-lg content-center justify-center">
-            <div class="col-xs-12 col-md-6">
-              <q-btn
-                no-caps
-                class="full-width"
-                label="Voltar"
-                color="secondary"
-                :size="'lg'"
-                @click="() => {
-                  configurationStep =
-                    selectedUserRole === USER_ROLE.responsible
-                      ? 2
-                      : 1;
-                }"
-              />
-            </div>
-            <div class="col-xs-12 col-md-6">
-              <q-btn
-                no-caps
-                class="full-width"
-                label="Avançar"
-                color="primary"
-                :size="'lg'"
-                @click="() => {
-                  configurationStep = 4;
-                }"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div
-          v-else-if="configurationStep === 4"
-          class="full-width"
-        >
-          <div class="text-h6 text-center">
-            Agora seu Pilli-o Dispenser está conectado.
-            <br>
-            <br>
-            Por último, precisamos configurar a rede wi-fi
-            <br>
-            onde seu dispositivo Pilli-o Dispenser será conectado.
-            <br>
-            <br>
-            Toque em uma das redes wi-fi
-            <br>
-            exibidas abaixo para realizar a conexão.
-          </div>
 
           <div
-            class="column full-width content-center q-mt-md"
+            v-else-if="configurationStep === 2"
+            class="full-width q-px-md"
           >
-            <div class="col q-gutter-md full-width">
-              <div class="q-mx-lg">
-                <q-list
-                  separator
-                  bordered
-                  style="max-height: 30vh"
-                  class="scroll rounded-borders"
-                >
-                  <q-item
-                    class="full-width"
-                    clickable v-ripple
-                    v-for="wifiNetwork in availableWifiNetworks"
-                    :key="wifiNetwork.name"
-                    @click="() => {
-                      selectedWifiNetwork = resetSelectedNetwork(wifiNetwork)
-                      showWifiNetworkConnectionDialog = true;
-                    }"
-                  >
-                    <q-item-section>
-                      <q-item-label>{{ wifiNetwork.name }}</q-item-label>
-                    </q-item-section>
-                    <q-item-section side>
-                      <div class="row items-center q-gutter-md">
-                        <div
-                          v-if="wifiNetwork.name === connectedWifiNetwork.name"
-                        >
-                          Conectado
-                        </div>
-                        <div>
-                          <q-icon
-                            :name="wifiNetwork.signalQuality"
-                            size="md"
-                            color="grey"
-                          />
-                        </div>
-                      </div>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
+            <div class="text-h6 text-body text-center q-px-md">
+              Precisamos cadastrar a pessoa para
+              quem você administrará os remédios.
+            </div>
+
+            <div class="column q-pt-md">
+              <InputText
+                class="q-mt-lg"
+                label="Nome da pessoa"
+                v-model="newElderly.name"
+              />
+              <InputText
+                class="q-mt-lg"
+                label="Telefone da pessoa"
+                v-model="newElderly.phoneNumber"
+              />
+            </div>
+
+            <div class="row q-pt-xl q-col-gutter-lg content-center justify-center">
+              <div class="col-xs-12 col-md-6">
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  label="Avançar"
+                  color="primary"
+                  :size="'lg'"
+                  @click="() => {
+                    configurationStep = 3;
+                  }"
+                />
+              </div>
+              <div class="col-xs-12 col-md-6">
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  label="Voltar"
+                  color="secondary"
+                  :size="'lg'"
+                  @click="() => {
+                    selectedUserRole = null;
+                    configurationStep = 1;
+                  }"
+                />
               </div>
             </div>
           </div>
-          
-          <div class="row q-px-lg q-pt-xl q-col-gutter-lg content-center justify-center">
-            <div class="col-xs-12 col-md-6">
-              <q-btn
-                no-caps
-                class="full-width"
-                label="Voltar"
-                color="secondary"
-                :size="'lg'"
-                @click="() => {
-                  configurationStep = 3;
-                }"
-              />
-            </div>
-            <div class="col-xs-12 col-md-6">
-              <q-btn
-                no-caps
-                class="full-width"
-                label="Avançar"
-                color="primary"
-                :size="'lg'"
-                @click="() => {
-                  configurationStep = 5;
-                }"
-              />
-            </div>
-          </div>
-        </div>
 
-        <div
-          v-else-if="configurationStep === 5"
-          class="full-width"
-        >
-          <div class="text-h6 text-center">
-            Tudo pronto!
-            <br>
-            <br>
-            Agora você já pode começar a usar o sistema.
-            <!-- <br>
-            Caso precise administrar os remédios de mais de uma pessoa,
-            <br>
-            basta tocar no campo "Cadastrar outra pessoa". -->
-          </div>
-
-          <div class="row q-px-lg q-pt-lg q-gutter-lg content-center justify-center">
-            <div
-              class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
-              style="height: 56px;"
-            >
-              <q-btn
-                no-caps
-                class="full-width"
-                style="height: 100%; width: 100%"
-                label="Começar"
-                color="primary"
-                :size="'lg'"
-                to="/"
-              />
+          <div
+            v-else-if="configurationStep === 3"
+            class="full-width q-px-md"
+          >
+            <div class="text-h6 text-body text-center q-pb-md q-px-md">
+              É necessário configurar o Dispenser que armazenará os remédios.
+              <br>
+              Você deve escanear o QR Code contido na etiqueta do dispositivo
+              ou digitar seu código alfanumérico correspondente no campo abaixo.
             </div>
-
-            <!-- <div
-              class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
-              style="height: 56px;"
-            >
-              <q-btn
-                no-caps
-                class="full-width"
-                style="height: 100%; width: 100%"
-                label="Cadastrar outra pessoa"
-                color="primary"
-                :size="'lg'"
-                @click="() => {
-                }"
-              />
-            </div> -->
 
             <div
-              class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
-              style="height: 56px;"
+              class="column full-width content-center q-pt-lg"
             >
-              <q-btn
-                no-caps
-                class="full-width"
-                style="height: 100%; width: 100%"
-                label="Voltar"
-                color="secondary"
-                :size="'lg'"
-                @click="() => {
-                  configurationStep = 4;
-                }"
-              />
+              <div class="col q-gutter-md full-width">
+                <div class="full-width">
+                  <q-input
+                    class="col-xs-12 col-md-6"
+                    standout="bg-primary text-white"
+                    label="Código do Dispenser"
+                    required
+                    v-model="dispenserIdCode"
+                    clearable
+                  >
+                    <template v-slot:prepend>
+                      <q-icon
+                        class="cursor-pointer"
+                        size="md"
+                        name="photo_camera"
+                        @click="() => isScanningQrCode = true"
+                      />
+                    </template>
+
+                    <template>
+                      <div class="self-center full-width no-outline" tabindex="1"></div>
+                    </template>
+                  </q-input>
+
+                  <!-- {{ availableCamerasRef }} -->
+                </div>
+              </div>
+            </div>
+            
+            <div class="row q-pt-xl q-col-gutter-lg content-center justify-center">
+              <div class="col-xs-12 col-md-6">
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  label="Avançar"
+                  color="primary"
+                  :size="'lg'"
+                  @click="() => {
+                    configurationStep = 4;
+                  }"
+                />
+              </div>
+              <div class="col-xs-12 col-md-6">
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  label="Voltar"
+                  color="secondary"
+                  :size="'lg'"
+                  @click="() => {
+                    configurationStep =
+                      selectedUserRole === USER_ROLE.responsible
+                        ? 2
+                        : 1;
+                  }"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-else-if="configurationStep === 4"
+            class="full-width q-px-md"
+          >
+            <div class="text-h6 text-body q-px-md">
+              <div class="text-center">
+                Agora siga os passos abaixo 
+                para configurar o Dispenser.
+              </div>
+
+              <div class="text-left q-px-lg">
+                <ol>
+                  <li>
+                    <br>
+                    <div>
+                      Coloque seu Dispenser em modo 
+                      de configuração pressionando 
+                      o botão por 10 segundos.
+                    </div>
+                  </li>
+                  <li>
+                    <br>
+                    <div>
+                      Acesse as configurações de wi-fi de 
+                      seu dispositivo e conecte-o à rede 
+                      do Dispenser.
+                    </div>
+                  </li>
+                  <li>
+                    <br>
+                    <div>
+                      Seu dispositivo será redirecionado 
+                      à tela de configuração do Dispenser, 
+                      onde você deve definir a rede wi-fi 
+                      local onde ele deve ser conectado.
+                    </div>
+                  </li>
+                  <li>
+                    <br>
+                    <div>
+                      Após configurar o Dispenser, acesse 
+                      as configurações de wi-fi deu seu 
+                      dispositivo e conecte-o novamente 
+                      à internet.
+                    </div>
+                  </li>
+                </ol>
+              </div>
+            </div>
+
+            <div class="row q-pt-md q-col-gutter-lg content-center justify-center">
+              <div class="col-xs-12 col-md-6">
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  label="Avançar"
+                  color="primary"
+                  :size="'lg'"
+                  @click="() => {
+                    configurationStep = 5;
+                  }"
+                />
+              </div>
+              <div class="col-xs-12 col-md-6">
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  label="Voltar"
+                  color="secondary"
+                  :size="'lg'"
+                  @click="() => {
+                    configurationStep = 3;
+                  }"
+                />
+              </div>
+            </div>
+          </div>
+<!-- 
+          <div
+            v-else-if="configurationStep === 5"
+            class="full-width"
+          >
+            <div class="text-h6 text-center">
+              Agora seu Pilli-o Dispenser está conectado.
+              <br>
+              <br>
+              Por último, precisamos configurar a rede wi-fi
+              <br>
+              onde seu dispositivo Pilli-o Dispenser será conectado.
+              <br>
+              <br>
+              Toque em uma das redes wi-fi
+              <br>
+              exibidas abaixo para realizar a conexão.
+            </div>
+
+            <div
+              class="column full-width content-center q-mt-md"
+            >
+              <div class="col q-gutter-md full-width">
+                <div class="q-mx-lg">
+                  <q-list
+                    separator
+                    bordered
+                    style="max-height: 30vh"
+                    class="scroll rounded-borders"
+                  >
+                    <q-item
+                      class="full-width"
+                      clickable v-ripple
+                      v-for="wifiNetwork in availableWifiNetworks"
+                      :key="wifiNetwork.name"
+                      @click="() => {
+                        selectedWifiNetwork = resetSelectedNetwork(wifiNetwork)
+                        showWifiNetworkConnectionDialog = true;
+                      }"
+                    >
+                      <q-item-section>
+                        <q-item-label>{{ wifiNetwork.name }}</q-item-label>
+                      </q-item-section>
+                      <q-item-section side>
+                        <div class="row items-center q-gutter-md">
+                          <div
+                            v-if="wifiNetwork.name === connectedWifiNetwork.name"
+                          >
+                            Conectado
+                          </div>
+                          <div>
+                            <q-icon
+                              :name="wifiNetwork.signalQuality"
+                              size="md"
+                              color="grey"
+                            />
+                          </div>
+                        </div>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row q-px-lg q-pt-xl q-col-gutter-lg content-center justify-center">
+              <div class="col-xs-12 col-md-6">
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  label="Avançar"
+                  color="primary"
+                  :size="'lg'"
+                  @click="() => {
+                    configurationStep = 6;
+                  }"
+                />
+              </div>
+              <div class="col-xs-12 col-md-6">
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  label="Voltar"
+                  color="secondary"
+                  :size="'lg'"
+                  @click="() => {
+                    configurationStep = 4;
+                  }"
+                />
+              </div>
+            </div>
+          </div> -->
+
+          <div
+            v-else-if="configurationStep === 5"
+            class="full-width q-px-md"
+          >
+            <div class="text-h6 text-body text-center q-px-md">
+              <div class="q-gutter-md">
+                <div v-if="!isDispenserConnectedRef">
+                  Verificando conexão com o Dispenser
+                </div>
+                <q-spinner-puff v-if="!isDispenserConnectedRef" color="primary" size="3em" />
+
+                <div v-if="isDispenserConnectedRef">
+                  O Dispenser está conectado
+                </div>
+                <q-icon v-if="isDispenserConnectedRef" name="check_circle" size="3em" color="primary" />
+              </div>
+
+              <!-- Quando chegar nessa tela, fazer uma requisição 
+                      a API para verificar se o Dispenser foi 
+                            cadastrado/configurado -->
+            </div>
+            
+            <div class="row q-pt-xl q-col-gutter-lg content-center justify-center">
+              <div class="col-xs-12 col-md-6">
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  label="Avançar"
+                  color="primary"
+                  :size="'lg'"
+                  @click="() => {
+                    configurationStep = 6;
+                  }"
+                />
+              </div>
+              <div class="col-xs-12 col-md-6">
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  label="Voltar"
+                  color="secondary"
+                  :size="'lg'"
+                  @click="() => {
+                    configurationStep = 4;
+                  }"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-else-if="configurationStep === 6"
+            class="full-width q-px-md"
+          >
+            <div class="text-h6 text-body text-center q-px-md">
+              Tudo pronto!
+              <br>
+              <br>
+              Agora você já pode começar a usar o sistema.
+              <!-- <br>
+              Caso precise administrar os remédios de mais de uma pessoa,
+              <br>
+              basta tocar no campo "Cadastrar outra pessoa". -->
+            </div>
+
+            <div class="row q-pt-lg q-gutter-lg content-center justify-center">
+              <div
+                class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
+                style="height: 56px;"
+              >
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  style="height: 100%; width: 100%"
+                  label="Começar"
+                  color="primary"
+                  :size="'lg'"
+                  to="/"
+                />
+              </div>
+
+              <!-- <div
+                class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
+                style="height: 56px;"
+              >
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  style="height: 100%; width: 100%"
+                  label="Cadastrar outra pessoa"
+                  color="primary"
+                  :size="'lg'"
+                  @click="() => {
+                  }"
+                />
+              </div> -->
+
+              <div
+                class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
+                style="height: 56px;"
+              >
+                <q-btn
+                  no-caps
+                  class="full-width"
+                  style="height: 100%; width: 100%"
+                  label="Voltar"
+                  color="secondary"
+                  :size="'lg'"
+                  @click="() => {
+                    configurationStep = 5;
+                  }"
+                />
+              </div>
             </div>
           </div>
         </div>
       </q-card-section>
     </div>
+
+    <q-dialog
+      v-model="isScanningQrCode"
+      @show="toggleQrCodeScanning"
+      @before-hide="toggleQrCodeScanning"
+    >
+      <q-card style="max-width: 600px;" class="row">
+        <q-card-section class="col-12 q-pa-none">
+          <video
+            class="full-width"
+            style="background-color: white;"
+            ref="qrCodeScanRegionRef"
+            disablepictureinpicture
+            playsinline
+          />
+
+          <div
+            style="position: absolute; display: none; pointer-events: none;"
+            class="scan-region-highlight"
+            ref="qrCodeScanRegionHighlightRef"
+          >
+            <svg
+              class="scan-region-highlight-svg"
+              viewBox="0 0 238 238"
+              preserveAspectRatio="none"
+            >
+              <path d="M31 2H10a8 8 0 0 0-8 8v21M207 2h21a8 8 0 0 1 8 8v21m0 176v21a8 8 0 0 1-8 8h-21m-176 0H10a8 8 0 0 1-8-8v-21"></path>
+            </svg>
+          </div>
+        </q-card-section>
+
+        <q-card-section class="col-12 q-pt-none q-px-md q-pb-md flex justify-between">
+          <div class="row items-center q-gutter-md q-pt-sm">
+            <q-icon v-if="succeededQrCodeScanRef" name="check_circle" size="3em" color="primary" />
+            <span v-else class="text-body" style="max-width: 110px;">
+              Aponte a câmera para o QR Code</span>
+          </div>
+
+          <div
+            v-if="availableCamerasRef.length >= 2"
+            class="row items-center q-gutter-md q-pt-sm"
+          >
+            <span>Trocar câmera</span>
+            <div>
+              <q-btn v-if="useMainCameraRef" round color="primary" icon="camera_rear" @click="() => toggleQrCodeCamera()" />
+              <q-btn v-else round color="primary" icon="camera_front" @click="() => toggleQrCodeCamera()" />
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
 
     <q-dialog
       persistent
@@ -517,6 +660,7 @@
 
 <script>
 import { ref } from "vue";
+import QrScanner from "qr-scanner";
 import InputText from "src/components/InputText.vue";
 import InputPassword from "src/components/InputPassword.vue";
 
@@ -524,10 +668,16 @@ const USER_ROLE = Object.freeze({
   responsible: "responsible",
   elderly: "elderly",
 });
+
 const NETWORK_SIGNAL_QUALITY_ICONS = Object.freeze({
   good: "network_wifi",
   avarage: "network_wifi_3_bar",
   bad: "network_wifi_1_bar",
+});
+
+const CAMERA_OPTIONS = Object.freeze({
+  environment: "environment",
+  user: "user",
 });
 
 function resetNewElderlyData() {
@@ -552,7 +702,7 @@ export default {
   },
   setup() {
     const selectedUserRole = ref(null);
-    const configurationStep = ref(1);
+    const configurationStep = ref(5); // 1
 
     const elderlies = ref([]);
     const newElderly = ref(resetNewElderlyData());
@@ -593,6 +743,8 @@ export default {
         signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.bad,
       },
     ]);
+
+    const dispenserIdCode = ref("");
 
     const selectedDispenserNetwork = ref(resetSelectedNetwork());
     const connectedDispenserNetwork = ref(resetSelectedNetwork());
@@ -643,6 +795,65 @@ export default {
       // Quando o sistema verificar que está conectado, removerá o loading
     }
 
+    const succeededQrCodeScanRef = ref(false);
+    const useMainCameraRef = ref(true);
+    const availableCamerasRef = ref([]);
+    const qrCodeScanRegionRef = ref(null);
+    const qrCodeScanRegionHighlightRef = ref(null);
+    const isScanningQrCode = ref(false);
+    let scanner;
+
+    const isDispenserConnectedRef = ref(false);
+
+    function createQrScanner() {
+      succeededQrCodeScanRef.value = false;
+
+      return new QrScanner(
+        qrCodeScanRegionRef.value,
+        (scanResult) => {
+          succeededQrCodeScanRef.value = true;
+          dispenserIdCode.value = scanResult.data;
+          isScanningQrCode.value = false;
+        },
+        {
+          preferredCamera: CAMERA_OPTIONS.environment,
+          maxScansPerSecond: 10,
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+          overlay: qrCodeScanRegionHighlightRef.value,
+        },
+      );
+    }
+    
+    function toggleQrCodeScanning() {
+      if (!qrCodeScanRegionRef.value) {
+        console.log("Erro ao escanear QR code.")
+        return;
+      }
+
+      succeededQrCodeScanRef.value = false;
+
+      if (isScanningQrCode.value) {
+        scanner = createQrScanner();
+        QrScanner.listCameras().then(cameras => {
+          availableCamerasRef.value = cameras;
+          scanner.start();
+        });
+      }
+      else {
+        scanner.stop();
+        scanner.destroy();
+        scanner = null;
+      }
+    }
+
+    function toggleQrCodeCamera() {
+      if (scanner) {
+        scanner.setCamera(useMainCameraRef.value ? CAMERA_OPTIONS.environment : CAMERA_OPTIONS.user);
+        useMainCameraRef.value = !useMainCameraRef.value;
+      }
+    }
+
     return {
       USER_ROLE,
       selectedUserRole,
@@ -652,6 +863,7 @@ export default {
       dispenserConfigurationModeNetworks,
       availableWifiNetworks,
       resetSelectedNetwork,
+      dispenserIdCode,
       selectedDispenserNetwork,
       connectedDispenserNetwork,
       showDispenserConnectionDialog,
@@ -661,7 +873,56 @@ export default {
       showNetworkConnectionLoading,
       showNetworkConnectedWarning,
       connectToNetwork,
+      useMainCameraRef,
+      isScanningQrCode,
+      succeededQrCodeScanRef,
+      toggleQrCodeScanning,
+      qrCodeScanRegionRef,
+      qrCodeScanRegionHighlightRef,
+      availableCamerasRef,
+      toggleQrCodeCamera,
+      CAMERA_OPTIONS,
+      isDispenserConnectedRef,
     };
   },
 }
 </script>
+
+<style>
+/* QR Code */
+
+.scan-region-highlight-svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0px;
+  top: 0px;
+  fill: none;
+  stroke: #1976d2;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Dispenser Configuration Steps */
+
+ol {
+  padding: 0;
+  list-style: none;
+  counter-reset: steps;
+}
+
+ol li {
+  counter-increment: steps;
+}
+
+ol li::before {
+  content: "Passo " counter(steps);
+  margin-right: 0.5rem;
+  color: #1976d2;
+}
+
+ol li div {
+  margin-left: 1.5rem;
+}
+</style>

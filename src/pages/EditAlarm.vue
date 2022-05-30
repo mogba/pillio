@@ -45,8 +45,8 @@
           <template v-slot:prepend>
             <q-icon name="event" :size="'md'" class="cursor-pointer">
               <q-popup-proxy 
-                ref="qDataProxy" 
-                cover 
+                ref="qDataProxy"
+                cover
                 transition-show="scale"
                 transition-hide="hide"
               >
@@ -76,8 +76,8 @@
           <template v-slot:prepend>
             <q-icon name="access_time" :size="'md'" class="cursor-pointer">
               <q-popup-proxy 
-                ref="qDataProxy" 
-                cover 
+                ref="qDataProxy"
+                cover
                 transition-show="scale"
                 transition-hide="hide"
               >

@@ -11,7 +11,7 @@
           <img
             class="responsive"
             src="~/assets/undraw_medical_care_movn.svg"
-            alt="Duas mulheres profissionais de saúde em torno de um frasco de remédios"
+            alt="Uma médica e uma enfermeira em torno de um frasco com remédios"
           >
         </q-card-section>
 
@@ -113,11 +113,7 @@
                 class="full-width q-px-xl q-gutter-y-sm q-mt-lg"
               >
                 <div class="text-h6 text-center q-mb-md">
-                  Olá, {{ formData.name }}!
-                  <br>
-                  Agora você só precisa informar seu
-                  <br>
-                  e-mail e uma senha para sua conta
+                  Informe um e-mail e senha para cadastrar
                 </div>
               
                 <InputText
