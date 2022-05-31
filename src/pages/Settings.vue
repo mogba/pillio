@@ -44,7 +44,11 @@
                   :size="'lg'"
                   :disable="!selectedUserRole"
                   @click="() => {
-                    configurationStep = selectedUserRole === USER_ROLE.elderly ? 3 : 2;
+                    setConfigurationStep(
+                      selectedUserRole === USER_ROLE.elderly
+                      ? 3
+                      : 2
+                    );
                   }"
                 />
               </div>
@@ -65,11 +69,18 @@
                 class="q-mt-lg"
                 label="Nome da pessoa"
                 v-model="newElderly.name"
+                :rules="[
+                  val => !!val || 'O nome deve ser informado',
+                  val => (val?.trim().length || 0) >= 3 || 'O nome deve possuir mais que 3 caraceteres',
+                ]"
               />
               <InputText
                 class="q-mt-lg"
                 label="Telefone da pessoa"
+                mask="(##) #####-####"
+                fill-mask
                 v-model="newElderly.phoneNumber"
+                :rules="[val => (val?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8 || 'O telefone deve ser informado']"
               />
             </div>
 
@@ -81,8 +92,12 @@
                   label="Avançar"
                   color="primary"
                   :size="'lg'"
+                  :disable="!(
+                    (newElderly.name?.trim().length || 0) >= 3 &&
+                    (newElderly.phoneNumber?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8
+                  )"
                   @click="() => {
-                    configurationStep = 3;
+                    setConfigurationStep(3);
                   }"
                 />
               </div>
@@ -94,8 +109,8 @@
                   color="secondary"
                   :size="'lg'"
                   @click="() => {
-                    selectedUserRole = null;
-                    configurationStep = 1;
+                    // selectedUserRole = null;
+                    setConfigurationStep(1);
                   }"
                 />
               </div>
@@ -123,8 +138,9 @@
                     standout="bg-primary text-white"
                     label="Código do Dispenser"
                     required
-                    v-model="dispenserIdCode"
+                    v-model="dispenserIdCodeRef"
                     clearable
+                    :rules="[val => !!val || 'O código do Dispenser deve ser informado']"
                   >
                     <template v-slot:prepend>
                       <q-icon
@@ -153,8 +169,9 @@
                   label="Avançar"
                   color="primary"
                   :size="'lg'"
+                  :disable="!dispenserIdCodeRef"
                   @click="() => {
-                    configurationStep = 4;
+                    setConfigurationStep(4);
                   }"
                 />
               </div>
@@ -166,10 +183,11 @@
                   color="secondary"
                   :size="'lg'"
                   @click="() => {
-                    configurationStep =
+                    setConfigurationStep(
                       selectedUserRole === USER_ROLE.responsible
-                        ? 2
-                        : 1;
+                      ? 2
+                      : 1
+                    );
                   }"
                 />
               </div>
@@ -235,7 +253,7 @@
                   color="primary"
                   :size="'lg'"
                   @click="() => {
-                    configurationStep = 5;
+                    setConfigurationStep(5, configurationStep5Callback);
                   }"
                 />
               </div>
@@ -247,7 +265,7 @@
                   color="secondary"
                   :size="'lg'"
                   @click="() => {
-                    configurationStep = 3;
+                    setConfigurationStep(3);
                   }"
                 />
               </div>
@@ -376,8 +394,9 @@
                   label="Avançar"
                   color="primary"
                   :size="'lg'"
+                  :disable="!isDispenserConnectedRef"
                   @click="() => {
-                    configurationStep = 6;
+                    setConfigurationStep(6);
                   }"
                 />
               </div>
@@ -389,7 +408,7 @@
                   color="secondary"
                   :size="'lg'"
                   @click="() => {
-                    configurationStep = 4;
+                    setConfigurationStep(4);
                   }"
                 />
               </div>
@@ -411,15 +430,11 @@
               basta tocar no campo "Cadastrar outra pessoa". -->
             </div>
 
-            <div class="row q-pt-lg q-gutter-lg content-center justify-center">
-              <div
-                class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
-                style="height: 56px;"
-              >
+            <div class="row q-pt-xl q-col-gutter-lg content-center justify-center">
+              <div class="col-xs-12 col-md-6">
                 <q-btn
                   no-caps
                   class="full-width"
-                  style="height: 100%; width: 100%"
                   label="Começar"
                   color="primary"
                   :size="'lg'"
@@ -427,14 +442,10 @@
                 />
               </div>
 
-              <!-- <div
-                class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
-                style="height: 56px;"
-              >
+              <!-- <div class="col-xs-12 col-md-6">
                 <q-btn
                   no-caps
                   class="full-width"
-                  style="height: 100%; width: 100%"
                   label="Cadastrar outra pessoa"
                   color="primary"
                   :size="'lg'"
@@ -443,19 +454,15 @@
                 />
               </div> -->
 
-              <div
-                class="col-xs-12 col-md-12 col-lg-6 col-xl-6"
-                style="height: 56px;"
-              >
+              <div class="col-xs-12 col-md-6">
                 <q-btn
                   no-caps
                   class="full-width"
-                  style="height: 100%; width: 100%"
                   label="Voltar"
                   color="secondary"
                   :size="'lg'"
                   @click="() => {
-                    configurationStep = 5;
+                    setConfigurationStep(5);
                   }"
                 />
               </div>
@@ -660,6 +667,7 @@
 
 <script>
 import { ref } from "vue";
+import { debounce } from "lodash";
 import QrScanner from "qr-scanner";
 import InputText from "src/components/InputText.vue";
 import InputPassword from "src/components/InputPassword.vue";
@@ -702,7 +710,29 @@ export default {
   },
   setup() {
     const selectedUserRole = ref(null);
-    const configurationStep = ref(5); // 1
+    const configurationStep = ref(1);
+    const isDispenserConnectedRef = ref(false);
+
+    const configurationStep5Callback = debounce(
+      () => {
+        // Request for API to check if the dispenser
+        // was registered for the current user
+        isDispenserConnectedRef.value = true;
+      },
+      5000,
+      {
+        leading: true,
+        trailing: false,
+      },
+    );
+
+    function setConfigurationStep(newStep, callback = null) {
+      configurationStep.value = newStep;
+
+      if (callback && typeof callback === "function") {
+        callback();
+      }
+    }
 
     const elderlies = ref([]);
     const newElderly = ref(resetNewElderlyData());
@@ -744,7 +774,7 @@ export default {
       },
     ]);
 
-    const dispenserIdCode = ref("");
+    const dispenserIdCodeRef = ref("");
 
     const selectedDispenserNetwork = ref(resetSelectedNetwork());
     const connectedDispenserNetwork = ref(resetSelectedNetwork());
@@ -803,8 +833,6 @@ export default {
     const isScanningQrCode = ref(false);
     let scanner;
 
-    const isDispenserConnectedRef = ref(false);
-
     function createQrScanner() {
       succeededQrCodeScanRef.value = false;
 
@@ -812,7 +840,7 @@ export default {
         qrCodeScanRegionRef.value,
         (scanResult) => {
           succeededQrCodeScanRef.value = true;
-          dispenserIdCode.value = scanResult.data;
+          dispenserIdCodeRef.value = scanResult.data;
           isScanningQrCode.value = false;
         },
         {
@@ -858,12 +886,14 @@ export default {
       USER_ROLE,
       selectedUserRole,
       configurationStep,
+      setConfigurationStep,
+      configurationStep5Callback,
       newElderly,
       userData,
       dispenserConfigurationModeNetworks,
       availableWifiNetworks,
       resetSelectedNetwork,
-      dispenserIdCode,
+      dispenserIdCodeRef,
       selectedDispenserNetwork,
       connectedDispenserNetwork,
       showDispenserConnectionDialog,

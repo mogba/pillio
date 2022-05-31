@@ -27,6 +27,10 @@
           label="Qual o nome do remédio?"
           v-model="alarmRef.medicineName"
           clearable
+          :rules="[
+            val => !!val || 'O nome deve ser informado',
+            val => (val?.trim().length || 0) >= 3 || 'O nome deve possuir mais que 3 caraceteres',
+          ]"
         >
           <template>
             <div class="self-center full-width no-outline" tabindex="0"></div>
@@ -37,10 +41,11 @@
           class="col-xs-12 col-md-6"
           standout="bg-primary text-white" 
           label="Que dia começará o tratamento?"
-          required
           v-model="alarmRef.startDate"
           mask="##/##/####"
+          fill-mask
           clearable
+          :rules="[val => (val?.split('/').join('').split('_').join('').length || 0) === 8 || 'O dia de início deve ser informado']"
         >
           <template v-slot:prepend>
             <q-icon name="event" :size="'md'" class="cursor-pointer">
@@ -68,10 +73,11 @@
           class="col-xs-12 col-md-6"
           standout="bg-primary text-white" 
           label="Que hora começará o tratamento?"
-          required
           v-model="alarmRef.startTime"
           mask="##:##"
+          fill-mask
           clearable
+          :rules="[val => (val?.split(':').join('').split('_').join('').length || 0) === 4 || 'A hora de início deve ser informada']"
         >
           <template v-slot:prepend>
             <q-icon name="access_time" :size="'md'" class="cursor-pointer">
@@ -102,6 +108,10 @@
           v-model="alarmRef.timesToRepeat"
           mask="##"
           clearable
+          :rules="[
+            val => !!val || 'A quantidade de doses deve ser informada',
+            val => val > 0 || 'No mínimo 1 dose deve ser cadastrada',
+          ]"
         >
           <template>
             <div class="self-center full-width no-outline" tabindex="3"></div>
@@ -112,21 +122,27 @@
           class="col-xs-12 col-md-6"
           standout="bg-primary text-white" 
           label="Quantas horas entre cada dose?"
-          required
           v-model="alarmRef.repetitionIntervalInHours"
           mask="##"
           clearable
+          :rules="[
+            val => !!val || 'O intervalo de horas entre doses deve ser informado',
+            val => val > 0 || 'O intervalo deve ser de no mínimo 1 hora',
+          ]"
         >
           <template>
             <div class="self-center full-width no-outline" tabindex="4"></div>
           </template>
         </q-input>
 
-        <InputSelectMultiple
-          :label="'Compartimentos usados no Dispenser'"
-          :options="dispenserSlotSelectOptions"
-          :values="usedDispenserSlotsRef"
-        />
+        <div class="col-xs-12 col-md-12">
+          <InputSelectMultiple
+            :label="'Compartimentos usados no Dispenser'"
+            :options="dispenserSlotSelectOptions"
+            v-model="usedDispenserSlotsRef"
+            :rules="[val => val.length > 0 || 'No mínimo 1 compartimento deve ser selecionado']"
+          />
+        </div>
       </div>
 
       <div
@@ -182,6 +198,14 @@
             label="Salvar"
             color="primary"
             :size="'lg'"
+            :disable="!(
+              alarmRef.medicineName &&
+              alarmRef.timesToRepeat &&
+              alarmRef.repetitionIntervalInHours &&
+              alarmRef.startDate?.split('/').join('').split('_').join('').length === 8 &&
+              alarmRef.startTime?.split(':').join('').split('_').join('').length === 4 &&
+              usedDispenserSlotsRef.length > 0
+            )"
             to="/"
             @click="handleSaveAlarm"
           />
