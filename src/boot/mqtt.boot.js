@@ -5,9 +5,9 @@ export default () => {
   // Test connections with 'http://tools.emqx.io/'
 
   const host = "xaf606cf.us-east-1.emqx.cloud";
-  const port = "8083";
+  const port = "8084";
   const clientId = `mqtt_${(v4())}`;
-  const connectUrl = `ws://${host}:${port}`;
+  const connectUrl = `wss://${host}:${port}`;
 
   const client = mqtt.connect(connectUrl, {
     clientId,
