@@ -104,7 +104,7 @@
         <q-input
           class="col-xs-12 col-md-6"
           standout="bg-primary text-white" 
-          label="Quantas doses do remédio serão tomadas?"
+          label="Quantas doses serão tomadas?"
           v-model="alarmRef.timesToRepeat"
           mask="##"
           clearable
@@ -143,6 +143,24 @@
             :rules="[val => val.length > 0 || 'No mínimo 1 compartimento deve ser selecionado']"
           />
         </div>
+
+        <q-input
+          v-if="alarmRef.timesToRepeat > 1 && usedDispenserSlotsRef.length === 1"
+          class="col-xs-12 col-md-6"
+          standout="bg-primary text-white" 
+          label="Quantos comprimidos por dose?"
+          v-model="alarmRef.pillsQuantity"
+          mask="##"
+          clearable
+          :rules="[
+            val => !!val || 'A quantidade de comprimidos por dose deve ser informada',
+            val => val > 0 || 'Deve ser informado no mínimo 1 comprimido',
+          ]"
+        >
+          <template>
+            <div class="self-center full-width no-outline" tabindex="3"></div>
+          </template>
+        </q-input>
       </div>
 
       <div
@@ -150,7 +168,7 @@
       >
         <div class="col-md-6">
           <p>
-            <strong>Quantas doses do remédio serão tomadas?</strong>
+            <strong>Quantas doses serão tomadas?</strong>
             <br>
             Este número equivale a quantidade de 
             vezes que o alarme vai tocar, e cada dose do medicamento deve 
@@ -173,7 +191,7 @@
           </p>
         </div>
       </div>
-      
+
       <div class="row q-px-lg q-pt-lg q-col-gutter-lg">
         <div class="col-xs-12 col-md-6">
           <q-btn
@@ -204,7 +222,8 @@
               alarmRef.repetitionIntervalInHours &&
               alarmRef.startDate?.split('/').join('').split('_').join('').length === 8 &&
               alarmRef.startTime?.split(':').join('').split('_').join('').length === 4 &&
-              usedDispenserSlotsRef.length > 0
+              usedDispenserSlotsRef.length > 0 &&
+              (alarmRef.timesToRepeat > 1 && usedDispenserSlotsRef.length === 1 ? alarmRef.pillsQuantity > 0 : true)
             )"
             to="/"
             @click="handleSaveAlarm"
@@ -234,11 +253,12 @@ export default {
       medicineName: String,
       timesToRepeat: Number,
       repetitionIntervalInHours: Number,
+      usedDispenserSlots: Array,
+      pillsQuantity: Number,
       startDate: String,
       startTime: String,
       isActive: Boolean,
       toDelete: Boolean,
-      usedDispenserSlots: Array,
     },
   },
   setup(props) {
