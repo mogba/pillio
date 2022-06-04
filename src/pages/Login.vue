@@ -173,9 +173,9 @@
 
 <script>
 import { reactive, ref } from "vue";
+import { SessionStorage } from 'quasar';
 import InputText from "src/components/InputText.vue";
 import InputPassword from "src/components/InputPassword.vue";
-import { SessionStorage } from 'quasar';
 
 const TABS = Object.freeze({
   register: "register",

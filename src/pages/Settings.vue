@@ -12,11 +12,11 @@
       >
         <div class="full-width">
           <div
-            v-if="configurationStep === 1"
+            v-if="configurationStepRef === 1"
             class="full-width q-px-md"
           >
             <div class="text-h6 text-body text-center q-px-md">
-              Olá, {{ userData.name }}!
+              Olá, {{ userRef.name }}!
               <br>
               <br>
               Você vai administrar seus 
@@ -26,8 +26,8 @@
             </div>
 
             <div class="row q-px-lg q-pt-lg q-pb-sm q-gutter-lg content-center justify-center" style="font-size: 19px;">
-              <q-radio size="lg" v-model="selectedUserRole" :val="USER_ROLE.elderly" label="Meus remédios" />
-              <q-radio size="lg" v-model="selectedUserRole" :val="USER_ROLE.responsible" label="De outra pessoa" />
+              <q-radio size="lg" v-model="selectedUserRoleRef" :val="USER_ROLE.elderly" label="Meus remédios" />
+              <q-radio size="lg" v-model="selectedUserRoleRef" :val="USER_ROLE.responsible" label="De outra pessoa" />
             </div>
 
             <div class="row q-pt-lg q-col-gutter-lg content-center justify-center">
@@ -42,10 +42,10 @@
                   label="Avançar"
                   color="primary"
                   :size="'lg'"
-                  :disable="!selectedUserRole"
+                  :disable="!selectedUserRoleRef"
                   @click="() => {
                     setConfigurationStep(
-                      selectedUserRole === USER_ROLE.elderly
+                      selectedUserRoleRef === USER_ROLE.elderly
                       ? 3
                       : 2
                     );
@@ -56,7 +56,7 @@
           </div>
 
           <div
-            v-else-if="configurationStep === 2"
+            v-else-if="configurationStepRef === 2"
             class="full-width q-px-md"
           >
             <div class="text-h6 text-body text-center q-px-md">
@@ -68,7 +68,7 @@
               <InputText
                 class="q-mt-lg"
                 label="Nome da pessoa"
-                v-model="newElderly.name"
+                v-model="newElderlyRef.name"
                 :rules="[
                   val => !!val || 'O nome deve ser informado',
                   val => (val?.trim().length || 0) >= 3 || 'O nome deve possuir mais que 3 caraceteres',
@@ -79,7 +79,7 @@
                 label="Telefone da pessoa"
                 mask="(##) #####-####"
                 fill-mask
-                v-model="newElderly.phoneNumber"
+                v-model="newElderlyRef.phoneNumber"
                 :rules="[val => (val?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8 || 'O telefone deve ser informado']"
               />
             </div>
@@ -93,8 +93,8 @@
                   color="primary"
                   :size="'lg'"
                   :disable="!(
-                    (newElderly.name?.trim().length || 0) >= 3 &&
-                    (newElderly.phoneNumber?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8
+                    (newElderlyRef.name?.trim().length || 0) >= 3 &&
+                    (newElderlyRef.phoneNumber?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8
                   )"
                   @click="() => {
                     setConfigurationStep(3);
@@ -109,7 +109,6 @@
                   color="secondary"
                   :size="'lg'"
                   @click="() => {
-                    // selectedUserRole = null;
                     setConfigurationStep(1);
                   }"
                 />
@@ -118,7 +117,7 @@
           </div>
 
           <div
-            v-else-if="configurationStep === 3"
+            v-else-if="configurationStepRef === 3"
             class="full-width q-px-md"
           >
             <div class="text-h6 text-body text-center q-pb-md q-px-md">
@@ -184,7 +183,7 @@
                   :size="'lg'"
                   @click="() => {
                     setConfigurationStep(
-                      selectedUserRole === USER_ROLE.responsible
+                      selectedUserRoleRef === USER_ROLE.responsible
                       ? 2
                       : 1
                     );
@@ -195,7 +194,7 @@
           </div>
 
           <div
-            v-else-if="configurationStep === 4"
+            v-else-if="configurationStepRef === 4"
             class="full-width q-px-md"
           >
             <div class="text-h6 text-body q-px-md">
@@ -204,7 +203,7 @@
                 para configurar o Dispenser.
               </div>
 
-              <div class="text-left q-px-lg">
+              <div class="text-left">
                 <ol>
                   <li>
                     <br>
@@ -273,7 +272,7 @@
           </div>
 <!-- 
           <div
-            v-else-if="configurationStep === 5"
+            v-else-if="configurationStepRef === 5"
             class="full-width"
           >
             <div class="text-h6 text-center">
@@ -345,7 +344,7 @@
                   color="primary"
                   :size="'lg'"
                   @click="() => {
-                    configurationStep = 6;
+                    configurationStepRef = 6;
                   }"
                 />
               </div>
@@ -357,7 +356,7 @@
                   color="secondary"
                   :size="'lg'"
                   @click="() => {
-                    configurationStep = 4;
+                    configurationStepRef = 4;
                   }"
                 />
               </div>
@@ -365,25 +364,43 @@
           </div> -->
 
           <div
-            v-else-if="configurationStep === 5"
+            v-else-if="configurationStepRef === 5"
             class="full-width q-px-md"
           >
             <div class="text-h6 text-body text-center q-px-md">
               <div class="q-gutter-md">
-                <div v-if="!isDispenserConnectedRef">
-                  Verificando conexão com o Dispenser
+                <div v-if="mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.pending">
+                  Aguarde, verificando conexão com o Dispenser.
                 </div>
-                <q-spinner-puff v-if="!isDispenserConnectedRef" color="primary" size="3em" />
+                <q-spinner-puff
+                  v-if="mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.pending"
+                  color="primary"
+                  size="3em"
+                />
 
-                <div v-if="isDispenserConnectedRef">
-                  O Dispenser está conectado
+                <div v-if="mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.connected">
+                  O Dispenser está conectado!
                 </div>
-                <q-icon v-if="isDispenserConnectedRef" name="check_circle" size="3em" color="primary" />
+                <q-icon
+                  v-if="mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.connected"
+                  name="check_circle"
+                  size="3em"
+                  color="primary"
+                />
+
+                <div v-if="mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.error">
+                  Não foi possível conectar ao Dispenser.
+                  <br>
+                  Verifique se o código foi informado corretamente 
+                  ou tente configurar seu dispositivo novamente.
+                </div>
+                <q-icon
+                  v-if="mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.error"
+                  name="cancel"
+                  size="3em"
+                  color="grey"
+                />
               </div>
-
-              <!-- Quando chegar nessa tela, fazer uma requisição 
-                      a API para verificar se o Dispenser foi 
-                            cadastrado/configurado -->
             </div>
             
             <div class="row q-pt-xl q-col-gutter-lg content-center justify-center">
@@ -394,7 +411,7 @@
                   label="Avançar"
                   color="primary"
                   :size="'lg'"
-                  :disable="!isDispenserConnectedRef"
+                  :disable="mqttDispenserConnectionStateRef !== DISPENSER_CONNECTION_STATE.connected"
                   @click="() => {
                     setConfigurationStep(6);
                   }"
@@ -416,7 +433,7 @@
           </div>
 
           <div
-            v-else-if="configurationStep === 6"
+            v-else-if="configurationStepRef === 6"
             class="full-width q-px-md"
           >
             <div class="text-h6 text-body text-center q-px-md">
@@ -522,146 +539,6 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-
-    <q-dialog
-      persistent
-      v-model="showDispenserConnectionDialog"
-    >
-      <q-card>
-        <q-card-section class="column items-center" style="min-width: 30vw;">
-          <div
-            class="q-mx-md q-mt-md"
-            v-if="!showNetworkConnectionLoading && !showNetworkConnectedWarning"
-          >
-            <span>
-              Deseja conectar-se a {{ selectedDispenserNetwork.name }}?
-            </span>
-          </div>
-
-          <div
-            class="row items-center q-mx-md q-mt-sm q-gutter-md"
-            v-if="showNetworkConnectionLoading"
-          >
-            <span>
-              Conectando, por favor aguarde.
-            </span>
-            <q-spinner-puff color="primary" size="3em" />
-          </div>
-
-          <div
-            class="row items-center q-mx-md q-mt-sm q-gutter-md"
-            v-if="showNetworkConnectedWarning"
-          >
-            <span>
-              {{ selectedDispenserNetwork.name }} conectado!
-            </span>
-            <q-icon name="check_circle" size="3em" color="primary" />
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn
-            v-if="!showNetworkConnectedWarning"
-            flat
-            label="Cancelar"
-            color="primary"
-            @click="() => {
-              showNetworkConnectedWarning = false;
-              showNetworkConnectionLoading = false;
-              showDispenserConnectionDialog = false;
-            }"
-          />
-          <q-btn
-            flat
-            label="OK"
-            color="primary"
-            @click="() => {
-              if (showNetworkConnectedWarning) {
-                showNetworkConnectedWarning = false;
-                showNetworkConnectionLoading = false;
-                showDispenserConnectionDialog = false;
-              }
-              else {
-                connectToNetwork(selectedDispenserNetwork);
-              }
-            }"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <q-dialog
-      persistent
-      v-model="showWifiNetworkConnectionDialog"
-    >
-      <q-card>
-        <q-card-section class="column items-center" style="min-width: 30vw;">
-          <div	
-            class="q-mx-md q-mt-md"	
-            v-if="!showNetworkConnectionLoading && !showNetworkConnectedWarning"	
-          >	
-            <span>	
-              Informe a senha para conectar-se a {{ selectedWifiNetwork.name }}.
-            </span>	
-
-            <InputPassword
-              class="q-mt-lg"
-              label="Senha"
-              v-model="selectedWifiNetwork.password"
-            />
-          </div>
-
-          <div
-            class="row items-center q-mx-md q-mt-sm q-gutter-md"
-            v-if="showNetworkConnectionLoading"
-          >
-            <span>
-              Conectando, por favor aguarde.
-            </span>
-            <q-spinner-puff color="primary" size="3em" />
-          </div>
-
-          <div
-            class="row items-center q-mx-md q-mt-sm q-gutter-md"
-            v-if="showNetworkConnectedWarning"
-          >
-            <span>
-              {{ selectedWifiNetwork.name }} conectada!
-            </span>
-            <q-icon name="check_circle" size="3em" color="primary" />
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn
-            v-if="!showNetworkConnectedWarning"
-            flat
-            label="Cancelar"
-            color="primary"
-            @click="() => {
-              showNetworkConnectedWarning = false;
-              showNetworkConnectionLoading = false;
-              showWifiNetworkConnectionDialog = false;
-            }"
-          />
-          <q-btn
-            flat
-            label="OK"
-            color="primary"
-            @click="() => {
-              if (showNetworkConnectedWarning) {
-                showNetworkConnectedWarning = false;
-                showNetworkConnectionLoading = false;
-                showWifiNetworkConnectionDialog = false;
-              }
-              else {
-                connectToNetwork(selectedWifiNetwork);
-              }
-            }"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 
@@ -669,23 +546,23 @@
 import { ref } from "vue";
 import { debounce } from "lodash";
 import QrScanner from "qr-scanner";
+import { subscribe, unsubscribe } from "src/services/mqtt/message.service";
 import InputText from "src/components/InputText.vue";
-import InputPassword from "src/components/InputPassword.vue";
 
 const USER_ROLE = Object.freeze({
   responsible: "responsible",
   elderly: "elderly",
 });
 
-const NETWORK_SIGNAL_QUALITY_ICONS = Object.freeze({
-  good: "network_wifi",
-  avarage: "network_wifi_3_bar",
-  bad: "network_wifi_1_bar",
-});
-
 const CAMERA_OPTIONS = Object.freeze({
   environment: "environment",
   user: "user",
+});
+
+const DISPENSER_CONNECTION_STATE = Object.freeze({
+  pending: "pending",
+  connected: "connected",
+  error: "error",
 });
 
 function resetNewElderlyData() {
@@ -695,134 +572,78 @@ function resetNewElderlyData() {
   };
 }
 
-function resetSelectedNetwork(network) {
-  return {
-    name: network ? network.name : "",
-    password: network ? network.password : "",
-  };
-}
-
 export default {
   name: "Settings",
   components: {
     InputText,
-    InputPassword,
   },
-  setup() {
-    const selectedUserRole = ref(null);
-    const configurationStep = ref(1);
-    const isDispenserConnectedRef = ref(false);
+  props: {
+    user: {
+      default: {},
+      name: String,
+    },
+  },
+  setup(props) {
+    // const elderlies = ref([]);
+    const newElderlyRef = ref(resetNewElderlyData());
 
-    const configurationStep5Callback = debounce(
-      () => {
-        // Request for API to check if the dispenser
-        // was registered for the current user
-        isDispenserConnectedRef.value = true;
-      },
-      5000,
-      {
-        leading: true,
-        trailing: false,
-      },
-    );
+    const userRef = ref({
+      name: props.user.name,
+    });
 
-    function setConfigurationStep(newStep, callback = null) {
-      configurationStep.value = newStep;
+    const selectedUserRoleRef = ref(null);
+    const configurationStepRef = ref(1);
+    
+    const dispenserIdCodeRef = ref("");
 
-      if (callback && typeof callback === "function") {
-        callback();
+    const mqttDispenserConnectionStateRef = ref(DISPENSER_CONNECTION_STATE.pending);
+    const mqttDispenserTopicRef = ref("");
+
+    function handleDispenserConnected() {
+      const changedDispenserCode = dispenserIdCodeRef.value &&
+        !mqttDispenserTopicRef.value.includes(dispenserIdCodeRef.value);
+
+      if (changedDispenserCode) {
+        if (mqttDispenserTopicRef.value) {
+          unsubscribe(mqttDispenserTopicRef.value);
+        }
+
+        mqttDispenserConnectionStateRef.value = DISPENSER_CONNECTION_STATE.pending;
+        mqttDispenserTopicRef.value = `dispenser/${dispenserIdCodeRef.value}`;
+
+        subscribe(
+          mqttDispenserTopicRef.value,
+          message => {
+            mqttDispenserConnectionStateRef.value = message === "success"
+            ? DISPENSER_CONNECTION_STATE.connected
+            : DISPENSER_CONNECTION_STATE.error;
+          },
+          err => {
+            mqttDispenserConnectionStateRef.value = DISPENSER_CONNECTION_STATE.error;
+          }
+        );
+
+        const setDispenserConnectionErrorAfter1Min = debounce(() => {
+          if (mqttDispenserConnectionStateRef.value === DISPENSER_CONNECTION_STATE.pending) {
+            mqttDispenserConnectionStateRef.value = DISPENSER_CONNECTION_STATE.error;
+          }
+        },
+        60000, { leading: false, trailing: true });
+
+        setDispenserConnectionErrorAfter1Min();
       }
     }
 
-    const elderlies = ref([]);
-    const newElderly = ref(resetNewElderlyData());
+    const configurationStep5Callback = debounce(() => {
+      handleDispenserConnected();
+    }, 5000, { leading: true, trailing: false });
 
-    const userData = ref({
-      name: "Caroline",
-    });
+    function setConfigurationStep(newStep, callback = null) {
+      configurationStepRef.value = newStep;
 
-    const dispenserConfigurationModeNetworks = ref([
-      {
-        name: "Pilli-o Dispenser AAA001",
-        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.good,
-      },
-      {
-        name: "Pilli-o Dispenser AAA002",
-        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.avarage,
-      },
-    ]);
-    const availableWifiNetworks = ref([
-      {
-        name: "Rede de casa",
-        openNetwork: true,
-        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.good,
-      },
-      {
-        name: "Wi-fi 2.4GHz",
-        openNetwork: true,
-        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.good,
-      },
-      {
-        name: "Vizinho",
-        openNetwork: true,
-        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.avarage,
-      },
-      {
-        name: "#NET-CLARO-WIFI",
-        openNetwork: true,
-        signalQuality: NETWORK_SIGNAL_QUALITY_ICONS.bad,
-      },
-    ]);
-
-    const dispenserIdCodeRef = ref("");
-
-    const selectedDispenserNetwork = ref(resetSelectedNetwork());
-    const connectedDispenserNetwork = ref(resetSelectedNetwork());
-    const showDispenserConnectionDialog = ref(false);
-
-    const selectedWifiNetwork = ref(resetSelectedNetwork());
-    const connectedWifiNetwork = ref(resetSelectedNetwork());
-    const showWifiNetworkConnectionDialog = ref(false);
-
-    const showNetworkConnectionLoading = ref(false);
-    const showNetworkConnectedWarning = ref(false);
-
-    function connectToNetwork(network) {
-      // CÓDIGO PROVISÓRIO
-      const alternateLoadingNetworkConnection = (callbackSetConnectedNetwork) => {
-        showNetworkConnectionLoading.value = !showNetworkConnectionLoading.value;
-        showNetworkConnectedWarning.value = !showNetworkConnectionLoading.value;
-        callbackSetConnectedNetwork();
-      };
-
-      if (showDispenserConnectionDialog.value) {
-        const callback = () => {
-          if (showNetworkConnectedWarning.value) {
-            connectedDispenserNetwork.value = selectedDispenserNetwork.value;
-          }
-        }
-        alternateLoadingNetworkConnection(callback);
-        setTimeout(() => alternateLoadingNetworkConnection(callback), 5000);
+      if (typeof callback === "function") {
+        callback();
       }
-      if (showWifiNetworkConnectionDialog.value) {
-        const callback = () => {
-          if (showNetworkConnectedWarning.value) {
-            connectedWifiNetwork.value = selectedWifiNetwork.value;
-          }
-
-          // Aqui, depois que o dispenser for conectado a rede wi-fi,
-          // o celular do usuário deve ser conectado à rede wi-fi
-          // a qual estava conectado inicialmente, ou seja, antes de
-          // ser conectado à rede do dispenser.
-        }
-
-        alternateLoadingNetworkConnection(callback);
-        setTimeout(() => alternateLoadingNetworkConnection(callback), 5000);
-      }
-
-      // Tentar conectar o celular ao dispenser
-      // Tirar o loading no callback. Funcionará como o setTimeout.
-      // Quando o sistema verificar que está conectado, removerá o loading
     }
 
     const succeededQrCodeScanRef = ref(false);
@@ -884,25 +705,13 @@ export default {
 
     return {
       USER_ROLE,
-      selectedUserRole,
-      configurationStep,
+      selectedUserRoleRef,
+      configurationStepRef,
       setConfigurationStep,
       configurationStep5Callback,
-      newElderly,
-      userData,
-      dispenserConfigurationModeNetworks,
-      availableWifiNetworks,
-      resetSelectedNetwork,
+      newElderlyRef,
+      userRef,
       dispenserIdCodeRef,
-      selectedDispenserNetwork,
-      connectedDispenserNetwork,
-      showDispenserConnectionDialog,
-      selectedWifiNetwork,
-      connectedWifiNetwork,
-      showWifiNetworkConnectionDialog,
-      showNetworkConnectionLoading,
-      showNetworkConnectedWarning,
-      connectToNetwork,
       useMainCameraRef,
       isScanningQrCode,
       succeededQrCodeScanRef,
@@ -912,7 +721,8 @@ export default {
       availableCamerasRef,
       toggleQrCodeCamera,
       CAMERA_OPTIONS,
-      isDispenserConnectedRef,
+      mqttDispenserConnectionStateRef,
+      DISPENSER_CONNECTION_STATE,
     };
   },
 }
