@@ -16,6 +16,9 @@
           :options="elderlySelectOptions"
           v-model="selectedElderlyRef"
           clearable
+          :rules="[
+            val => !!val || 'Uma pessoa deve ser selecionada',
+          ]"
         />
 
         <q-input
@@ -24,6 +27,10 @@
           label="Qual o nome do remédio?"
           v-model="alarmRef.medicineName"
           clearable
+          :rules="[
+            val => !!val || 'O nome deve ser informado',
+            val => (val?.trim().length || 0) >= 3 || 'O nome deve possuir mais que 3 caraceteres',
+          ]"
         >
           <template>
             <div class="self-center full-width no-outline" tabindex="0"></div>
@@ -34,16 +41,17 @@
           class="col-xs-12 col-md-6"
           standout="bg-primary text-white" 
           label="Que dia começará o tratamento?"
-          required
           v-model="alarmRef.startDate"
           mask="##/##/####"
+          fill-mask
           clearable
+          :rules="[val => (val?.split('/').join('').split('_').join('').length || 0) === 8 || 'O dia de início deve ser informado']"
         >
           <template v-slot:prepend>
             <q-icon name="event" :size="'md'" class="cursor-pointer">
               <q-popup-proxy 
-                ref="qDataProxy" 
-                cover 
+                ref="qDataProxy"
+                cover
                 transition-show="scale"
                 transition-hide="hide"
               >
@@ -65,16 +73,17 @@
           class="col-xs-12 col-md-6"
           standout="bg-primary text-white" 
           label="Que hora começará o tratamento?"
-          required
           v-model="alarmRef.startTime"
           mask="##:##"
+          fill-mask
           clearable
+          :rules="[val => (val?.split(':').join('').split('_').join('').length || 0) === 4 || 'A hora de início deve ser informada']"
         >
           <template v-slot:prepend>
             <q-icon name="access_time" :size="'md'" class="cursor-pointer">
               <q-popup-proxy 
-                ref="qDataProxy" 
-                cover 
+                ref="qDataProxy"
+                cover
                 transition-show="scale"
                 transition-hide="hide"
               >
@@ -95,10 +104,14 @@
         <q-input
           class="col-xs-12 col-md-6"
           standout="bg-primary text-white" 
-          label="Quantas doses do remédio serão tomadas?"
+          label="Quantas doses serão tomadas?"
           v-model="alarmRef.timesToRepeat"
           mask="##"
           clearable
+          :rules="[
+            val => !!val || 'A quantidade de doses deve ser informada',
+            val => val > 0 || 'No mínimo 1 dose deve ser cadastrada',
+          ]"
         >
           <template>
             <div class="self-center full-width no-outline" tabindex="3"></div>
@@ -109,39 +122,45 @@
           class="col-xs-12 col-md-6"
           standout="bg-primary text-white" 
           label="Quantas horas entre cada dose?"
-          required
           v-model="alarmRef.repetitionIntervalInHours"
           mask="##"
           clearable
+          :rules="[
+            val => !!val || 'O intervalo de horas entre doses deve ser informado',
+            val => val > 0 || 'O intervalo deve ser de no mínimo 1 hora',
+          ]"
         >
           <template>
             <div class="self-center full-width no-outline" tabindex="4"></div>
           </template>
         </q-input>
 
-        <q-select
-          class="col-xs-12 col-md-12"
-          standout="bg-primary text-white"
-          popup-content-class="rounded-borders limit-visible-area scroll"
-          multiple
-          use-chips
-          label="Compartimentos usados no Dispenser"
-          :options="dispenserSlotSelectOptions"
-          v-model="usedDispenserSlotsRef"
+        <div class="col-xs-12 col-md-12">
+          <InputSelectMultiple
+            :label="'Compartimentos usados no Dispenser'"
+            :options="dispenserSlotSelectOptions"
+            v-model="usedDispenserSlotsRef"
+            :rules="[val => val.length > 0 || 'No mínimo 1 compartimento deve ser selecionado']"
+          />
+        </div>
+
+        <q-input
+          v-if="alarmRef.timesToRepeat > 1 && usedDispenserSlotsRef.length === 1"
+          class="col-xs-12 col-md-6"
+          standout="bg-primary text-white" 
+          label="Quantos comprimidos por dose?"
+          v-model="alarmRef.pillsQuantity"
+          mask="##"
+          clearable
+          :rules="[
+            val => !!val || 'A quantidade de comprimidos por dose deve ser informada',
+            val => val > 0 || 'Deve ser informado no mínimo 1 comprimido',
+          ]"
         >
-          <template v-slot:pop></template>
-          <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
-            <q-item v-bind="itemProps">
-              <q-item-section side>
-                <q-checkbox v-if="opt.disable" color="grey" toggle-indeterminate :model-value="null" />
-                <q-checkbox v-else :model-value="selected" @update:model-value="toggleOption(opt)" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label v-html="opt.label" />
-              </q-item-section>
-            </q-item>
+          <template>
+            <div class="self-center full-width no-outline" tabindex="3"></div>
           </template>
-        </q-select>
+        </q-input>
       </div>
 
       <div
@@ -149,7 +168,7 @@
       >
         <div class="col-md-6">
           <p>
-            <strong>Quantas doses do remédio serão tomadas?</strong>
+            <strong>Quantas doses serão tomadas?</strong>
             <br>
             Este número equivale a quantidade de 
             vezes que o alarme vai tocar, e cada dose do medicamento deve 
@@ -196,6 +215,16 @@
             label="Salvar"
             color="primary"
             :size="'lg'"
+            :disable="!(
+              selectedElderlyRef?.value &&
+              alarmRef.medicineName &&
+              alarmRef.timesToRepeat &&
+              alarmRef.repetitionIntervalInHours &&
+              alarmRef.startDate?.split('/').join('').split('_').join('').length === 8 &&
+              alarmRef.startTime?.split(':').join('').split('_').join('').length === 4 &&
+              usedDispenserSlotsRef.length > 0 &&
+              (alarmRef.timesToRepeat > 1 && usedDispenserSlotsRef.length === 1 ? alarmRef.pillsQuantity > 0 : true)
+            )"
             to="/"
             @click="handleSaveAlarm"
           />
@@ -208,10 +237,14 @@
 <script>
 import { ref, watch } from "vue";
 import { SessionStorage } from "quasar";
+import InputSelectMultiple from "src/components/InputSelectMultiple.vue";
 import { getDispenserSlotOptions } from "src/helpers/dispenser.helper";
 
 export default {
   name: "AddAlarm",
+  components: {
+    InputSelectMultiple,
+  },
   props: {
     elderly: {
       id: Number,
@@ -233,17 +266,18 @@ export default {
       medicineName: null,
       timesToRepeat: null,
       repetitionIntervalInHours: null,
+      usedDispenserSlots: [],
+      pillsQuantity: null,
       startDate: null,
       startTime: null,
       isActive: true,
       toDelete: false,
-      usedDispenserSlots: [],
     });
 
     watch(selectedElderlyRef, (value) => {
       elderlyRef.value = {
-        id: value.value,
-        name: value.label,
+        id: value?.value || -1,
+        name: value?.label || "",
       };
     });
 

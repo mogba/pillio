@@ -32,6 +32,14 @@ npm run format
 quasar build
 ```
 
+### Example: Build the app for Android (.apk generation on Android Studio)
+
+```bash
+quasar build -m capacitor -T android --skip-pkg --ide
+```
+
+See [Build commands](https://quasar.dev/quasar-cli-vite/developing-capacitor-apps/build-commands).
+
 ### Customize the configuration
 
 See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
