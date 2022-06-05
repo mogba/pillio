@@ -54,31 +54,32 @@
                 >
                   <InputText
                     label="E-mail"
-                    v-model="formData.email"
+                    v-model="formDataRef.email"
+                    :rules="[val => val?.length > 5 || 'O e-mail deve ser informado']"
                   />
                   <InputPassword
                     label="Senha"
-                    v-model="formData.password"
+                    v-model="formDataRef.password"
+                    :rules="[
+                      val => !!val || 'A senha deve ser informada',
+                      val => val.length >= 8 || 'A senha deve possuir no mínimo 8 caracteres'
+                    ]"
                   />
                 
                   <div
                     class="full-width q-mt-lg"
                     style="height: 56px;"
                   >
-                    <router-link 
-                      style="text-decoration: none;"
-                      :to="redirectToAfterAuthentication"
-                    >
-                      <q-btn
-                        no-caps
-                        class="full-width"
-                        style="height: 100%; width: 100%"
-                        label="Entrar"
-                        color="primary"
-                        :size="'lg'"
-                        @click="() => handleAuthenticate('login')"
-                      />
-                    </router-link>
+                    <q-btn
+                      no-caps
+                      class="full-width"
+                      style="height: 100%; width: 100%"
+                      label="Entrar"
+                      color="primary"
+                      :size="'lg'"
+                      :disable="!(formDataRef.email?.length > 5 && formDataRef.password?.length >= 8)"
+                      @click="handleSignInUserWithEmailAndPassword"
+                    />
                   </div>
                 </div>
                 <div
@@ -87,7 +88,8 @@
                 >
                   <InputText
                     label="Como você se chama?"
-                    v-model="formData.name"
+                    v-model="formDataRef.name"
+                    :rules="[val => val?.length >= 3 || 'Informe seu nome']"
                   />
                 
                   <div
@@ -101,6 +103,7 @@
                       label="Iniciar cadastro"
                       color="primary"
                       :size="'lg'"
+                      :disable="!(formDataRef.name?.length >= 3)"
                       @click="registerStep += 1"
                     />
                   </div>
@@ -113,7 +116,7 @@
                 class="full-width q-px-xl q-gutter-y-sm q-mt-lg"
               >
                 <div class="text-h6 text-center q-mb-md">
-                  Olá, {{ formData.name }}!
+                  Olá, {{ formDataRef.name }}!
                   <br>
                   Agora você só precisa informar seu
                   <br>
@@ -122,31 +125,32 @@
               
                 <InputText
                   label="E-mail"
-                  v-model="formData.email"
+                  v-model="formDataRef.email"
+                  :rules="[val => val?.length > 5 || 'O e-mail deve ser informado']"
                 />
                 <InputPassword
                   label="Senha"
-                  v-model="formData.password"
+                  v-model="formDataRef.password"
+                  :rules="[
+                    val => !!val || 'A senha deve ser informada',
+                    val => val.length >= 8 || 'A senha deve possuir no mínimo 8 caracteres'
+                  ]"
                 />
 
                 <div
                   class="full-width q-mt-lg"
                   style="height: 56px;"
                 >
-                  <router-link 
-                    style="text-decoration: none;"
-                    :to="redirectToAfterAuthentication"
-                  >
-                    <q-btn
-                      no-caps
-                      class="full-width"
-                      style="height: 100%; width: 100%"
-                      label="Criar cadastro"
-                      color="primary"
-                      :size="'lg'"
-                      @click="() => handleAuthenticate('register')"
-                    />
-                  </router-link>
+                  <q-btn
+                    no-caps
+                    class="full-width"
+                    style="height: 100%; width: 100%"
+                    label="Criar cadastro"
+                    color="primary"
+                    :size="'lg'"
+                    :disable="!(formDataRef.email?.length > 5 && formDataRef.password?.length >= 8)"
+                    @click="handleRegisterUser"
+                  />
                 </div>
 
                 <div
@@ -176,10 +180,18 @@
 </template>
 
 <script>
-import { reactive, ref } from "vue";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import {
+  useQuasar,
+  SessionStorage,
+} from "quasar";
 import InputText from "src/components/InputText.vue";
 import InputPassword from "src/components/InputPassword.vue";
-import { SessionStorage } from 'quasar';
+import {
+  registerUser,
+  signInUserWithEmailAndPassword,
+} from "src/services/firebase.service";
 
 const TABS = Object.freeze({
   register: "register",
@@ -193,8 +205,7 @@ const tabsDefinition = [
 
 const registerStep = ref(1);
 const selectedTab = ref(TABS.login);
-const redirectToAfterAuthentication = ref("/");
-const formData = reactive(resetFormData());
+const formDataRef = ref(resetFormData());
 
 function resetFormData() {
   return {
@@ -206,24 +217,8 @@ function resetFormData() {
 
 function handleChangeTab(tab) {
   if (selectedTab.value !== tab.name) {
-    Object.assign(formData, resetFormData())
+    Object.assign(formDataRef.value, resetFormData())
   }
-}
-
-function handleAuthenticate(type) {
-  if (type === "register") {
-    // Verificar se o usuário já configurou algum idoso ou dispenser.
-    // Caso ainda não tenha configurado, deve ser redirecionado para
-    // a tela de configurações iniciais.
-    redirectToAfterAuthentication.value = "/setup";
-  }
-  else {
-    redirectToAfterAuthentication.value = "/";
-  }
-
-  // Comando abaixo movido para o arquivo de boot 
-  // "initialize-data-temp-file.boot.js" para desenvolvimento
-  SessionStorage.set("user", { id: -1, isLoggedIn: true, isNotConfiguredYet: false });
 }
 
 export default {
@@ -233,19 +228,49 @@ export default {
     InputPassword,
   },
   setup() {
+    const router = useRouter();
+    const $q = useQuasar();
+
     SessionStorage.set("user", { id: -1, isLoggedIn: false, isNotConfiguredYet: true });
+
+    function handleRegisterUser() {
+      console.log(formDataRef);
+      registerUser(formDataRef.value.name, formDataRef.value.email, formDataRef.value.password, () => {
+        $q.notify({ message: "Cadastro efetuado com sucesso!" })
+
+        // Redirecionar o usuário para a tela de configurações iniciais,
+        // não para a tela principal. É a primeira vez que ele está entrando.
+        // router.push("/setup");
+
+        router.push("/");
+      });
+    }
+
+    function handleSignInUserWithEmailAndPassword() {
+      signInUserWithEmailAndPassword(formDataRef.value.email, formDataRef.value.password, () => {
+        $q.notify({ message: "Log-in efetuado com sucesso!" })
+
+        // Quando logar de novo, se o usuário ainda não tiver 
+        // passado pelas configurações inicias, ele deve ser
+        // redirecionado para essa tela, senão pode ser
+        // redirecionado para a tela principal.
+        // if (isNotConfiguredYet) {
+        //   router.push("/setup");
+        // }
+        
+        router.push("/");
+      });
+    }
 
     return {
       TABS,
       tabsDefinition,
       selectedTab,
       handleChangeTab,
-
       registerStep,
-      formData,
-
-      redirectToAfterAuthentication,
-      handleAuthenticate,
+      formDataRef,
+      handleRegisterUser,
+      handleSignInUserWithEmailAndPassword,
     };
   },
 };

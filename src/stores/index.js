@@ -7,5 +7,5 @@ export default store(() => {
 });
 
 export {
-  useAuthStore,
-} from "./modules/auth.store";
+  useSessionStore,
+} from "./modules/session.store";
