@@ -59,6 +59,7 @@
         target="_self"
         :href="link.link"
         :disable="link.disable"
+        @click="link.action"
       >
         <q-item-section v-if="link.icon" avatar>
           <q-icon :name="link.icon" size="md" color="primary" />
@@ -82,7 +83,9 @@
 
 <script>
 import { ref } from "vue";
-import { SessionStorage } from "quasar";
+import { useRouter } from "vue-router";
+import { useQuasar, SessionStorage } from "quasar";
+import { signOutUser } from "src/services/firebase.service";
 
 // O usuário terá os idosos como "children" apenas se
 // for um cuidador. Isso deve ser tratado depois
@@ -91,11 +94,21 @@ import { SessionStorage } from "quasar";
 // ao clicar no menu "Alarmes". Os alarmes exibidos
 // neste caso seriam do próprio usuário
 
-
 export default {
   name: "MenuLinks",
   setup() {
+    const router = useRouter();
+    const $q = useQuasar();
+    
     const elderliesRef = ref(SessionStorage.getItem("elderlies"));
+
+    function handleSignOut() {
+      signOutUser(() => {
+        router.push('/login')
+          .then(() => $q.notify({message: 'Log-out efetuado com sucesso.'}))
+          .catch(error =>  console.log('error',error));
+      });
+    }
 
     const linksList = [
       {
@@ -139,7 +152,7 @@ export default {
       {
         title: "Sair",
         icon: "logout",
-        link: "#/login",
+        action: handleSignOut
       },
     ];
 

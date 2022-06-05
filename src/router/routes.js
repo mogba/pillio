@@ -47,6 +47,7 @@ const routes = [
     path: "/login",
     component: () => import("pages/Login.vue"),
     meta: {
+      guest: true,
       authNotRequired: true,
     }
   },

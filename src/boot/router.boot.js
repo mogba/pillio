@@ -1,10 +1,16 @@
-import { SessionStorage } from "quasar";
+import { useSessionStore } from "src/stores";
 
-export default ({ router }) => {
-  router.beforeEach((to, from, next) => {
-    if (!to.meta.authNotRequired &&
-      !SessionStorage.getItem("user").isLoggedIn) {
+export default async ({ router, store }) => {
+  const sessionStore = useSessionStore(store);
+
+  await router.beforeEach(async (to, from, next) => {
+    const isUserAuthenticated = await sessionStore.isUserAuthenticated();
+
+    if (!to.meta.authNotRequired && !isUserAuthenticated) {
       next({ path: "/login" });
+    }
+    else if (to.meta.guest && isUserAuthenticated) {
+      next({ path: "/" });
     }
     else {
       next();
