@@ -5,53 +5,53 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updateProfile,
 } from "firebase/auth";
 import { useSessionStore } from "src/stores";
 
 const auth = getAuth();
 
-function saveUserCredential(userCredential, otherUserData) {
+function saveFirebaseUserState(userCredential, otherUserData) {
   const sessionStore = useSessionStore();
-  sessionStore.user = { ...userCredential.user, ...otherUserData };
+  sessionStore.firebaseUser = userCredential.user;
   sessionStore.userCredential = userCredential;
 }
 
 function removeUserCredential() {
   const sessionStore = useSessionStore();
-  sessionStore.user = null;
+  sessionStore.firebaseUser = null;
   sessionStore.userCredential = null;
 }
 
-function registerUser(name, email, password, successCallback) {
+function registerUser(displayName, email, password, successCallback) {
   createUserWithEmailAndPassword(auth, email, password)
-  .then(userCredential => {
-    // Cadastrar o usuário no banco da API, pegar 
-    // dados relevantes e salvá-los em sessionStore.
-    // Após isso, os parâmetros depois de userCredential
-    // devem ser revisados.
-    saveUserCredential(userCredential, { name, isNotConfiguredYet: true });
-    successCallback();
-  })
-  .catch(error => console.log("Erro ao cadastrar:", error));
+    .then(userCredential => {
+      updateProfile(userCredential.user, { displayName })
+        .catch(error => console.log("Erro ao salvar o nome do usuário:", error));
+      
+      saveFirebaseUserState(userCredential);
+      successCallback();
+    })
+    .catch(error => console.log("Erro ao cadastrar usuário:", error));
 }
 
 function signInUserWithEmailAndPassword(email, password, successCallback) {
   signInWithEmailAndPassword(auth, email, password)
     .then(userCredential => {
-      saveUserCredential(userCredential);
+      saveFirebaseUserState(userCredential);
       successCallback();
     })
-    .catch(error => console.log("Erro ao entrar:", error));
+    .catch(error => console.log("Erro ao iniciar sessão:", error));
 }
 
 function signInUserWithGoogle(successCallback) {
   const provider = new GoogleAuthProvider();
   signInWithPopup(auth, provider)
     .then(userCredential => {
-      saveUserCredential(userCredential);
+      saveFirebaseUserState(userCredential);
       successCallback();
     })
-    .catch(error => console.log("Erro ao entrar:", error));
+    .catch(error => console.log("Erro ao iniciar sessão:", error));
 }
 
 function signOutUser(successCallback) {

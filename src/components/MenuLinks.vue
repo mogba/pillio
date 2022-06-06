@@ -85,7 +85,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar, SessionStorage } from "quasar";
-import { signOutUser } from "src/services/firebase.service";
+import { signOutUser } from "src/services/firebase";
 
 // O usuário terá os idosos como "children" apenas se
 // for um cuidador. Isso deve ser tratado depois

@@ -178,16 +178,14 @@
 <script>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import {
-  useQuasar,
-  SessionStorage,
-} from "quasar";
+import { useQuasar } from "quasar";
 import InputText from "src/components/InputText.vue";
 import InputPassword from "src/components/InputPassword.vue";
 import {
   registerUser,
   signInUserWithEmailAndPassword,
-} from "src/services/firebase.service";
+} from "src/services/firebase";
+import { getIsUserConfigured } from "src/services/user/user-config.service";
 
 const TABS = Object.freeze({
   register: "register",
@@ -227,35 +225,24 @@ export default {
     const router = useRouter();
     const $q = useQuasar();
 
-    SessionStorage.set("user", { id: -1, isLoggedIn: false, isNotConfiguredYet: true });
-
     function handleRegisterUser() {
-      console.log(formDataRef);
       registerUser(formDataRef.value.name, formDataRef.value.email, formDataRef.value.password, () => {
-        $q.notify({ message: "Cadastro efetuado com sucesso!" })
-
-        // Redirecionar o usuário para a tela de configurações iniciais,
-        // não para a tela principal. É a primeira vez que ele está entrando.
-        // router.push("/setup");
-
-        router.push("/");
+        $q.notify({ message: "Cadastro efetuado com sucesso!" });
+        router.push("/setup");
       });
     }
 
     function handleSignInUserWithEmailAndPassword() {
-      signInUserWithEmailAndPassword(formDataRef.value.email, formDataRef.value.password, () => {
-        $q.notify({ message: "Log-in efetuado com sucesso!" })
-
-        // Quando logar de novo, se o usuário ainda não tiver 
-        // passado pelas configurações inicias, ele deve ser
-        // redirecionado para essa tela, senão pode ser
-        // redirecionado para a tela principal.
-        // if (isNotConfiguredYet) {
-        //   router.push("/setup");
-        // }
-        
-        router.push("/");
-      });
+      signInUserWithEmailAndPassword(
+        formDataRef.value.email,
+        formDataRef.value.password,
+        async () => {
+          const isUserConfigured = await getIsUserConfigured();
+          const redirectToRoute = isUserConfigured ? "/" : "/setup";
+          router.push(redirectToRoute);
+          $q.notify({ message: "Log-in efetuado com sucesso!" });
+        },
+      );
     }
 
     return {

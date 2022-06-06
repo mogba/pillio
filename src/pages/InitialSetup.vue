@@ -413,7 +413,7 @@
                   :size="'lg'"
                   :disable="mqttDispenserConnectionStateRef !== DISPENSER_CONNECTION_STATE.connected"
                   @click="() => {
-                    setConfigurationStep(6);
+                    setConfigurationStep(6, configurationStep6Callback);
                   }"
                 />
               </div>
@@ -546,7 +546,7 @@
 import { ref } from "vue";
 import { debounce } from "lodash";
 import QrScanner from "qr-scanner";
-import { subscribe, unsubscribe } from "src/services/mqtt/message.service";
+import { subscribe, unsubscribe } from "src/services/mqtt";
 import InputText from "src/components/InputText.vue";
 
 const USER_ROLE = Object.freeze({
@@ -573,7 +573,7 @@ function resetNewElderlyData() {
 }
 
 export default {
-  name: "Settings",
+  name: "InitialSetup",
   components: {
     InputText,
   },
@@ -599,7 +599,7 @@ export default {
     const mqttDispenserConnectionStateRef = ref(DISPENSER_CONNECTION_STATE.pending);
     const mqttDispenserTopicRef = ref("");
 
-    function handleDispenserConnected() {
+    function handleDispenserConnectionCheck() {
       const changedDispenserCode = dispenserIdCodeRef.value &&
         !mqttDispenserTopicRef.value.includes(dispenserIdCodeRef.value);
 
@@ -635,8 +635,17 @@ export default {
     }
 
     const configurationStep5Callback = debounce(() => {
-      handleDispenserConnected();
+      handleDispenserConnectionCheck();
     }, 5000, { leading: true, trailing: false });
+
+    function configurationStep6Callback() {
+      // criar usuario
+      // verificar funcao do usuario
+      // se for responsavel, criar responsavel, seu idoso e o dispenser do isoso
+      // se for idoso, criar idoso e seu dispenser
+      // desabilitar botao de voltar quando chegar no passo 6 da configuracao
+      // colocar um debounce para redirecionar o usuario para a tela principal depois de 1 minuto
+    }
 
     function setConfigurationStep(newStep, callback = null) {
       configurationStepRef.value = newStep;
@@ -709,6 +718,7 @@ export default {
       configurationStepRef,
       setConfigurationStep,
       configurationStep5Callback,
+      configurationStep6Callback,
       newElderlyRef,
       userRef,
       dispenserIdCodeRef,

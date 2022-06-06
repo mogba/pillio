@@ -6,6 +6,4 @@ export default store(() => {
   return pinia;
 });
 
-export {
-  useSessionStore,
-} from "./modules/session.store";
+export * from "./modules/session.store";

@@ -35,13 +35,13 @@ const routes = [
       },
       {
         path: "/settings",
-        component: () => import("src/pages/Settings.vue"),
+        component: () => import("src/pages/InitialSetup.vue"),
       },
     ],
   },
   {
     path: "/setup",
-    component: () => import("src/pages/Settings.vue"),
+    component: () => import("src/pages/InitialSetup.vue"),
   },
   {
     path: "/login",

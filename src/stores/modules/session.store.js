@@ -4,6 +4,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export const useSessionStore = defineStore("sessionStore", () => {
   const userRef = ref(null);
+  const firebaseUserRef = ref(null);
   const userCredentialRef = ref(null);
 
   const auth = getAuth();
@@ -19,8 +20,8 @@ export const useSessionStore = defineStore("sessionStore", () => {
 
   return {
     user: userRef,
+    firebaseUser: firebaseUserRef,
     userCredential: userCredentialRef,
-    
     isUserAuthenticated,
   };
 });
