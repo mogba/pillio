@@ -31,17 +31,14 @@
 </template>
 
 <script>
+import { ref } from "vue";
 import MenuLinks from "components/MenuLinks.vue";
 
-import { defineComponent, ref } from "vue";
-
-export default defineComponent({
+export default {
   name: "MainLayout",
-
   components: {
     MenuLinks,
   },
-
   setup() {
     const leftDrawerOpen = ref(false);
 
@@ -52,5 +49,5 @@ export default defineComponent({
       },
     };
   },
-});
+};
 </script>

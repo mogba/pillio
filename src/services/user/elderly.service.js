@@ -1,20 +1,21 @@
-import axios from "axios";
+import api from "src/boot/axios.boot";
 
-function createElderlyUser(user) {
+function createElderlyUser(dispenserIdCode) {
   const user = {
-    firebaseUid: "uid do firebase",
-    email: "",
-    name: "",
+    firebaseUserUid: sessionStore.firebaseUser.uid,
+    login: sessionStore.firebaseUser.email,
+    nome: sessionStore.firebaseUser.displayName,
+    codigoMaquina: dispenserIdCode,
   };
 
-  axios.post("/idosos/create", user)
+  api.post("/idosos/create", user)
     .catch(error => console.log("Erro ao criar usuário:", error));
 }
 
 function getAllByElderly() {
   let elderlies;
 
-  axios.get(`/idosos/findidosobyresp/${responsibleUserId}`)
+  api.get(`/idosos/findidosobyresp/${responsibleUserId}`)
     .then(result => elderlies = result)
     .catch(error => console.log("Erro ao criar usuário:", error));
 

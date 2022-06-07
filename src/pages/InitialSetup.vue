@@ -70,7 +70,7 @@
                 label="Nome da pessoa"
                 v-model="newElderlyRef.name"
                 :rules="[
-                  val => !!val || 'O nome deve ser informado',
+                  val => !!val?.trim() || 'O nome deve ser informado',
                   val => (val?.trim().length || 0) >= 3 || 'O nome deve possuir mais que 3 caraceteres',
                 ]"
               />
@@ -139,7 +139,7 @@
                     required
                     v-model="dispenserIdCodeRef"
                     clearable
-                    :rules="[val => !!val || 'O código do Dispenser deve ser informado']"
+                    :rules="[val => !!val?.trim() || 'O código do Dispenser deve ser informado']"
                   >
                     <template v-slot:prepend>
                       <q-icon
@@ -478,6 +478,10 @@
                   label="Voltar"
                   color="secondary"
                   :size="'lg'"
+                  :disable="
+                    configurationStepRef === 6 &&
+                    mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.connected
+                  "
                   @click="() => {
                     setConfigurationStep(5);
                   }"
@@ -548,6 +552,8 @@ import { debounce } from "lodash";
 import QrScanner from "qr-scanner";
 import { subscribe, unsubscribe } from "src/services/mqtt";
 import InputText from "src/components/InputText.vue";
+import { createResponsibleUser } from 'src/services/user/responsible.service';
+import { createElderlyUser } from 'src/services/user/elderly.service';
 
 const USER_ROLE = Object.freeze({
   responsible: "responsible",
@@ -639,12 +645,16 @@ export default {
     }, 5000, { leading: true, trailing: false });
 
     function configurationStep6Callback() {
-      // criar usuario
-      // verificar funcao do usuario
-      // se for responsavel, criar responsavel, seu idoso e o dispenser do isoso
-      // se for idoso, criar idoso e seu dispenser
-      // desabilitar botao de voltar quando chegar no passo 6 da configuracao
-      // colocar um debounce para redirecionar o usuario para a tela principal depois de 1 minuto
+      if (selectedUserRoleRef.value === USER_ROLE.responsible) {
+        createResponsibleUser([{
+          nome: newElderlyRef.value.name,
+          telefone: newElderlyRef.value.phoneNumber,
+          codigoMaquina: dispenserIdCodeRef.value,
+        }]);
+      }
+      else {
+        createElderlyUser(dispenserIdCodeRef.value);
+      }
     }
 
     function setConfigurationStep(newStep, callback = null) {

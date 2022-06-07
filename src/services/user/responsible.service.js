@@ -1,11 +1,14 @@
-import api from "src/boot/api.boot";
+import api from "src/boot/axios.boot";
+import { useSessionStore } from "src/stores";
 
-function createResponsibleUser(user, elderlies) {
+const sessionStore = useSessionStore();
+
+function createResponsibleUser(responsibleElderlies) {
   const user = {
-    firebaseUid: "uid do firebase",
-    email: "",
-    name: "",
-    elderlies: [{ name: "", phoneNumber: "" }]
+    firebaseUserUid: sessionStore.firebaseUser.uid,
+    login: sessionStore.firebaseUser.email,
+    nome: sessionStore.firebaseUser.displayName,
+    idosos: responsibleElderlies,
   };
 
   api.post("/resp/create", user)

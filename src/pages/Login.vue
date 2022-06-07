@@ -238,7 +238,7 @@ export default {
         formDataRef.value.password,
         async () => {
           const isUserConfigured = await getIsUserConfigured();
-          const redirectToRoute = isUserConfigured ? "/" : "/setup";
+          const redirectToRoute = isUserConfigured === "true" ? "/" : "/setup";
           router.push(redirectToRoute);
           $q.notify({ message: "Log-in efetuado com sucesso!" });
         },
