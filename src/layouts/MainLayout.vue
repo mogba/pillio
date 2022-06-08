@@ -42,11 +42,13 @@ export default {
   setup() {
     const leftDrawerOpen = ref(false);
 
+    function toggleLeftDrawer() {
+      leftDrawerOpen.value = !leftDrawerOpen.value;
+    }
+
     return {
       leftDrawerOpen,
-      toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value;
-      },
+      toggleLeftDrawer,
     };
   },
 };

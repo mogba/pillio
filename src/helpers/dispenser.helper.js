@@ -40,7 +40,7 @@ function setDispenserSlots(alarms) {
       { label: "13", value: 13 },
       { label: "14", value: 14 },
       { label: "15", value: 15 },
-      { label: "16", value: 16 },
+      // { label: "16", value: 16 },
     ]
     .map(slot =>
       filledDispenserSlots.includes(slot.value)

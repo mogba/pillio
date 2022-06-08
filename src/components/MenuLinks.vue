@@ -84,8 +84,9 @@
 <script>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useQuasar, SessionStorage } from "quasar";
+import { useQuasar } from "quasar";
 import { signOutUser } from "src/services/firebase";
+import { useSessionStore } from "src/stores";
 
 // O usuário terá os idosos como "children" apenas se
 // for um cuidador. Isso deve ser tratado depois
@@ -99,8 +100,11 @@ export default {
   setup() {
     const router = useRouter();
     const $q = useQuasar();
+    const sessionStore = useSessionStore();
     
-    const elderliesRef = ref(SessionStorage.getItem("elderlies"));
+    // const elderliesRef = ref(SessionStorage.getItem("elderlies"));
+
+    const elderliesRef = ref(sessionStore.user.elderlies);
 
     function handleSignOut() {
       signOutUser(() => {

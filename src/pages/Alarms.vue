@@ -41,7 +41,11 @@
         >
           <AlarmItem :alarm="alarm">
             <q-item-section side>
-              <q-toggle v-model="alarm.isActive" val="{{ alarm.isActive }}" />
+              <q-toggle
+                v-model="alarm.isActive"
+                val="{{ alarm.isActive }}"
+                @update:v-model="handleEnableDisableAlarm"
+              />
             </q-item-section>
           </AlarmItem>
         </q-item>
@@ -123,7 +127,7 @@
         v-if="alarmsRef.filter(x => x.toDelete)?.length > 0"
       >
         <q-card-section class="q-mx-sm">
-          <div class="text-h6">Os seguintes alarmes serão excluídos</div>
+          <div class="text-h6 text-body">Os seguintes alarmes serão excluídos. Lembre-se de remover os remédios do Dispenser.</div>
         </q-card-section>
 
         <q-card-section>
@@ -139,7 +143,7 @@
 
         <q-card-actions align="right">
           <q-btn flat color="primary" label="Cancelar" v-close-popup />
-          <q-btn flat color="negative" label="OK" v-close-popup @click="() => {}" />
+          <q-btn flat color="negative" label="OK" v-close-popup @click="handleDeleteAlarms" />
         </q-card-actions>
       </q-card>
 
@@ -162,22 +166,12 @@
 <script>
 import { ref } from "vue";
 import { onBeforeRouteUpdate } from "vue-router";
-import { SessionStorage } from "quasar";
-import { setDispenserSlots } from "src/helpers/dispenser.helper";
+// import { SessionStorage } from "quasar";
 import AlarmItem from "src/components/AlarmItem.vue";
-
-const alarmsRef = ref([]);
-
-const isDeleteMode = ref(false);
-const showAlarmDeleteConfirmationDialog = ref(false);
-
-function handleChangeDeleteMode() {
-  isDeleteMode.value = !isDeleteMode.value;
-
-  if (!isDeleteMode.value) {
-    alarmsRef.value.forEach(x => x.toDelete = false);
-  }
-}
+import { setDispenserSlots } from "src/helpers/dispenser.helper";
+import { getAlarmsByElderly } from "src/services/user/elderly.service";
+import { deleteAlarms } from "src/services/alarm/alarm.service";
+import { useSessionStore } from "src/stores";
 
 export default {
   name: "Alarms",
@@ -192,30 +186,62 @@ export default {
     },
   },
   setup(props) {
+    const sessionStore = useSessionStore();
+    const loadAlarmsRef = ref(true);
+    
     const elderlyRef = ref({
       id: Number(props.elderly.id),
       name: props.elderly.name,
     });
 
     if (!elderlyRef.value.id) {
-      elderlyRef.value = SessionStorage.getItem("elderlies")[0];
+      // elderlyRef.value = SessionStorage.getItem("elderlies")[0];
+      elderlyRef.value = sessionStore.user.elderlies[0];
     }
 
-    alarmsRef.value = SessionStorage.getItem("alarms")
-      .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
+    // alarmsRef.value = SessionStorage.getItem("alarms")
+    //   .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
+
+    const alarmsRef = ref(await getAlarmsByElderly(elderlyRef.value.id));
 
     setDispenserSlots(alarmsRef.value);
+    // Deve ser adicionada no sistema a 
+    // configuração de quantidade de 
+    // compartimentos para cada dispenser
 
     onBeforeRouteUpdate((to, from) => {
       const newElderly = { id: Number(to.params.id), name: to.params.name };
       elderlyRef.value = newElderly;
-      alarmsRef.value = SessionStorage.getItem("alarms")
-        .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
 
-      // Essa função é chamada ao clicar nos submenus de idosos no menu lateral,
-      // mais precisamente, somente quando um idoso diferente é selecionado.
-      // Atualizar aqui todos os dados da tela para condizerem com o novo idoso.
+      alarmsRef.value = await getAlarmsByElderly(elderlyRef.value.id);
+
+      // alarmsRef.value = SessionStorage.getItem("alarms")
+      //   .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
     });
+
+    const isDeleteMode = ref(false);
+    const showAlarmDeleteConfirmationDialog = ref(false);
+
+    function handleChangeDeleteMode() {
+      isDeleteMode.value = !isDeleteMode.value;
+
+      if (!isDeleteMode.value) {
+        alarmsRef.value.forEach(x => x.toDelete = false);
+      }
+    }
+
+    async function handleDeleteAlarms() {
+      const idAlarmsToDelete = alarmsRef.filter(x => x.toDelete).map(x => x.id);
+      if (idAlarmsToDelete?.length) {
+        const success = await deleteAlarms(idAlarmsToDelete);
+
+        if (success) {
+          alarmsRef.value = alarmsRef.value.filter(x => idAlarmsToDelete.includes(x.id));
+        }
+      }
+
+      handleChangeDeleteMode();
+    }
 
     return {
       elderlyRef,
@@ -223,6 +249,7 @@ export default {
       isDeleteMode,
       showAlarmDeleteConfirmationDialog,
       handleChangeDeleteMode,
+      handleDeleteAlarms,
     }
   },
 }

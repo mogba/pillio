@@ -12,17 +12,29 @@ function createElderlyUser(dispenserIdCode) {
     .catch(error => console.log("Erro ao criar usuário:", error));
 }
 
-function getAllByElderly() {
-  let elderlies;
+async function getAlarmsByElderly(elderlyId) {
+  try {
+    const response = await api.get(`/idosos/findallbyidoso/${elderlyId}`);
+    const alarms = response.data?.alarmes?.map(x => ({
+      id: x.id,
+      medicineName: x.nomeRemedio,
+      timesToRepeat: x.qtdeVezesRepetir,
+      repetitionIntervalInHours: x.repetirEmQuantasHoras,
+      usedDispenserSlots: x.compartimentos.split(","),
+      pillsQuantity: x.quantidadeComprimidosPorDose,
+      startDate: x.dataInicio,
+      startTime: x.horaInicio,
+      isActive: x.ativo,
+      toDelete: false,
+    })) || [];
 
-  api.get(`/idosos/findidosobyresp/${responsibleUserId}`)
-    .then(result => elderlies = result)
-    .catch(error => console.log("Erro ao criar usuário:", error));
-
-  return elderlies;
+    return alarms;
+  } catch (error) {
+    console.log("Erro ao buscar alarmes:", error);
+  }
 }
 
 export {
   createElderlyUser,
-  getAllByElderly,
+  getAlarmsByElderly,
 };
