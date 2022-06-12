@@ -1,6 +1,35 @@
 import { sortBy } from "lodash";
 import { api } from "src/boot/axios.boot";
 
+async function createAlarm(alarm) {
+  try {
+    const startDateStrings = alarm.startDate.split("/"); // DD/MM/YYYY
+    const startDate = new Date(`${startDateStrings[2]}/${startDateStrings[1]}-${startDateStrings[0]}`);
+
+    const usedDispenserSlots = sortBy(alarm.usedDispenserSlots).join(",");
+
+    await api.post(
+      `pills/create`,
+      {
+        nomeRemedio: alarm.medicineName,
+        qtdeVezesRepetir: alarm.timesToRepeat,
+        dataInicio: startDate,
+        horaInicio: alarm.startTime,
+        repetirEmQuantasHoras: alarm.repetitionIntervalInHours,
+        qtdeComprimidosPorDose: alarm.pillsQuantity,
+        compartimentos: usedDispenserSlots,
+        idIdoso: alarm.elderlyId,
+      },
+    );
+
+    return { success: true, message: "Alarme criado." };
+  } catch (error) {
+    const message = `Erro ao criar alarme: ${error}`;
+    console.log(message);
+    return { error: true, message };
+  }
+}
+
 async function updateAlarm(alarm) {
   try {
     const startDateStrings = alarm.startDate.split("/"); // DD/MM/YYYY
@@ -48,6 +77,7 @@ async function deleteAlarms(alarmIds) {
 }
 
 export {
+  createAlarm,
   updateAlarm,
   deleteAlarms,
 };

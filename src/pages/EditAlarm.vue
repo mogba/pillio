@@ -8,19 +8,6 @@
 
     <q-card-section>
       <div class="row q-col-gutter-sm">
-        <!-- <q-input
-          class="col-xs-12 col-xl-12"
-          standout="bg-primary text-white" 
-          label="Para quem o alarme será adicionado?"
-          v-model="alarmRef.elderlyName"
-          clearable
-          readonly
-        >
-          <template>
-            <div class="self-center full-width no-outline" tabindex="0"></div>
-          </template>
-        </q-input> -->
-
         <q-input
           class="col-xs-12 col-xl-12"
           standout="bg-primary text-white" 
@@ -138,7 +125,7 @@
         <div class="col-xs-12 col-md-12">
           <InputSelectMultiple
             :label="'Compartimentos usados no Dispenser'"
-            :options="dispenserSlotSelectOptions"
+            :options="dispenserSlotSelectOptionsRef"
             v-model="usedDispenserSlotsRef"
             :rules="[val => val.length > 0 || 'No mínimo 1 compartimento deve ser selecionado']"
           />
@@ -240,8 +227,8 @@ import { useQuasar } from "quasar";
 import { onBeforeRouteLeave } from "vue-router";
 import InputSelectMultiple from "src/components/InputSelectMultiple.vue";
 import { useAlarmStore } from "src/stores";
-import { getDispenserSlotOptions } from "src/services/dispenser/dispenser.service";
 import { updateAlarm } from "src/services/alarm/alarm.service";
+import { getDispenserSlotOptions } from "src/services/dispenser/dispenser.service";
 import { mapDispenserSlotOptions } from "src/helpers/dispenser.helper";
 
 export default {
@@ -265,13 +252,13 @@ export default {
       isActive: Boolean,
     },
   },
-  async setup(props, { emit }) {
-    const alarmStore = useAlarmStore();
-    const router = useRouter();
+  async setup(props) {
     const $q = useQuasar();
+    const router = useRouter();
+    const alarmStore = useAlarmStore();
 
     onBeforeRouteLeave(() => {
-      alarmStore.alarm = {};
+      alarmStore.alarm = null;
     });
 
     const alarmRef = ref(props.alarm.id ? props.alarm : alarmStore.alarm);
@@ -282,21 +269,28 @@ export default {
 
     const usedDispenserSlotsValue = (alarmRef.value.usedDispenserSlots || [])
       .map(slot => Number(slot));
-
     const usedDispenserSlotsRef = ref(usedDispenserSlotsValue.map(slot =>
       ({ label: slot.toString(), value: Number(slot) })
     ));
+    const dispenserSlotSelectOptionsRef = ref([]);
 
-    const {
-      unavailableDispenserSlots,
-      dispenserSlots,
-    } = await getDispenserSlotOptions(alarmRef.value.elderlyId);
+    const response = await getDispenserSlotOptions(alarmRef.value.elderlyId);
 
-    const dispenserSlotSelectOptions = mapDispenserSlotOptions(
-      dispenserSlots,
-      unavailableDispenserSlots,
-      usedDispenserSlotsValue,
-    );
+    if (response.success) {
+      const {
+        unavailableDispenserSlots,
+        dispenserSlots,
+      } = response.data;
+
+      dispenserSlotSelectOptionsRef.value = mapDispenserSlotOptions(
+        dispenserSlots,
+        unavailableDispenserSlots,
+        usedDispenserSlotsValue,
+      );
+    }
+    else {
+      $q.notify({ message: response.message });
+    }
 
     async function handleSaveAlarm() {
       alarmRef.value.usedDispenserSlots = (
@@ -321,7 +315,7 @@ export default {
     return {
       alarmRef,
       usedDispenserSlotsRef,
-      dispenserSlotSelectOptions,
+      dispenserSlotSelectOptionsRef,
       handleSaveAlarm,
     }
   },

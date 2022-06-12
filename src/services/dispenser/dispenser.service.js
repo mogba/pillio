@@ -14,11 +14,16 @@ async function getDispenserSlotOptions(elderlyId) {
     )).map((_, i) => i + 1);
 
     return {
-      unavailableDispenserSlots: sortBy(unavailableDispenserSlots),
-      dispenserSlots: sortBy(dispenserSlots),
+      success: true,
+      data: {
+        unavailableDispenserSlots: sortBy(unavailableDispenserSlots),
+        dispenserSlots: sortBy(dispenserSlots),
+      },
     };
   } catch (error) {
-    console.log("Erro ao buscar configurações do Dispenser:", error);
+    const message = `Erro ao buscar configurações do Dispenser: ${error}`;
+    console.log(message);
+    return { error: true, message };
   }
 }
 

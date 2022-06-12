@@ -232,7 +232,7 @@ export default {
         formDataRef.value.email,
         formDataRef.value.password,
         () => {
-          $q.notify({ message: "Cadastro efetuado com sucesso!" });
+          $q.notify({ message: "Cadastro efetuado com sucesso." });
           router.push("/setup");
         },
         (error) => {
@@ -255,7 +255,7 @@ export default {
           if (isUserConfigured) {
             const redirectToRoute = isUserConfigured ? "/" : "/setup";
             router.push(redirectToRoute);
-            $q.notify({ message: "Log-in efetuado com sucesso!" });
+            $q.notify({ message: "Log-in efetuado com sucesso." });
           }
         },
         (error) => {

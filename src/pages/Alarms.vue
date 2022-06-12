@@ -206,7 +206,7 @@ export default {
     });
 
     if (!elderlyRef.value.id) {
-      elderlyRef.value = sessionStore.user.elderlies[0];
+      elderlyRef.value = sessionStore.user?.elderlies[0] || {};
     }
 
     await loadAlarms();
