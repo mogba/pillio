@@ -1,6 +1,7 @@
 const axiosConfig = {
-  baseUrl: "https://pills-api-final.herokuapp.com/api/",
-  withCredentials: true,
+  // baseURL: "https://api-pillio.herokuapp.com/api/",
+  baseURL: "http://localhost:3000/api/",
+  withCredentials: false,
 };
 
 export default axiosConfig;

@@ -184,6 +184,7 @@ import InputPassword from "src/components/InputPassword.vue";
 import {
   registerUser,
   signInUserWithEmailAndPassword,
+  signOutUser,
 } from "src/services/firebase";
 import { getIsUserConfigured } from "src/services/user/user-config.service";
 
@@ -226,10 +227,18 @@ export default {
     const $q = useQuasar();
 
     function handleRegisterUser() {
-      registerUser(formDataRef.value.name, formDataRef.value.email, formDataRef.value.password, () => {
-        $q.notify({ message: "Cadastro efetuado com sucesso!" });
-        router.push("/setup");
-      });
+      registerUser(
+        formDataRef.value.name,
+        formDataRef.value.email,
+        formDataRef.value.password,
+        () => {
+          $q.notify({ message: "Cadastro efetuado com sucesso!" });
+          router.push("/setup");
+        },
+        (error) => {
+          $q.notify({ message: error });
+        },
+      );
     }
 
     function handleSignInUserWithEmailAndPassword() {
@@ -237,10 +246,20 @@ export default {
         formDataRef.value.email,
         formDataRef.value.password,
         async () => {
-          const isUserConfigured = await getIsUserConfigured();
-          const redirectToRoute = isUserConfigured ? "/" : "/setup";
-          router.push(redirectToRoute);
-          $q.notify({ message: "Log-in efetuado com sucesso!" });
+          const isUserConfigured = await getIsUserConfigured((error) => {
+            signOutUser();
+            $q.notify({ message: error });
+            return null;
+          });
+
+          if (isUserConfigured) {
+            const redirectToRoute = isUserConfigured ? "/" : "/setup";
+            router.push(redirectToRoute);
+            $q.notify({ message: "Log-in efetuado com sucesso!" });
+          }
+        },
+        (error) => {
+          $q.notify({ message: error });
         },
       );
     }

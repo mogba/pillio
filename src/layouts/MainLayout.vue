@@ -25,7 +25,13 @@
       class="relative-position row flex-center"
       style="width: 100%"
     >
-      <router-view class="col-xs-12 col-md-12 col-lg-8" />
+      <Suspense>
+        <router-view class="col-xs-12 col-md-12 col-lg-8" />
+
+        <template #fallback>
+          Carregando...
+        </template>
+      </Suspense>
     </q-page-container>
   </q-layout>
 </template>

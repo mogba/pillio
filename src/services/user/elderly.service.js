@@ -1,4 +1,5 @@
-import api from "src/boot/axios.boot";
+import { sortBy } from "lodash";
+import { api } from "src/boot/axios.boot";
 
 function createElderlyUser(dispenserIdCode) {
   const user = {
@@ -14,23 +15,37 @@ function createElderlyUser(dispenserIdCode) {
 
 async function getAlarmsByElderly(elderlyId) {
   try {
-    const response = await api.get(`/idosos/findallbyidoso/${elderlyId}`);
-    const alarms = response.data?.alarmes?.map(x => ({
-      id: x.id,
-      medicineName: x.nomeRemedio,
-      timesToRepeat: x.qtdeVezesRepetir,
-      repetitionIntervalInHours: x.repetirEmQuantasHoras,
-      usedDispenserSlots: x.compartimentos.split(","),
-      pillsQuantity: x.quantidadeComprimidosPorDose,
-      startDate: x.dataInicio,
-      startTime: x.horaInicio,
-      isActive: x.ativo,
-      toDelete: false,
-    })) || [];
+    const response = await api.get(`idosos/findallbyidoso/${elderlyId}`);
+    const elderly = (response.data || [])[0] || {};
 
-    return alarms;
+    const alarms = elderly?.alarmes?.map(x => {
+      const usedDispenserSlots = sortBy(x.compartimentos?.split(",") || []);
+
+      const startDateStrings = x.dataInicio.split("T")[0].split("-");
+      const startDate = `${startDateStrings[2]}/${startDateStrings[1]}/${startDateStrings[0]}`;
+
+      const startTimeStrings = x.horaInicio.split(":");
+      const startTime = `${startTimeStrings[0]}:${startTimeStrings[1]}`
+      
+      return {
+        id: x.id,
+        medicineName: x.nomeRemedio,
+        timesToRepeat: x.qtdeVezesRepetir,
+        repetitionIntervalInHours: x.repetirEmQuantasHoras,
+        usedDispenserSlots,
+        pillsQuantity: x.qtdeComprimidosPorDose,
+        startDate,
+        startTime,
+        isActive: !!x.ativo,
+        toDelete: false,
+      };
+    }) || [];
+
+    return { success: true, message: "Alarmes carregados.", data: alarms };
   } catch (error) {
-    console.log("Erro ao buscar alarmes:", error);
+    const message = `Erro ao buscar alarmes: ${error}`;
+    console.log(message);
+    return { error: true, message };
   }
 }
 

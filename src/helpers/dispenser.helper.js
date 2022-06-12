@@ -50,20 +50,28 @@ function setDispenserSlots(alarms) {
   );
 }
 
-function getDispenserSlotOptions(usedDispenserSlotsValue) {
-  let options = (SessionStorage.getItem("dispenserSlots") || [])
-    .map(slot =>
-      usedDispenserSlotsValue.includes(slot.value)
-        ? (({ disable, ...slot }) => (slot))(slot)
-        : slot
-    );
+function mapDispenserSlotOptions(
+  dispenserSlots,
+  unavailableDispenserSlots,
+  dispenserSlotsUsedByAlarm = [],
+) {
+  let options = dispenserSlots.map(slotValue => ({
+    ...(
+      unavailableDispenserSlots.includes(slotValue) &&
+      !dispenserSlotsUsedByAlarm.includes(slotValue)
+      ? { disable: true }
+      : {}
+    ),
+    label: slotValue.toString(),
+    value: slotValue,
+  }));
 
-  options = orderBy(options, ["disable"], ["desc"]);
+  options = orderBy(options, ["disable", "value"], ["desc", "asc"]);
 
   return options;
 }
 
 export {
   setDispenserSlots,
-  getDispenserSlotOptions,
+  mapDispenserSlotOptions,
 };

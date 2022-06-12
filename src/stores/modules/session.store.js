@@ -1,11 +1,17 @@
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { defineStore } from "pinia";
+import { LocalStorage } from "quasar";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export const useSessionStore = defineStore("sessionStore", () => {
-  const userRef = ref(null);
-  const firebaseUserRef = ref(null);
-  const userCredentialRef = ref(null);
+  const userRef = ref(LocalStorage.getItem("user") || {});
+  const firebaseUserRef = ref(LocalStorage.getItem("firebaseUser") || {});
+  // const userCredentialRef = ref(null);
+
+  watch([userRef, firebaseUserRef], ([user, firebaseUser]) => {
+    LocalStorage.set("user", user);
+    LocalStorage.set("firebaseUser", firebaseUser);
+  });
 
   const auth = getAuth();
 
@@ -21,7 +27,7 @@ export const useSessionStore = defineStore("sessionStore", () => {
   return {
     user: userRef,
     firebaseUser: firebaseUserRef,
-    userCredential: userCredentialRef,
+    // userCredential: userCredentialRef,
     isUserAuthenticated,
   };
 });

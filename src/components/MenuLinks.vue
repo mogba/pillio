@@ -5,7 +5,7 @@
       :key="link.title"
     >
       <q-expansion-item
-        v-if="link.expandable && link.children?.data.length > 0"
+        v-if="link.expandable"
         expand-separator
         :default-opened="link.defaultOpened"
         :disable="link.disable"
@@ -37,7 +37,8 @@
             :to="{
               name: link.children.routeName,
               params: {
-                ...child
+                id: child.id,
+                name: child.name,
               },
             }"
           >
@@ -102,15 +103,13 @@ export default {
     const $q = useQuasar();
     const sessionStore = useSessionStore();
     
-    // const elderliesRef = ref(SessionStorage.getItem("elderlies"));
-
-    const elderliesRef = ref(sessionStore.user.elderlies);
+    const elderliesRef = ref(sessionStore.user?.elderlies || []);
 
     function handleSignOut() {
       signOutUser(() => {
-        router.push('/login')
-          .then(() => $q.notify({message: 'Log-out efetuado com sucesso.'}))
-          .catch(error =>  console.log('error',error));
+        router.push("/login")
+          .then(() => $q.notify({message: "Log-out efetuado com sucesso."}))
+          .catch(error =>  console.log("error",error));
       });
     }
 

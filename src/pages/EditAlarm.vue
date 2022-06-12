@@ -225,7 +225,6 @@
               usedDispenserSlotsRef.length > 0 &&
               (alarmRef.timesToRepeat > 1 && usedDispenserSlotsRef.length === 1 ? alarmRef.pillsQuantity > 0 : true)
             )"
-            to="/"
             @click="handleSaveAlarm"
           />
         </div>
@@ -236,8 +235,14 @@
 
 <script>
 import { ref } from "vue";
-import { getDispenserSlotOptions } from "src/helpers/dispenser.helper";
+import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
+import { onBeforeRouteLeave } from "vue-router";
 import InputSelectMultiple from "src/components/InputSelectMultiple.vue";
+import { useAlarmStore } from "src/stores";
+import { getDispenserSlotOptions } from "src/services/dispenser/dispenser.service";
+import { updateAlarm } from "src/services/alarm/alarm.service";
+import { mapDispenserSlotOptions } from "src/helpers/dispenser.helper";
 
 export default {
   name: "EditAlarm",
@@ -258,26 +263,59 @@ export default {
       startDate: String,
       startTime: String,
       isActive: Boolean,
-      toDelete: Boolean,
     },
   },
-  setup(props) {
-    const alarmRef = ref(props.alarm);
+  async setup(props, { emit }) {
+    const alarmStore = useAlarmStore();
+    const router = useRouter();
+    const $q = useQuasar();
 
-    const usedDispenserSlotsValue = (props.alarm.usedDispenserSlots || [])
+    onBeforeRouteLeave(() => {
+      alarmStore.alarm = {};
+    });
+
+    const alarmRef = ref(props.alarm.id ? props.alarm : alarmStore.alarm);
+
+    if (alarmRef.value.id) {
+      alarmStore.alarm = alarmRef.value;
+    }
+
+    const usedDispenserSlotsValue = (alarmRef.value.usedDispenserSlots || [])
       .map(slot => Number(slot));
+
     const usedDispenserSlotsRef = ref(usedDispenserSlotsValue.map(slot =>
       ({ label: slot.toString(), value: Number(slot) })
-    ))
+    ));
 
-    const dispenserSlotSelectOptions = getDispenserSlotOptions(usedDispenserSlotsValue);
+    const {
+      unavailableDispenserSlots,
+      dispenserSlots,
+    } = await getDispenserSlotOptions(alarmRef.value.elderlyId);
 
-    function handleSaveAlarm(e, go) {
-      e.preventDefault();
-      
-      // Connect to API and save data
-      console.log(alarmRef);
-      // alert('Alarm saved!');
+    const dispenserSlotSelectOptions = mapDispenserSlotOptions(
+      dispenserSlots,
+      unavailableDispenserSlots,
+      usedDispenserSlotsValue,
+    );
+
+    async function handleSaveAlarm() {
+      alarmRef.value.usedDispenserSlots = (
+        usedDispenserSlotsRef.value || []
+      ).map(slot => slot.value);
+
+      const response = await updateAlarm(alarmRef.value);
+
+      if (response.success) {
+        router.push({
+          name: "alarms",
+          params: {
+            id: alarmRef.value.elderlyId,
+            name: alarmRef.value.elderlyName,
+          },
+        });
+      }
+
+      $q.notify({ message: response.message });
     }
 
     return {

@@ -238,7 +238,8 @@
 import { ref, watch } from "vue";
 import { SessionStorage } from "quasar";
 import InputSelectMultiple from "src/components/InputSelectMultiple.vue";
-import { getDispenserSlotOptions } from "src/helpers/dispenser.helper";
+import { getDispenserSlotOptions } from "src/services/dispenser/dispenser.service";
+import { mapDispenserSlotOptions } from "src/helpers/dispenser.helper";
 
 export default {
   name: "AddAlarm",
@@ -251,7 +252,7 @@ export default {
       name: String,
     },
   },
-  setup(props) {
+  async setup(props) {
     const elderlyRef = ref(props.elderly);
     const selectedElderlyRef = ref(
       props.elderly.id
@@ -282,7 +283,17 @@ export default {
     });
 
     const usedDispenserSlotsRef = ref(alarmRef.value.usedDispenserSlots);
-    const dispenserSlotSelectOptions = getDispenserSlotOptions(usedDispenserSlotsRef.value);
+
+    const {
+      unavailableDispenserSlots,
+      dispenserSlots,
+    } = await getDispenserSlotOptions(alarmRef.value.elderlyId);
+
+    const dispenserSlotSelectOptions = mapDispenserSlotOptions(
+      dispenserSlots,
+      unavailableDispenserSlots,
+    );
+
     const elderlySelectOptions = SessionStorage.getItem("elderlies")
       .map(elderly => ({ label: elderly.name, value: elderly.id }));
 

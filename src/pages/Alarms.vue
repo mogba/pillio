@@ -18,7 +18,10 @@
         >
           <AlarmItem :alarm="alarm">
             <q-item-section side>
-              <q-checkbox v-model="alarm.toDelete" val="{{ alarm.toDelete }}" />
+              <q-checkbox
+                v-model="alarm.toDelete"
+                val="{{ alarm.toDelete }}"
+              />
             </q-item-section>
           </AlarmItem>
         </q-item>
@@ -44,7 +47,7 @@
               <q-toggle
                 v-model="alarm.isActive"
                 val="{{ alarm.isActive }}"
-                @update:v-model="handleEnableDisableAlarm"
+                @click="() => handleEnableDisableAlarm(alarm)"
               />
             </q-item-section>
           </AlarmItem>
@@ -166,11 +169,10 @@
 <script>
 import { ref } from "vue";
 import { onBeforeRouteUpdate } from "vue-router";
-// import { SessionStorage } from "quasar";
+import { useQuasar } from "quasar";
 import AlarmItem from "src/components/AlarmItem.vue";
-import { setDispenserSlots } from "src/helpers/dispenser.helper";
 import { getAlarmsByElderly } from "src/services/user/elderly.service";
-import { deleteAlarms } from "src/services/alarm/alarm.service";
+import { updateAlarm, deleteAlarms } from "src/services/alarm/alarm.service";
 import { useSessionStore } from "src/stores";
 
 export default {
@@ -185,39 +187,40 @@ export default {
       name: String,
     },
   },
-  setup(props) {
+  async setup(props) {
     const sessionStore = useSessionStore();
-    const loadAlarmsRef = ref(true);
-    
+    const $q = useQuasar();
+
     const elderlyRef = ref({
       id: Number(props.elderly.id),
       name: props.elderly.name,
     });
 
-    if (!elderlyRef.value.id) {
-      // elderlyRef.value = SessionStorage.getItem("elderlies")[0];
-      elderlyRef.value = sessionStore.user.elderlies[0];
-    }
+    const alarmsRef = ref([]);
 
-    // alarmsRef.value = SessionStorage.getItem("alarms")
-    //   .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
-
-    const alarmsRef = ref(await getAlarmsByElderly(elderlyRef.value.id));
-
-    setDispenserSlots(alarmsRef.value);
-    // Deve ser adicionada no sistema a 
-    // configuração de quantidade de 
-    // compartimentos para cada dispenser
-
-    onBeforeRouteUpdate((to, from) => {
+    onBeforeRouteUpdate(async (to, from) => {
       const newElderly = { id: Number(to.params.id), name: to.params.name };
       elderlyRef.value = newElderly;
 
-      alarmsRef.value = await getAlarmsByElderly(elderlyRef.value.id);
-
-      // alarmsRef.value = SessionStorage.getItem("alarms")
-      //   .filter(alarm => alarm.elderlyId === elderlyRef.value.id);
+      await loadAlarms();
     });
+
+    if (!elderlyRef.value.id) {
+      elderlyRef.value = sessionStore.user.elderlies[0];
+    }
+
+    await loadAlarms();
+
+    async function loadAlarms() {
+      const response = await getAlarmsByElderly(elderlyRef.value.id);
+
+      if (response.success) {
+        alarmsRef.value = response.data;
+      }
+      else {
+        $q.notify({ message: response.message });
+      }
+    }
 
     const isDeleteMode = ref(false);
     const showAlarmDeleteConfirmationDialog = ref(false);
@@ -230,14 +233,18 @@ export default {
       }
     }
 
-    async function handleDeleteAlarms() {
-      const idAlarmsToDelete = alarmsRef.filter(x => x.toDelete).map(x => x.id);
-      if (idAlarmsToDelete?.length) {
-        const success = await deleteAlarms(idAlarmsToDelete);
+    async function handleEnableDisableAlarm(alarm) {
+      const response = await updateAlarm(alarm);
+      $q.notify({ message: response.message });
+    }
 
-        if (success) {
-          alarmsRef.value = alarmsRef.value.filter(x => idAlarmsToDelete.includes(x.id));
-        }
+    async function handleDeleteAlarms() {
+      const idAlarmsToDelete = alarmsRef.value.filter(x => x.toDelete).map(x => x.id);
+      if (idAlarmsToDelete?.length) {
+        const response = await deleteAlarms(idAlarmsToDelete);
+        $q.notify({ message: response.message });
+
+        await loadAlarms();
       }
 
       handleChangeDeleteMode();
@@ -248,6 +255,7 @@ export default {
       alarmsRef,
       isDeleteMode,
       showAlarmDeleteConfirmationDialog,
+      handleEnableDisableAlarm,
       handleChangeDeleteMode,
       handleDeleteAlarms,
     }
