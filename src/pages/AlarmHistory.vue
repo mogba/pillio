@@ -13,8 +13,13 @@
         v-for="alarm in alarmsRef"
         :key="alarm.id"
       >
+      <!-- @before-show="async () => await loadTriggers(alarm.id, triggersTable)"
+        @after-hide="() => handleHideTriggersTable(triggersTable)" -->
         <template v-slot:header>
-          <AlarmHistoryItem :alarm="alarm">
+          <AlarmHistoryItem
+            :alarm="alarm"
+            :nextTrigger="alarm.triggers[0]"
+          >
             <q-item-section v-if="alarm.triggers?.length" side>
               <div v-if="isMobile()">
                 <q-icon
@@ -26,7 +31,8 @@
                   size="2rem"
                 />
                 <q-icon
-                  v-else
+                  v-else-if="alarm.triggers[0]
+                    .status === TRIGGER_MEDICINE_STATUS.done"
                   :name="triggerMedicineStatusStyle.done.icon"
                   :color="triggerMedicineStatusStyle.done.color"
                   size="2rem"
@@ -34,9 +40,7 @@
               </div>
               <div v-else>
                 <q-chip
-                  v-if="alarm.triggers.some(trigger =>
-                    trigger.status == TRIGGER_MEDICINE_STATUS.pending
-                  )"
+                  v-if="shouldShowPendingState(alarm)"
                   square
                   :icon-right="triggerMedicineStatusStyle.pending.icon"
                   :color="triggerMedicineStatusStyle.pending.color"
@@ -45,7 +49,8 @@
                   {{ triggerMedicineStatusStyle.pending.label }}
                 </q-chip>
                 <q-chip
-                  v-else
+                  v-else-if="alarm.triggers[0]
+                    .status === TRIGGER_MEDICINE_STATUS.done"
                   square
                   :icon-right="triggerMedicineStatusStyle.done.icon"
                   :color="triggerMedicineStatusStyle.done.color"
@@ -58,7 +63,10 @@
           </AlarmHistoryItem>
         </template>
 
-        <div class="q-pa-sm">
+          <!-- v-if="showTriggersTablesRef.includes(triggersTable)" -->
+        <div
+          class="q-pa-sm"
+        >
           <q-table
             style="box-shadow: none;"
             bordered
@@ -108,12 +116,15 @@
 </template>
 
 <script>
+import { debounce } from "lodash";
 import { ref } from "vue";
 import { onBeforeRouteUpdate } from "vue-router";
-import { SessionStorage } from "quasar";
-import { isMobile } from "src/helpers/media.helper";
-import { TRIGGER_MEDICINE_STATUS, mapAlarmsWithTriggersForElderly } from "src/helpers/alarm.helper";
+import { useQuasar } from "quasar";
 import AlarmHistoryItem from "src/components/AlarmHistoryItem.vue";
+import { TRIGGER_MEDICINE_STATUS } from "src/helpers/alarm.helper";
+import { isMobile } from "src/helpers/media.helper";
+import { getAlarmTriggersByElderly } from "src/services/alarm/alarm-trigger.service";
+import { useSessionStore } from "src/stores";
 
 const triggerMedicineStatusStyle = {
   [TRIGGER_MEDICINE_STATUS.done]: {
@@ -159,8 +170,8 @@ const alarmTriggersGridColumns = [
 
 function mapAlarmTriggersIntoGridRows(triggers) {
   return triggers.map(trigger => ({
-    date: trigger.dateString,
-    time: trigger.timeString,
+    date: trigger.triggerDate,
+    time: trigger.triggerTime,
     status: trigger.status,
   }));
 }
@@ -177,37 +188,73 @@ export default {
       name: String,
     },
   },
-  setup(props) {
+  async setup(props) {
+    const $q = useQuasar();
+    const sessionStore = useSessionStore();
+    
+    const showTriggersTablesRef = ref([]);
+
     const elderlyRef = ref({
       id: Number(props.elderly.id),
       name: props.elderly.name,
     });
 
+    const alarmsRef = ref([]);
+
+    onBeforeRouteUpdate(async (to, from) => {
+      elderlyRef.value = { id: Number(to.params.id), name: to.params.name };
+
+      await loadTriggers();
+    });
+
     if (!elderlyRef.value.id) {
-      elderlyRef.value = SessionStorage.getItem("elderlies")[0];
+      elderlyRef.value = sessionStore.user?.elderlies[0] || {};
     }
 
-    const alarmsRef = ref(SessionStorage.getItem("alarms"));
+    await loadTriggers();
+
+    async function loadTriggers(alarmId, triggersTableToShow) {
+      const response = await getAlarmTriggersByElderly(elderlyRef.value.id);
+
+      if (response.success) {
+        alarmsRef.value = response.data;
+      }
+      else {
+        $q.notify({ message: response.message });
+      }
+    }
+
+    const handleHideTriggersTable = debounce((triggersTableToHide) => {
+      const index = showTriggersTablesRef.value.indexOf(triggersTableToHide);
+      showTriggersTablesRef.value = showTriggersTablesRef.value.splice(index, 1);
+    }, 500, { leading: false, trailing: true });
     
-    mapAlarmsWithTriggersForElderly(alarmsRef, elderlyRef.value.id);
+    function shouldShowPendingState(alarm) {
+      let lastTrigger;
 
-    onBeforeRouteUpdate((to, from) => {
-      const newElderly = { id: Number(to.params.id), name: to.params.name };
-      elderlyRef.value = newElderly;
-      alarmsRef.value = SessionStorage.getItem("alarms");
-      mapAlarmsWithTriggersForElderly(alarmsRef, elderlyRef.value.id);
+      for (let index = 0; index < alarm.triggers.length; index++) {
+        const trigger = alarm.triggers[index];
 
-      // Essa função é chamada ao clicar nos submenus de idosos no menu lateral,
-      // mais precisamente, somente quando um idoso diferente é selecionado.
-      // Atualizar aqui todos os dados da tela para condizerem com o novo idoso.
-    });
+        if (!lastTrigger && trigger.status !== TRIGGER_MEDICINE_STATUS.ongoing) {
+          lastTrigger = trigger;
+        }
+        if (lastTrigger) {
+          return lastTrigger.status !== TRIGGER_MEDICINE_STATUS.done;
+        }
+      }
+
+      return false;
+    }
 
     return {
       isMobile,
       triggerMedicineStatusStyle,
       TRIGGER_MEDICINE_STATUS,
+      shouldShowPendingState,
+      showTriggersTablesRef,
       alarmTriggersGridColumns,
       mapAlarmTriggersIntoGridRows,
+      handleHideTriggersTable,
       alarmsRef,
       elderlyRef,
     };

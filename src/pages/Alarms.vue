@@ -188,8 +188,8 @@ export default {
     },
   },
   async setup(props) {
-    const sessionStore = useSessionStore();
     const $q = useQuasar();
+    const sessionStore = useSessionStore();
 
     const elderlyRef = ref({
       id: Number(props.elderly.id),

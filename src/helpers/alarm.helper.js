@@ -52,15 +52,15 @@ function mapAlarmsWithTriggersForElderly(alarmsRef, elderlyId) {
       triggers = getExpectedAlarmTriggers(alarm);
     }
 
-    return (alarm.elderlyId === elderlyId
-      ? [
+    if (alarm.elderlyId === elderlyId) {
+      alarm.triggers = triggers;
+      return [
         ...acc,
-        {
-          ...alarm,
-          triggers,
-        },
-      ]
-      : acc);
+        alarm,
+      ];
+    }
+
+    return acc;
   }, []);
 }
 

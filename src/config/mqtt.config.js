@@ -1,6 +1,6 @@
 const { v4 } = require("uuid");
 
-const host = "xaf606cf.us-east-1.emqx.cloud";
+const host = "cb12f099.eu-central-1.emqx.cloud";
 const port = "8084";
 const connectUrl = `wss://${host}:${port}`;
 
@@ -11,7 +11,7 @@ const mqttConfig = {
     clean: true,
     connectTimeout: 4000,
     username: "admin",
-    password: "a%!undQWy7ys",
+    password: "h8xkjEDU$oC%",
     reconnectPeriod: 1000,
     path: "/mqtt",
   },
