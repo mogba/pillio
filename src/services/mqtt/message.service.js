@@ -1,4 +1,4 @@
-import { mqttClient } from "../../boot/mqtt.boot";
+import { mqttClient } from "src/boot/mqtt.boot";
 
 function subscribe(topic, messageCallback, subscribeErrorCallback) {
   mqttClient.subscribe(topic, (err, granted) => {

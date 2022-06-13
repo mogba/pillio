@@ -173,7 +173,9 @@ import { useQuasar } from "quasar";
 import AlarmItem from "src/components/AlarmItem.vue";
 import { getAlarmsByElderly } from "src/services/user/elderly.service";
 import { updateAlarm, deleteAlarms } from "src/services/alarm/alarm.service";
+import { requestPermissionPushNotifications } from "src/services/firebase";
 import { useSessionStore } from "src/stores";
+import { mqttClient } from "src/boot/mqtt.boot";
 
 export default {
   name: "Alarms",
@@ -249,6 +251,19 @@ export default {
 
       handleChangeDeleteMode();
     }
+
+    // requestPermissionPushNotifications();
+
+    mqttClient.publish('topico-teste-notificacao', 'Hello mqtt');
+
+    // mqttClient.subscribe("topico-teste-notificacao", (err, granted) => {
+    //   if (err) {
+    //     console.log(`Erro ao conectar ao tópico MQTT 'topico-teste-notificacao':`, err);
+    //   }
+    //   else {
+    //     console.log("Conectado com sucesso ao tópico MQTT: topico-teste-notificacao");
+    //   }
+    // });
 
     return {
       elderlyRef,

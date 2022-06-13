@@ -77,10 +77,14 @@ module.exports = configure(function (ctx) {
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
       server: {
-        type: "http",
+        type: "https",
+        options: {
+          key: fs.readFileSync("./certs/localhost-key.pem"),
+          cert: fs.readFileSync("./certs/localhost.pem"),
+        },
       },
+      open: false, // opens browser window automatically
       port: 8080,
-      open: true, // opens browser window automatically
     },
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
@@ -136,8 +140,8 @@ module.exports = configure(function (ctx) {
 
     // https://quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
-      workboxOptions: {}, // only for GenerateSW
+      workboxPluginMode: "InjectManifest", // 'GenerateSW' or 'InjectManifest'
+      // workboxOptions: {}, // only for GenerateSW
 
       // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
       // if using workbox in InjectManifest mode

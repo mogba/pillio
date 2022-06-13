@@ -4,7 +4,7 @@ const firebaseConfig = {
   projectId: "pillio",
   storageBucket: "pillio.appspot.com",
   messagingSenderId: "633401020435",
-  appId: "1:633401020435:web:de523dcf6b9ea9484eefe6"
+  appId: "1:633401020435:web:de523dcf6b9ea9484eefe6",
 };
 
 export default firebaseConfig;

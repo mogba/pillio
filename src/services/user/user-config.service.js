@@ -41,6 +41,22 @@ async function getIsUserConfigured(errorCallback) {
   }
 }
 
+async function updatePushNotificationToken(pushNotificationToken) {
+  try {
+    const sessionStore = useSessionStore();
+    const user = sessionStore.user;
+    const role = user.role === "responsible" ? "responsavel" : "idoso";
+
+    await api.put(`config/registrar-notificacao/${user.id}`, {
+      funcaoUsuario: role,
+      pushNotificationToken,
+    });
+  } catch (error) {
+    console.log("Erro ao salvar preferências de notificações:", error.message);
+  }
+}
+
 export {
   getIsUserConfigured,
+  updatePushNotificationToken,
 };

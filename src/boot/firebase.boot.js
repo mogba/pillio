@@ -11,4 +11,6 @@ export default boot(() => {
   firebaseApp = initializeApp(firebaseConfig);
 });
 
-export { firebaseApp };
+export {
+  firebaseApp,
+};
