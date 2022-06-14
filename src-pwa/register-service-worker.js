@@ -8,46 +8,46 @@ register(process.env.SERVICE_WORKER_FILE, {
   ready(registration) {
     console.log("Service Worker está ativo.");
 
-    if (mqttClient) {
-      const sessionStore = useSessionStore();
+    // if (mqttClient) {
+    //   const sessionStore = useSessionStore();
 
-      mqttClient.on("message", (topic, payload) => {
-        console.log("Mensagem MQTT com tópico", topic);
+    //   mqttClient.on("message", (topic, payload) => {
+    //     console.log("Mensagem MQTT com tópico", topic);
 
-        const user = sessionStore.user;
+    //     const user = sessionStore.user;
 
-        if (!user?.id) {
-          return;
-        }
+    //     if (!user?.id) {
+    //       return;
+    //     }
 
-        const isUserResponsible = user.role === "responsible";
-        const elderlyIds = isUserResponsible
-          ? user.elderlies.map(elderly => elderly.id)
-          : [user.id];
+    //     const isUserResponsible = user.role === "responsible";
+    //     const elderlyIds = isUserResponsible
+    //       ? user.elderlies.map(elderly => elderly.id)
+    //       : [user.id];
 
-        const expectedTopics = elderlyIds.map(id => (
-          `api/elderly/${id}/alarm/notification/notake`
-        ));
+    //     const expectedTopics = elderlyIds.map(id => (
+    //       `api/elderly/${id}/alarm/notification/notake`
+    //     ));
 
-        if (expectedTopics.includes(topic)) {
-          const message = JSON.parse(payload?.toString() || "{}");
+    //     if (expectedTopics.includes(topic)) {
+    //       const message = JSON.parse(payload?.toString() || "{}");
 
-          const title = "Não tomou o remédio";
-          const body = isUserResponsible
-            ? `${message.nomeIdoso} não tomou o remédio ${message.nomeRemedio} às ${message.horaDisparo}`
-            : `${message.nomeIdoso}, você não tomou o remédio ${message.nomeRemedio} às ${message.horaDisparo}`;
+    //       const title = "Não tomou o remédio";
+    //       const body = isUserResponsible
+    //         ? `${message.nomeIdoso} não tomou o remédio ${message.nomeRemedio} às ${message.horaDisparo}`
+    //         : `${message.nomeIdoso}, você não tomou o remédio ${message.nomeRemedio} às ${message.horaDisparo}`;
   
-          const options = {
-            body,
-            icon: "/favicon.ico",
-            vibrate: [100, 50, 100],
-            // data: { someKey: "someValue" },
-          };
+    //       const options = {
+    //         body,
+    //         icon: "/favicon.ico",
+    //         vibrate: [100, 50, 100],
+    //         // data: { someKey: "someValue" },
+    //       };
 
-          registration.showNotification(title, options);
-        }
-      });
-    }
+    //       registration.showNotification(title, options);
+    //     }
+    //   });
+    // }
   },
 
   registered(/* registration */) {
