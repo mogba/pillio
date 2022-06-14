@@ -252,11 +252,9 @@ export default {
             return null;
           });
 
-          if (isUserConfigured) {
-            const redirectToRoute = isUserConfigured ? "/" : "/setup";
-            router.push(redirectToRoute);
-            $q.notify({ message: "Log-in efetuado com sucesso." });
-          }
+          const redirectToRoute = isUserConfigured ? "/" : "/setup";
+          $q.notify({ message: "Log-in efetuado com sucesso." });
+          router.push(redirectToRoute);
         },
         (error) => {
           $q.notify({ message: error });

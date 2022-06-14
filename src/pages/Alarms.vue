@@ -174,6 +174,7 @@ import AlarmItem from "src/components/AlarmItem.vue";
 import { getAlarmsByElderly } from "src/services/user/elderly.service";
 import { updateAlarm, deleteAlarms } from "src/services/alarm/alarm.service";
 import { useSessionStore } from "src/stores";
+import { mqttClient } from "src/boot/mqtt.boot";
 
 export default {
   name: "Alarms",
@@ -248,6 +249,27 @@ export default {
       }
 
       handleChangeDeleteMode();
+    }
+
+    try {
+      const user = sessionStore.user;
+
+      if (user.id) {
+        const isUserResponsible = user.role === "responsible";
+        const elderlyIds = isUserResponsible
+          ? user.elderlies.map(elderly => elderly.id)
+          : [user.id];
+
+        const topics = elderlyIds.map(id => (
+          `api/elderly/${id}/alarm/notification/notake`
+        ));
+
+        topics.forEach(topic => mqttClient.subscribe(topic));
+
+        console.log("Tópicos MQTT para notificações conectados");
+      }
+    } catch (error) {
+      console.log("Não foi possível configurar tópicos MQTT para recebimento de notificações", error);
     }
 
     Notification.requestPermission();
