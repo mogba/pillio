@@ -6,6 +6,8 @@ register(process.env.SERVICE_WORKER_FILE, {
   registrationOptions: { scope: "./" },
 
   ready(registration) {
+    console.log("Service Worker está ativo.");
+
     if (mqttClient) {
       const sessionStore = useSessionStore();
 
@@ -68,7 +70,7 @@ register(process.env.SERVICE_WORKER_FILE, {
     // console.log("No internet connection found. App is running in offline mode.")
   },
 
-  error(/* err */) {
-    // console.error("Error during service worker registration:", err)
+  error(error) {
+    console.error("Erro durante o registro do Service Worker:", error);
   }
 })
