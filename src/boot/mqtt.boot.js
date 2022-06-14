@@ -10,7 +10,7 @@ export default boot(() => {
 
   const client = mqtt.connect(mqttConfig.connectUrl, mqttConfig.options);
 
-  client.on('connect', (teste) => {
+  client.on("connect", packet => {
     console.log("Broker MQTT conectado com sucesso.");
   });
 

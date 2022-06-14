@@ -17,8 +17,11 @@
             " " + nextTriggerData.triggerTime
           }}
         </div>
-        <div>
+        <div v-if="alarmData.timesToRepeat > 0">
           {{ `Repetir ${alarmData.timesToRepeat} ${alarmData.timesToRepeat > 1 ? "vezes" : "vez"}` }}
+        </div>
+        <div v-else>
+          Sem próximas repetições
         </div>
       </q-item-label>
       <!-- <q-item-label caption>
