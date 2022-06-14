@@ -16,7 +16,7 @@ register(process.env.SERVICE_WORKER_FILE, {
 
         const user = sessionStore.user;
 
-        if (!user.id) {
+        if (!user?.id) {
           return;
         }
 
