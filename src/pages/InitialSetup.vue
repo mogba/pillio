@@ -620,7 +620,7 @@ export default {
         subscribe(
           mqttDispenserTopicRef.value,
           message => {
-            mqttDispenserConnectionStateRef.value = message === "success"
+            mqttDispenserConnectionStateRef.value = message ? "success" : null
             ? DISPENSER_CONNECTION_STATE.connected
             : DISPENSER_CONNECTION_STATE.error;
           },
