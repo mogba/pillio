@@ -39,6 +39,8 @@
 <script>
 import { ref } from "vue";
 import MenuLinks from "components/MenuLinks.vue";
+import { useSessionStore } from "src/stores";
+import { mqttClient } from "src/boot/mqtt.boot";
 
 export default {
   name: "MainLayout",
@@ -46,6 +48,34 @@ export default {
     MenuLinks,
   },
   setup() {
+    const sessionStore = useSessionStore();
+    const user = sessionStore.user;
+
+    function subscribeNotificationTopics() {
+      if (!user?.id) {
+        console.log("Tópicos MQTT para notificações não foram conectados, pois os dados do usuário ainda não estão disponíveis.");
+        return;
+      }
+
+      const isUserResponsible = user.role === "responsible";
+      const elderlyIds = isUserResponsible
+        ? user.elderlies.map(elderly => elderly.id)
+        : [user.id];
+
+      const topics = elderlyIds.map(id => (
+        `api/elderly/${id}/alarm/notification/notake`
+      ));
+
+      topics.forEach(topic => mqttClient.subscribe(topic));
+      console.log("Tópicos MQTT para notificações conectados", topics);
+
+      sessionStore.notificationTopics = topics;
+    }
+
+    Notification.requestPermission();
+
+    subscribeNotificationTopics();
+
     const leftDrawerOpen = ref(false);
 
     function toggleLeftDrawer() {

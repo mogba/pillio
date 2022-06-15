@@ -242,6 +242,7 @@ import { useAlarmStore, useSessionStore } from "src/stores";
 import { createAlarm } from "src/services/alarm/alarm.service";
 import { getDispenserSlotOptions } from "src/services/dispenser/dispenser.service";
 import { mapDispenserSlotOptions } from "src/helpers/dispenser.helper";
+// import { mqttClient } from "src/boot/mqtt.boot";
 
 export default {
   name: "AddAlarm",
@@ -409,6 +410,29 @@ export default {
 
       $q.notify({ message: response.message });
     }
+
+    // setTimeout(() => {
+    //   const user = sessionStore.user;
+
+    //   console.log("setTimeout executou funcao")
+
+    //   if (!user?.id) {
+    //     return;
+    //   }
+
+    //   const isUserResponsible = user.role === "responsible";
+    //   const elderlyIds = isUserResponsible
+    //     ? user.elderlies.map(elderly => elderly.id)
+    //     : [user.id];
+
+    //   const expectedTopics = elderlyIds.map(id => (
+    //     `api/elderly/${id}/alarm/notification/notake`
+    //   ));
+
+    //   const firstTopic = expectedTopics[0];
+
+    //   mqttClient.publish(firstTopic, JSON.stringify({ deuCerto: true }));
+    // }, 10000);
 
     return {
       elderlyRef,

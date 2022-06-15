@@ -19,9 +19,10 @@ function saveFirebaseUserState(userCredential, otherUserData) {
 
 function removeUserCredential() {
   const sessionStore = useSessionStore();
-  sessionStore.user = null;
-  sessionStore.firebaseUser = null;
   // sessionStore.userCredential = null;
+  sessionStore.firebaseUser = null;
+  sessionStore.user = null;
+  sessionStore.notificationTopics = null;
 }
 
 function registerUser(displayName, email, password, successCallback, errorCallback) {

@@ -1,53 +1,60 @@
 import { register } from "register-service-worker";
-import { mqttClient } from "src/boot/mqtt.boot";
 import { useSessionStore } from "src/stores";
+import { mqttClient } from "src/boot/mqtt.boot";
 
 register(process.env.SERVICE_WORKER_FILE, {
   registrationOptions: { scope: "./" },
 
   ready(registration) {
     console.log("Service Worker está ativo.");
+    
+    if (mqttClient) {
+      const sessionStore = useSessionStore();
+      // const user = sessionStore.user;
 
-    // if (mqttClient) {
-    //   const sessionStore = useSessionStore();
+      // if (!user?.id) {
+      //   console.log("Tópicos MQTT para notificações não foram conectados, pois os dados do usuário ainda não estão disponíveis.");
+      //   return;
+      // }
 
-    //   mqttClient.on("message", (topic, payload) => {
-    //     console.log("Mensagem MQTT com tópico", topic);
+      // const isUserResponsible = user.role === "responsible";
+      // const elderlyIds = isUserResponsible
+      //   ? user.elderlies.map(elderly => elderly.id)
+      //   : [user.id];
 
-    //     const user = sessionStore.user;
+      // const topics = elderlyIds.map(id => (
+      //   `api/elderly/${id}/alarm/notification/notake`
+      // ));
 
-    //     if (!user?.id) {
-    //       return;
-    //     }
+      // topics.forEach(topic => mqttClient.subscribe(topic));
+      // console.log("Tópicos MQTT para notificações conectados", topics);
 
-    //     const isUserResponsible = user.role === "responsible";
-    //     const elderlyIds = isUserResponsible
-    //       ? user.elderlies.map(elderly => elderly.id)
-    //       : [user.id];
+      mqttClient.on("message", (topic, payload) => {
+        const topics = sessionStore.notificationTopics;
+        const user = sessionStore.user;
+        const isUserResponsible = user.role === "responsible";
 
-    //     const expectedTopics = elderlyIds.map(id => (
-    //       `api/elderly/${id}/alarm/notification/notake`
-    //     ));
+        if (topics.includes(topic)) {
+          console.log("Mensagem MQTT com tópico", topic);
 
-    //     if (expectedTopics.includes(topic)) {
-    //       const message = JSON.parse(payload?.toString() || "{}");
+          const message = JSON.parse(payload?.toString() || "{}");
 
-    //       const title = "Não tomou o remédio";
-    //       const body = isUserResponsible
-    //         ? `${message.nomeIdoso} não tomou o remédio ${message.nomeRemedio} às ${message.horaDisparo}`
-    //         : `${message.nomeIdoso}, você não tomou o remédio ${message.nomeRemedio} às ${message.horaDisparo}`;
+          const title = "Não tomou o remédio";
+          const body = isUserResponsible
+            ? `${message.nomeIdoso} não tomou o remédio ${message.nomeRemedio} às ${message.horaDisparo}`
+            : `${message.nomeIdoso}, você não tomou o remédio ${message.nomeRemedio} às ${message.horaDisparo}`;
   
-    //       const options = {
-    //         body,
-    //         icon: "/favicon.ico",
-    //         vibrate: [100, 50, 100],
-    //         // data: { someKey: "someValue" },
-    //       };
+          const options = {
+            body,
+            icon: "/favicon.ico",
+            vibrate: [100, 50, 100],
+            // data: { someKey: "someValue" },
+          };
 
-    //       registration.showNotification(title, options);
-    //     }
-    //   });
-    // }
+          registration.showNotification(title, options);
+        }
+      });
+    }
   },
 
   registered(/* registration */) {
