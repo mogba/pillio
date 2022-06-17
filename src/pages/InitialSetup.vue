@@ -16,7 +16,7 @@
             class="full-width q-px-md"
           >
             <div class="text-h6 text-body text-center q-px-md">
-              Olá, {{ userRef.name }}!
+              Olá{{ userNameRef?.length ? `, ${userNameRef}` : ""}}!
               <br>
               <br>
               Você vai administrar seus 
@@ -76,6 +76,12 @@
               />
               <InputText
                 class="q-mt-lg"
+                label="E-mail"
+                v-model="newElderlyRef.email"
+                :rules="[val => val?.length > 5 || 'O e-mail deve ser informado']"
+              />
+              <InputText
+                class="q-mt-lg"
                 label="Telefone da pessoa"
                 mask="(##) #####-####"
                 fill-mask
@@ -94,6 +100,7 @@
                   :size="'lg'"
                   :disable="!(
                     (newElderlyRef.name?.trim().length || 0) >= 3 &&
+                    (newElderlyRef.email?.trim().length || 0) > 5 &&
                     (newElderlyRef.phoneNumber?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8
                   )"
                   @click="() => {
@@ -375,7 +382,7 @@
                 <q-spinner-puff
                   v-if="mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.pending"
                   color="primary"
-                  size="3em"
+                  size="5em"
                 />
 
                 <div v-if="mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.connected">
@@ -548,12 +555,17 @@
 
 <script>
 import { ref } from "vue";
+import { useRouter, onBeforeRouteLeave } from "vue-router";
 import { debounce } from "lodash";
 import QrScanner from "qr-scanner";
-import { subscribe, unsubscribe } from "src/services/mqtt";
+import { useQuasar } from "quasar";
 import InputText from "src/components/InputText.vue";
-import { createResponsibleUser } from 'src/services/user/responsible.service';
-import { createElderlyUser } from 'src/services/user/elderly.service';
+import { subscribe, unsubscribe } from "src/services/mqtt";
+import { registerSecondaryUser, signOutUser } from "src/services/firebase";
+import { createResponsibleUser } from "src/services/user/responsible.service";
+import { getIsUserConfigured } from "src/services/user/user-config.service";
+import { createElderlyUser } from "src/services/user/elderly.service";
+import { useSessionStore } from "src/stores";
 
 const USER_ROLE = Object.freeze({
   responsible: "responsible",
@@ -574,6 +586,7 @@ const DISPENSER_CONNECTION_STATE = Object.freeze({
 function resetNewElderlyData() {
   return {
     name: "",
+    email: "",
     phoneNumber: "",
   };
 }
@@ -589,13 +602,21 @@ export default {
       name: String,
     },
   },
-  setup(props) {
+  async setup(props) {
+    const $q = useQuasar();
+    const router = useRouter();
+    const sessionStore = useSessionStore();
+
+    onBeforeRouteLeave(() => {
+      sessionStore.initialSetup = {};
+    });
+
     // const elderlies = ref([]);
     const newElderlyRef = ref(resetNewElderlyData());
 
-    const userRef = ref({
-      name: props.user.name,
-    });
+    const userNameRef = ref(
+      sessionStore.firebaseUser?.displayName || props.user.name
+    );
 
     const selectedUserRoleRef = ref(null);
     const configurationStepRef = ref(1);
@@ -605,9 +626,27 @@ export default {
     const mqttDispenserConnectionStateRef = ref(DISPENSER_CONNECTION_STATE.pending);
     const mqttDispenserTopicRef = ref("");
 
+    if (sessionStore.initialSetup
+      ?.dispenserConnectionState === DISPENSER_CONNECTION_STATE.connected) {
+      const initialSetup = sessionStore.initialSetup;
+
+      selectedUserRoleRef.value = initialSetup.userRole;
+      newElderlyRef.value = {
+        name: initialSetup.elderlies[0].name,
+        email: initialSetup.elderlies[0].email,
+        phoneNumber: initialSetup.elderlies[0].phoneNumber,
+      };
+      dispenserIdCodeRef.value = initialSetup.elderlies[0].dispenserIdCode;
+      mqttDispenserConnectionStateRef.value = initialSetup.dispenserConnectionState;
+
+      const isUserConfigured = await getIsUserConfigured();
+      configurationStepRef.value = isUserConfigured ? 6 : 5;
+    }
+
     function handleDispenserConnectionCheck() {
-      const changedDispenserCode = dispenserIdCodeRef.value &&
-        !mqttDispenserTopicRef.value.includes(dispenserIdCodeRef.value);
+      const dispenserIdCode = (dispenserIdCodeRef.value || "").trim();
+      const changedDispenserCode = dispenserIdCode.length &&
+        !mqttDispenserTopicRef.value.includes(dispenserIdCode);
 
       if (changedDispenserCode) {
         if (mqttDispenserTopicRef.value) {
@@ -615,14 +654,30 @@ export default {
         }
 
         mqttDispenserConnectionStateRef.value = DISPENSER_CONNECTION_STATE.pending;
-        mqttDispenserTopicRef.value = `dispenser/${dispenserIdCodeRef.value}`;
+        mqttDispenserTopicRef.value = `dispenser/${dispenserIdCode}`;
 
         subscribe(
           mqttDispenserTopicRef.value,
           message => {
-            mqttDispenserConnectionStateRef.value = message ? "success" : null
-            ? DISPENSER_CONNECTION_STATE.connected
-            : DISPENSER_CONNECTION_STATE.error;
+            const {
+              redeConectada: isNetworkConnected,
+              nomeRedeConectada: networkName,
+            } = message;
+
+            mqttDispenserConnectionStateRef.value = isNetworkConnected
+              ? DISPENSER_CONNECTION_STATE.connected
+              : DISPENSER_CONNECTION_STATE.error;
+
+            sessionStore.initialSetup = {
+              userRole: selectedUserRoleRef.value,
+              elderlies: [{
+                name: newElderlyRef.value.name,
+                email: newElderlyRef.value.email,
+                phoneNumber: newElderlyRef.value.phoneNumber,
+                dispenserIdCode: dispenserIdCodeRef.value,
+              }],
+              dispenserConnectionState: mqttDispenserConnectionStateRef.value,
+            };
           },
           err => {
             mqttDispenserConnectionStateRef.value = DISPENSER_CONNECTION_STATE.error;
@@ -644,17 +699,44 @@ export default {
       handleDispenserConnectionCheck();
     }, 5000, { leading: true, trailing: false });
 
-    function configurationStep6Callback() {
+    async function configurationStep6Callback() {
+      let response;
+
       if (selectedUserRoleRef.value === USER_ROLE.responsible) {
-        createResponsibleUser([{
+        const newElderlyData = await registerSecondaryUser(
+          newElderlyRef.value.name,
+          newElderlyRef.value.email,
+        );
+
+        const elderlies = [{
           nome: newElderlyRef.value.name,
+          login: newElderlyRef.value.email,
           telefone: newElderlyRef.value.phoneNumber,
           codigoMaquina: dispenserIdCodeRef.value,
-        }]);
+          firebaseUserUid: newElderlyData.firebaseUserUid,
+          codigoAcesso: newElderlyData.password,
+        }];
+
+        response = await createResponsibleUser(elderlies);
       }
       else {
-        createElderlyUser(dispenserIdCodeRef.value);
+        response = await createElderlyUser(dispenserIdCodeRef.value);
       }
+
+      if (response.success) {
+        const { error, message } = await getIsUserConfigured();
+
+        if (error) {
+          $q.notify({ message });
+          signOutUser(() => {
+            router.push("/login");
+          });
+
+          return;
+        }
+      }
+
+      $q.notify({ message: response.message });
     }
 
     function setConfigurationStep(newStep, callback = null) {
@@ -730,7 +812,7 @@ export default {
       configurationStep5Callback,
       configurationStep6Callback,
       newElderlyRef,
-      userRef,
+      userNameRef,
       dispenserIdCodeRef,
       useMainCameraRef,
       isScanningQrCode,

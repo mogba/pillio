@@ -1,3 +1,17 @@
+import { h, Suspense } from "vue";
+import LoadingSpinner from "src/components/LoadingSpinner.vue";
+
+async function suspenseHack({ default: component }) {
+  const wrapper = props =>
+    h(Suspense, component.props, {
+      default: () => h(component, props),
+      fallback: () => h(LoadingSpinner),
+    });
+
+  wrapper.displayName = "SuspenseHack";
+  return wrapper;
+}
+
 function handleProp(router, propName) {
   return {
     [propName]: { ...router.params }
@@ -12,36 +26,36 @@ const routes = [
       {
         name: "alarms",
         path: "",
-        component: () => import("pages/Alarms.vue"),
+        component: () => import("pages/Alarms.vue").then(c => suspenseHack(c)),
         props: router => handleProp(router, "elderly"),
       },
       {
         name: "add-alarm",
         path: "add-alarm",
-        component: () => import("pages/AddAlarm.vue"),
+        component: () => import("pages/AddAlarm.vue").then(c => suspenseHack(c)),
         props: router => handleProp(router, "elderly"),
       },
       {
         name: "edit-alarm",
         path: "edit-alarm",
-        component: () => import("pages/EditAlarm.vue"),
+        component: () => import("pages/EditAlarm.vue").then(c => suspenseHack(c)),
         props: router => handleProp(router, "alarm"),
       },
       {
         name: "alarm-history",
         path: "alarm-history",
-        component: () => import("pages/AlarmHistory.vue"),
+        component: () => import("pages/AlarmHistory.vue").then(c => suspenseHack(c)),
         props: router => handleProp(router, "elderly"),
       },
       {
         path: "/settings",
-        component: () => import("src/pages/InitialSetup.vue"),
+        component: () => import("pages/InitialSetup.vue").then(c => suspenseHack(c)),
       },
     ],
   },
   {
     path: "/setup",
-    component: () => import("src/pages/InitialSetup.vue"),
+    component: () => import("pages/InitialSetup.vue").then(c => suspenseHack(c)),
   },
   {
     path: "/login",

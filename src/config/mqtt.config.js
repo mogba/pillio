@@ -14,6 +14,10 @@ const mqttConfig = {
     password: "h8xkjEDU$oC%",
     reconnectPeriod: 1000,
     path: "/mqtt",
+
+    // Para receber mensagens com QoS 1 e 2 enquanto estiver
+    // offline, porém as mensagens podem ser duplicadas.
+    clean: false,
   },
 };
 

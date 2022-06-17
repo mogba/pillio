@@ -25,7 +25,7 @@ function removeUserCredential() {
   sessionStore.notificationTopics = null;
 }
 
-function registerUser(displayName, email, password, successCallback, errorCallback) {
+export function registerUser(displayName, email, password, successCallback, errorCallback) {
   createUserWithEmailAndPassword(auth, email, password)
     .then(userCredential => {
       updateProfile(userCredential.user, { displayName })
@@ -53,7 +53,30 @@ function registerUser(displayName, email, password, successCallback, errorCallba
     });
 }
 
-function signInUserWithEmailAndPassword(email, password, successCallback, errorCallback) {
+export async function registerSecondaryUser(displayName, email, successCallback) {
+  try {
+    const password = generatePassword();
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+    updateProfile(userCredential.user, { displayName });
+
+    return {
+      firebaseUserUid: userCredential.user.uid,
+      name: displayName,
+      email,
+      password,
+    };
+  } catch (error) {
+    console.log("Erro ao cadastrar usuário:", error);
+  }
+}
+
+function generatePassword(length = 6) {
+  const options = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  for (var p = ""; p.length < length; p += options.charAt(Math.random() * 62 | 0));
+  return p;
+}
+
+export function signInUserWithEmailAndPassword(email, password, successCallback, errorCallback) {
   signInWithEmailAndPassword(auth, email, password)
     .then(userCredential => {
       saveFirebaseUserState(userCredential);
@@ -79,7 +102,7 @@ function signInUserWithEmailAndPassword(email, password, successCallback, errorC
     });
 }
 
-function signInUserWithGoogle(successCallback) {
+export function signInUserWithGoogle(successCallback) {
   const provider = new GoogleAuthProvider();
   signInWithPopup(auth, provider)
     .then(userCredential => {
@@ -89,7 +112,7 @@ function signInUserWithGoogle(successCallback) {
     .catch(error => console.log("Erro ao iniciar sessão:", error));
 }
 
-function signOutUser(successCallback) {
+export function signOutUser(successCallback) {
   signOut(auth);  
   removeUserCredential();
 
@@ -97,10 +120,3 @@ function signOutUser(successCallback) {
     successCallback();
   }
 }
-
-export {
-  registerUser,
-  signInUserWithEmailAndPassword,
-  signInUserWithGoogle,
-  signOutUser,
-};

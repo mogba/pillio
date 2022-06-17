@@ -14,6 +14,10 @@ export default boot(() => {
     console.log("Broker MQTT conectado com sucesso.");
   });
 
+  client.on("disconnect", packet => {
+    console.log("Broker MQTT desconectado", packet);
+  });
+
   mqttClient = client;
 });
 

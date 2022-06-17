@@ -1,18 +1,25 @@
-import api from "src/boot/axios.boot";
+import { api } from "src/boot/axios.boot";
 import { useSessionStore } from "src/stores";
 
 const sessionStore = useSessionStore();
 
-function createResponsibleUser(responsibleElderlies) {
-  const user = {
-    firebaseUserUid: sessionStore.firebaseUser.uid,
-    login: sessionStore.firebaseUser.email,
-    nome: sessionStore.firebaseUser.displayName,
-    idosos: responsibleElderlies,
-  };
+async function createResponsibleUser(responsibleElderlies) {
+  try {
+    const user = {
+      firebaseUserUid: sessionStore.firebaseUser.uid,
+      login: sessionStore.firebaseUser.email,
+      nome: sessionStore.firebaseUser.displayName,
+      idosos: responsibleElderlies,
+    };
+  
+    await api.post("/resp/create", user);
 
-  api.post("/resp/create", user)
-    .catch(error => console.log("Erro ao criar usuário:", error));
+    return { success: true, message: "Configurações salvas." };
+  } catch (error) {
+    const message = `Erro ao salvar configurações: ${error}`;
+    console.log(message);
+    return { error: true, message };
+  }
 }
 
 // function getElderliesByResponsible() {

@@ -29,7 +29,9 @@
         <router-view class="col-xs-12 col-md-12 col-lg-8" />
 
         <template #fallback>
-          Carregando...
+          <div class="q-pt-xl">
+            <q-spinner-puff color="primary" size="5em" />
+          </div>
         </template>
       </Suspense>
     </q-page-container>
@@ -53,7 +55,7 @@ export default {
 
     function subscribeNotificationTopics() {
       if (!user?.id) {
-        console.log("Tópicos MQTT para notificações não foram conectados, pois os dados do usuário ainda não estão disponíveis.");
+        console.log("Tópicos MQTT para notificações não foram conectados, pois os dados do usuário ainda não estavam disponíveis.");
         return;
       }
 
@@ -66,8 +68,8 @@ export default {
         `api/elderly/${id}/alarm/notification/notake`
       ));
 
-      topics.forEach(topic => mqttClient.subscribe(topic));
-      console.log("Tópicos MQTT para notificações conectados", topics);
+      mqttClient.subscribe(topics);
+      console.log("Tópicos MQTT para notificações conectados");
 
       sessionStore.notificationTopics = topics;
     }

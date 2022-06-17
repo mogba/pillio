@@ -159,7 +159,7 @@
             <br>
             Este número equivale a quantidade de 
             vezes que o alarme vai tocar, e cada dose do medicamento deve 
-            ocupar um compartimento do Pilli-o Dispenser.
+            ocupar um compartimento do Dispenser.
             <br>
             Por exemplo: Se o alarme vai tocar 5 vezes, então devem ser 
             preenchidos 5 compartimentos do Dispenser, cada um com uma 
@@ -183,9 +183,10 @@
         <div class="col-xs-12 col-md-6">
           <q-btn
             no-caps
+            flat
             class="full-width"
-            label="Voltar para os alarmes"
-            color="secondary"
+            label="Cancelar"
+            color="primary"
             :size="'lg'"
             :to="{
               name: 'alarms',
@@ -203,6 +204,7 @@
             label="Salvar"
             color="primary"
             :size="'lg'"
+            :loading="loadingRef"
             :disable="!(
               alarmRef.medicineName &&
               alarmRef.timesToRepeat &&
@@ -213,14 +215,18 @@
               (alarmRef.timesToRepeat > 1 && usedDispenserSlotsRef.length === 1 ? alarmRef.pillsQuantity > 0 : true)
             )"
             @click="handleSaveAlarm"
-          />
+          >
+            <template v-slot:loading>
+              <q-spinner-puff color="white" size="1em" />
+            </template>
+          </q-btn>
         </div>
       </div>
     </q-card-section>
   </q-page>
 </template>
 
-<script>
+<script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
@@ -231,95 +237,85 @@ import { updateAlarm } from "src/services/alarm/alarm.service";
 import { getDispenserSlotOptions } from "src/services/dispenser/dispenser.service";
 import { mapDispenserSlotOptions } from "src/helpers/dispenser.helper";
 
-export default {
-  name: "EditAlarm",
-  components: {
-    InputSelectMultiple,
+const props = defineProps({
+  alarm: {
+    default: {},
+    elderlyId: Number,
+    elderlyName: String,
+    id: Number,
+    medicineName: String,
+    timesToRepeat: Number,
+    repetitionIntervalInHours: Number,
+    usedDispenserSlots: Array,
+    pillsQuantity: Number,
+    startDate: String,
+    startTime: String,
+    isActive: Boolean,
   },
-  props: {
-    alarm: {
-      default: {},
-      elderlyId: Number,
-      elderlyName: String,
-      id: Number,
-      medicineName: String,
-      timesToRepeat: Number,
-      repetitionIntervalInHours: Number,
-      usedDispenserSlots: Array,
-      pillsQuantity: Number,
-      startDate: String,
-      startTime: String,
-      isActive: Boolean,
-    },
-  },
-  async setup(props) {
-    const $q = useQuasar();
-    const router = useRouter();
-    const alarmStore = useAlarmStore();
+});
 
-    onBeforeRouteLeave(() => {
-      alarmStore.alarm = null;
+const $q = useQuasar();
+const router = useRouter();
+const alarmStore = useAlarmStore();
+
+onBeforeRouteLeave(() => {
+  alarmStore.alarm = null;
+});
+
+const loadingRef = ref(false);
+const alarmRef = ref(props.alarm.id ? props.alarm : alarmStore.alarm);
+
+if (alarmRef.value.id) {
+  alarmStore.alarm = alarmRef.value;
+}
+
+const usedDispenserSlotsValue = (alarmRef.value.usedDispenserSlots || [])
+  .map(slot => Number(slot));
+const usedDispenserSlotsRef = ref(usedDispenserSlotsValue.map(slot =>
+  ({ label: slot.toString(), value: Number(slot) })
+));
+const dispenserSlotSelectOptionsRef = ref([]);
+
+const response = await getDispenserSlotOptions(alarmRef.value.elderlyId);
+
+if (response.success) {
+  const {
+    unavailableDispenserSlots,
+    dispenserSlots,
+  } = response.data;
+
+  dispenserSlotSelectOptionsRef.value = mapDispenserSlotOptions(
+    dispenserSlots,
+    unavailableDispenserSlots,
+    usedDispenserSlotsValue,
+  );
+}
+else {
+  $q.notify({ message: response.message });
+}
+
+async function handleSaveAlarm() {
+  loadingRef.value = true;
+
+  alarmRef.value.usedDispenserSlots = (
+    usedDispenserSlotsRef.value || []
+  ).map(slot => slot.value);
+
+  const response = await updateAlarm(alarmRef.value);
+
+  if (response.success) {
+    router.push({
+      name: "alarms",
+      params: {
+        id: alarmRef.value.elderlyId,
+        name: alarmRef.value.elderlyName,
+      },
     });
+  }
 
-    const alarmRef = ref(props.alarm.id ? props.alarm : alarmStore.alarm);
-
-    if (alarmRef.value.id) {
-      alarmStore.alarm = alarmRef.value;
-    }
-
-    const usedDispenserSlotsValue = (alarmRef.value.usedDispenserSlots || [])
-      .map(slot => Number(slot));
-    const usedDispenserSlotsRef = ref(usedDispenserSlotsValue.map(slot =>
-      ({ label: slot.toString(), value: Number(slot) })
-    ));
-    const dispenserSlotSelectOptionsRef = ref([]);
-
-    const response = await getDispenserSlotOptions(alarmRef.value.elderlyId);
-
-    if (response.success) {
-      const {
-        unavailableDispenserSlots,
-        dispenserSlots,
-      } = response.data;
-
-      dispenserSlotSelectOptionsRef.value = mapDispenserSlotOptions(
-        dispenserSlots,
-        unavailableDispenserSlots,
-        usedDispenserSlotsValue,
-      );
-    }
-    else {
-      $q.notify({ message: response.message });
-    }
-
-    async function handleSaveAlarm() {
-      alarmRef.value.usedDispenserSlots = (
-        usedDispenserSlotsRef.value || []
-      ).map(slot => slot.value);
-
-      const response = await updateAlarm(alarmRef.value);
-
-      if (response.success) {
-        router.push({
-          name: "alarms",
-          params: {
-            id: alarmRef.value.elderlyId,
-            name: alarmRef.value.elderlyName,
-          },
-        });
-      }
-
-      $q.notify({ message: response.message });
-    }
-
-    return {
-      alarmRef,
-      usedDispenserSlotsRef,
-      dispenserSlotSelectOptionsRef,
-      handleSaveAlarm,
-    }
-  },
-};
+  loadingRef.value = false;
+  $q.notify({ message: response.message });
+}
 </script>
 
 <style>

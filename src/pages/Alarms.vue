@@ -239,7 +239,10 @@ export default {
     }
 
     async function handleDeleteAlarms() {
-      const idAlarmsToDelete = alarmsRef.value.filter(x => x.toDelete).map(x => x.id);
+      const idAlarmsToDelete = alarmsRef.value
+        .filter(x =>x.toDelete)
+        .map(x => x.id);
+
       if (idAlarmsToDelete?.length) {
         const response = await deleteAlarms(idAlarmsToDelete);
         $q.notify({ message: response.message });

@@ -13,6 +13,13 @@ export default boot(async ({ router, store }) => {
     else if (to.meta.guest && isUserAuthenticated) {
       next({ path: from.path });
     }
+    // else if ( // Comentar para testar configurações iniciais
+    //   to.path === "/setup" &&
+    //   from.path !== "/login" &&
+    //   sessionStore.user.id
+    // ) {
+    //   next({ path: from.path });
+    // }
     else {
       next();
     }

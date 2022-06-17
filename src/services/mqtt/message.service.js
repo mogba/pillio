@@ -16,7 +16,7 @@ function subscribe(topic, messageCallback, subscribeErrorCallback) {
 
   mqttClient.on("message", (messageTopic, payload) => {
     if (messageTopic === topic) {
-      const message = payload.toString();
+      const message = JSON.parse(payload?.toString() || "{}");
       console.log(`Mensagem recebida pelo tópico MQTT '${messageTopic}'`, message);
       messageCallback(message);
     }

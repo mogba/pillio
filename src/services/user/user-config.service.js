@@ -1,10 +1,11 @@
 import { api } from "src/boot/axios.boot";
 import { useSessionStore } from "src/stores";
 
-async function getIsUserConfigured(errorCallback) {
+async function getIsUserConfigured() {
   try {
     const sessionStore = useSessionStore();
     const firebaseUserUid = sessionStore.firebaseUser.uid;
+    const userName = sessionStore.firebaseUser.displayName;
 
     const response = await api.post("config/usuario-esta-configurado", { firebaseUserUid });
     const userConfig = response.data;
@@ -21,23 +22,22 @@ async function getIsUserConfigured(errorCallback) {
 
       sessionStore.user = {
         id: userConfig.id,
-        name: userConfig.nome,
+        // name: userConfig.nome,
+        name: userName,
         email: userConfig.login,
         role,
         elderlies,
       };
 
-      return true;
+      return { success: true, data: { isUserConfigured: true } };
     }
 
-    return false;
+    return { success: true, data: { isUserConfigured: false } };
   }
   catch (error) {
-    console.log("Erro ao verificar configurações do usuário:", error);
-
-    if (typeof errorCallback === "function") {
-      errorCallback(`Erro ao verificar configurações do usuário: ${error.message}`);
-    }
+    const message = `Erro ao verificar configurações do usuário: ${error.message}`;
+    console.log(message);
+    return { error: true, message };
   }
 }
 

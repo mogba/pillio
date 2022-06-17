@@ -172,7 +172,7 @@
             <br>
             Este número equivale a quantidade de 
             vezes que o alarme vai tocar, e cada dose do medicamento deve 
-            ocupar um compartimento do Pilli-o Dispenser.
+            ocupar um compartimento do Dispenser.
             <br>
             Por exemplo: Se o alarme vai tocar 5 vezes, então devem ser 
             preenchidos 5 compartimentos do Dispenser, cada um com uma 
@@ -196,9 +196,10 @@
         <div class="col-xs-12 col-md-6">
           <q-btn
             no-caps
+            flat
             class="full-width"
-            label="Voltar para os alarmes"
-            color="secondary"
+            label="Cancelar"
+            color="primary"
             :size="'lg'"
             :to="{
               name: 'alarms',
@@ -215,6 +216,7 @@
             label="Salvar"
             color="primary"
             :size="'lg'"
+            :loading="loadingRef"
             :disable="!(
               selectedElderlyRef?.value &&
               alarmRef.medicineName &&
@@ -226,14 +228,18 @@
               (alarmRef.timesToRepeat > 1 && usedDispenserSlotsRef.length === 1 ? alarmRef.pillsQuantity > 0 : true)
             )"
             @click="handleSaveAlarm"
-          />
+          >
+            <template v-slot:loading>
+              <q-spinner-puff color="white" size="1em" />
+            </template>
+          </q-btn>
         </div>
       </div>
     </q-card-section>
   </q-page>
 </template>
 
-<script>
+<script setup>
 import { ref, watch } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
@@ -244,207 +250,200 @@ import { getDispenserSlotOptions } from "src/services/dispenser/dispenser.servic
 import { mapDispenserSlotOptions } from "src/helpers/dispenser.helper";
 // import { mqttClient } from "src/boot/mqtt.boot";
 
-export default {
-  name: "AddAlarm",
-  components: {
-    InputSelectMultiple,
+const props = defineProps({
+  elderly: {
+    id: Number,
+    name: String,
   },
-  props: {
-    elderly: {
-      id: Number,
-      name: String,
-    },
-  },
-  async setup(props) {
-    const $q = useQuasar();
-    const router = useRouter();
-    const alarmStore = useAlarmStore();
-    const sessionStore = useSessionStore();
+});
 
-    onBeforeRouteLeave(() => {
-      alarmStore.alarm = null;
-      alarmStore.elderly = null;
-      alarmStore.dispenser = null;
-    });
+const $q = useQuasar();
+const router = useRouter();
+const alarmStore = useAlarmStore();
+const sessionStore = useSessionStore();
 
-    const alarmRef = ref(
-      typeof alarmStore.alarm === "object" && 
-      alarmStore.alarm !== null
-      ? alarmStore.alarm
-      : {
-        elderlyId: null,
-        medicineName: null,
-        timesToRepeat: null,
-        repetitionIntervalInHours: null,
-        usedDispenserSlots: [],
-        pillsQuantity: null,
-        startDate: null,
-        startTime: null,
-      }
-    );
+onBeforeRouteLeave(() => {
+  alarmStore.alarm = null;
+  alarmStore.elderly = null;
+  alarmStore.dispenser = null;
+});
 
-    const usedDispenserSlotsValue = (alarmRef.value.usedDispenserSlots || [])
-      .map(slot => Number(slot));
-    const usedDispenserSlotsRef = ref(usedDispenserSlotsValue.map(slot =>
-      ({ label: slot.toString(), value: Number(slot) })
-    ));
-    const dispenserSlotSelectOptionsRef = ref([]);
+const loadingRef = ref(false);
+const alarmRef = ref(
+  typeof alarmStore.alarm === "object" && 
+  alarmStore.alarm !== null
+  ? alarmStore.alarm
+  : {
+    elderlyId: null,
+    medicineName: null,
+    timesToRepeat: null,
+    repetitionIntervalInHours: null,
+    usedDispenserSlots: [],
+    pillsQuantity: null,
+    startDate: null,
+    startTime: null,
+  }
+);
 
-    const elderlyRef = ref(
-      props.elderly?.id
-      ? props.elderly
-      : typeof alarmStore.elderly === "object" &&
-      alarmStore.elderly !== null
-      ? alarmStore.elderly
-      : {}
-    );
+const usedDispenserSlotsValue = (alarmRef.value.usedDispenserSlots || [])
+  .map(slot => Number(slot));
+const usedDispenserSlotsRef = ref(usedDispenserSlotsValue.map(slot =>
+  ({ label: slot.toString(), value: Number(slot) })
+));
+const dispenserSlotSelectOptionsRef = ref([]);
 
-    const selectedElderlyRef = ref(
-      elderlyRef.value.id
-      ? {
-        label: elderlyRef.value.name,
-        value: Number(elderlyRef.value.id),
-      }
-      : null
-    );
+const elderlyRef = ref(
+  props.elderly?.id
+  ? props.elderly
+  : typeof alarmStore.elderly === "object" &&
+  alarmStore.elderly !== null
+  ? alarmStore.elderly
+  : {}
+);
 
-    watch(
-      [selectedElderlyRef, alarmRef],
-      async (
-        [newSelectedElderly],
-        [oldSelectedElderly]
-      ) => {
-        elderlyRef.value = {
-          id: newSelectedElderly?.value || null,
-          name: newSelectedElderly?.label || null,
-        };
+const selectedElderlyRef = ref(
+  elderlyRef.value.id
+  ? {
+    label: elderlyRef.value.name,
+    value: Number(elderlyRef.value.id),
+  }
+  : null
+);
 
-        updateAlarmStore();
-
-        if (newSelectedElderly?.value != oldSelectedElderly?.value) {
-          alarmStore.dispenser = null;
-          await updateDispenserSlotSelectOptions();
-        }
-      },
-      { deep: true },
-    );
-
-    watch(usedDispenserSlotsRef, (newUsedDispenserSlots) => {
-      alarmRef.value.usedDispenserSlots = newUsedDispenserSlots
-        .map(slot => slot.value);
-    });
+watch(
+  [selectedElderlyRef, alarmRef],
+  async (
+    [newSelectedElderly],
+    [oldSelectedElderly]
+  ) => {
+    elderlyRef.value = {
+      id: newSelectedElderly?.value || null,
+      name: newSelectedElderly?.label || null,
+    };
 
     updateAlarmStore();
-    await updateDispenserSlotSelectOptions();
 
-    function updateAlarmStore() {
-      if (elderlyRef.value.id) {
-        alarmStore.elderly = elderlyRef.value;
-      }
-
-      alarmStore.alarm = alarmRef.value;
-    }
-
-    async function updateDispenserSlotSelectOptions() {
-      if (!elderlyRef.value.id) {
-        return;
-      }
-
-      const dispenser = alarmStore.dispenser;
-
-      let unavailableDispenserSlots;
-      let dispenserSlots;
-
-      if (typeof dispenser === "object" && dispenser !== null) {
-        unavailableDispenserSlots = dispenser.unavailableDispenserSlots;
-        dispenserSlots = dispenser.dispenserSlots;
-      }
-      else {
-        const response = await getDispenserSlotOptions(elderlyRef.value.id);
-
-        if (response.success) {
-          const newDispenserSlots = response.data;
-          unavailableDispenserSlots = newDispenserSlots.unavailableDispenserSlots;
-          dispenserSlots = newDispenserSlots.dispenserSlots;
-          alarmStore.dispenser = { unavailableDispenserSlots, dispenserSlots };
-
-          usedDispenserSlotsRef.value = [];
-        }
-        else {
-          $q.notify({ message: response.message });
-          return;
-        }
-      }
-
-      const oldOptionsCount = dispenserSlotSelectOptionsRef.value.length;
-
-      const newOptions = [...mapDispenserSlotOptions(
-        dispenserSlots,
-        unavailableDispenserSlots,
-      )];
-      
-      for (let index = 0; index < oldOptionsCount; index++) {
-        dispenserSlotSelectOptionsRef.value.pop();
-      }
-
-      dispenserSlotSelectOptionsRef.value.push(...newOptions);
-    }
-
-    const elderlySelectOptions = (sessionStore.user?.elderlies || [])
-      .map(elderly => ({ label: elderly.name, value: elderly.id }));
-
-    async function handleSaveAlarm() {
-      alarmRef.value.elderlyId = elderlyRef.value.id;
-
-      const response = await createAlarm(alarmRef.value);
-
-      if (response.success) {
-        router.push({
-          name: "alarms",
-          params: {
-            id: elderlyRef.value.id,
-            name: elderlyRef.value.name,
-          },
-        });
-      }
-
-      $q.notify({ message: response.message });
-    }
-
-    // setTimeout(() => {
-    //   const user = sessionStore.user;
-
-    //   console.log("setTimeout executou funcao")
-
-    //   if (!user?.id) {
-    //     return;
-    //   }
-
-    //   const isUserResponsible = user.role === "responsible";
-    //   const elderlyIds = isUserResponsible
-    //     ? user.elderlies.map(elderly => elderly.id)
-    //     : [user.id];
-
-    //   const expectedTopics = elderlyIds.map(id => (
-    //     `api/elderly/${id}/alarm/notification/notake`
-    //   ));
-
-    //   const firstTopic = expectedTopics[0];
-
-    //   mqttClient.publish(firstTopic, JSON.stringify({ deuCerto: true }));
-    // }, 10000);
-
-    return {
-      elderlyRef,
-      selectedElderlyRef,
-      alarmRef,
-      usedDispenserSlotsRef,
-      dispenserSlotSelectOptionsRef,
-      elderlySelectOptions,
-      handleSaveAlarm,
+    if (newSelectedElderly?.value != oldSelectedElderly?.value) {
+      alarmStore.dispenser = null;
+      await updateDispenserSlotSelectOptions();
     }
   },
-};
+  { deep: true },
+);
+
+watch(usedDispenserSlotsRef, (newUsedDispenserSlots) => {
+  alarmRef.value.usedDispenserSlots = newUsedDispenserSlots
+    .map(slot => slot.value);
+});
+
+updateAlarmStore();
+await updateDispenserSlotSelectOptions();
+
+function updateAlarmStore() {
+  if (elderlyRef.value.id) {
+    alarmStore.elderly = elderlyRef.value;
+  }
+
+  alarmStore.alarm = alarmRef.value;
+}
+
+async function updateDispenserSlotSelectOptions() {
+  if (!elderlyRef.value.id) {
+    return;
+  }
+
+  const dispenser = alarmStore.dispenser;
+
+  let unavailableDispenserSlots;
+  let dispenserSlots;
+
+  if (typeof dispenser === "object" && dispenser !== null) {
+    unavailableDispenserSlots = dispenser.unavailableDispenserSlots;
+    dispenserSlots = dispenser.dispenserSlots;
+  }
+  else {
+    await getDispenserSlotOptions(elderlyRef.value.id)
+    await getDispenserSlotOptions(elderlyRef.value.id)
+    await getDispenserSlotOptions(elderlyRef.value.id)
+    await getDispenserSlotOptions(elderlyRef.value.id)
+    await getDispenserSlotOptions(elderlyRef.value.id)
+    await getDispenserSlotOptions(elderlyRef.value.id)
+    const response = await getDispenserSlotOptions(elderlyRef.value.id);
+
+    if (response.success) {
+      const newDispenserSlots = response.data;
+      unavailableDispenserSlots = newDispenserSlots.unavailableDispenserSlots;
+      dispenserSlots = newDispenserSlots.dispenserSlots;
+      alarmStore.dispenser = { unavailableDispenserSlots, dispenserSlots };
+
+      usedDispenserSlotsRef.value = [];
+    }
+    else {
+      $q.notify({ message: response.message });
+      return;
+    }
+  }
+
+  const oldOptionsCount = dispenserSlotSelectOptionsRef.value.length;
+
+  const newOptions = [...mapDispenserSlotOptions(
+    dispenserSlots,
+    unavailableDispenserSlots,
+  )];
+  
+  for (let index = 0; index < oldOptionsCount; index++) {
+    dispenserSlotSelectOptionsRef.value.pop();
+  }
+
+  dispenserSlotSelectOptionsRef.value.push(...newOptions);
+}
+
+const elderlySelectOptions = (sessionStore.user?.elderlies || [])
+  .map(elderly => ({ label: elderly.name, value: elderly.id }));
+
+async function handleSaveAlarm() {
+  loadingRef.value = true;
+
+  alarmRef.value.elderlyId = elderlyRef.value.id;
+
+  const response = await createAlarm(alarmRef.value);
+
+  if (response.success) {
+    router.push({
+      name: "alarms",
+      params: {
+        id: elderlyRef.value.id,
+        name: elderlyRef.value.name,
+      },
+    });
+  }
+
+  loadingRef.value = false;
+  $q.notify({ message: response.message });
+}
+
+// setTimeout(() => {
+//   const user = sessionStore.user;
+
+//   console.log("setTimeout executou funcao")
+
+//   if (!user?.id) {
+//     return;
+//   }
+
+//   const isUserResponsible = user.role === "responsible";
+//   const elderlyIds = isUserResponsible
+//     ? user.elderlies.map(elderly => elderly.id)
+//     : [user.id];
+
+//   const expectedTopics = elderlyIds.map(id => (
+//     `api/elderly/${id}/alarm/notification/notake`
+//   ));
+
+//   const firstTopic = expectedTopics[0];
+
+//   mqttClient.publish(firstTopic, JSON.stringify({ deuCerto: true }));
+// }, 10000);
 </script>
 
 <style>

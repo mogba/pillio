@@ -1,16 +1,26 @@
 import { sortBy } from "lodash";
 import { api } from "src/boot/axios.boot";
+import { useSessionStore } from "src/stores";
 
-function createElderlyUser(dispenserIdCode) {
-  const user = {
-    firebaseUserUid: sessionStore.firebaseUser.uid,
-    login: sessionStore.firebaseUser.email,
-    nome: sessionStore.firebaseUser.displayName,
-    codigoMaquina: dispenserIdCode,
-  };
+const sessionStore = useSessionStore();
 
-  api.post("/idosos/create", user)
-    .catch(error => console.log("Erro ao criar usuário:", error));
+async function createElderlyUser(dispenserIdCode) {
+  try {
+    const user = {
+      firebaseUserUid: sessionStore.firebaseUser.uid,
+      login: sessionStore.firebaseUser.email,
+      nome: sessionStore.firebaseUser.displayName,
+      codigoMaquina: dispenserIdCode,
+    };
+
+    await api.post("/idosos/create", user);
+
+    return { success: true, message: "Configurações salvas." };
+  } catch (error) {
+    const message = `Erro ao salvar configurações: ${error}`;
+    console.log(message);
+    return { error: true, message };
+  }
 }
 
 async function getAlarmsByElderly(elderlyId) {

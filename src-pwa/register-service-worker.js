@@ -2,34 +2,22 @@ import { register } from "register-service-worker";
 import { useSessionStore } from "src/stores";
 import { mqttClient } from "src/boot/mqtt.boot";
 
+let _mqttClient;
+
 register(process.env.SERVICE_WORKER_FILE, {
   registrationOptions: { scope: "./" },
 
   ready(registration) {
     console.log("Service Worker está ativo.");
+
+    if (!_mqttClient) {
+      _mqttClient = mqttClient;
+    }
     
-    if (mqttClient) {
+    if (_mqttClient) {
       const sessionStore = useSessionStore();
-      // const user = sessionStore.user;
 
-      // if (!user?.id) {
-      //   console.log("Tópicos MQTT para notificações não foram conectados, pois os dados do usuário ainda não estão disponíveis.");
-      //   return;
-      // }
-
-      // const isUserResponsible = user.role === "responsible";
-      // const elderlyIds = isUserResponsible
-      //   ? user.elderlies.map(elderly => elderly.id)
-      //   : [user.id];
-
-      // const topics = elderlyIds.map(id => (
-      //   `api/elderly/${id}/alarm/notification/notake`
-      // ));
-
-      // topics.forEach(topic => mqttClient.subscribe(topic));
-      // console.log("Tópicos MQTT para notificações conectados", topics);
-
-      mqttClient.on("message", (topic, payload) => {
+      _mqttClient.on("message", (topic, payload) => {
         const topics = sessionStore.notificationTopics;
         const user = sessionStore.user;
         const isUserResponsible = user.role === "responsible";

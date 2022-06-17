@@ -65,7 +65,7 @@
                       val => val.length >= 8 || 'A senha deve possuir no mínimo 8 caracteres'
                     ]"
                   />
-                
+
                   <div
                     class="full-width q-mt-lg"
                     style="height: 56px;"
@@ -77,9 +77,14 @@
                       label="Entrar"
                       color="primary"
                       :size="'lg'"
+                      :loading="loadingRef"
                       :disable="!(formDataRef.email?.length > 5 && formDataRef.password?.length >= 8)"
                       @click="handleSignInUserWithEmailAndPassword"
-                    />
+                    >
+                      <template v-slot:loading>
+                        <q-spinner-puff color="white" size="1em" />
+                      </template>
+                    </q-btn>
                   </div>
                 </div>
                 <div
@@ -144,9 +149,14 @@
                     label="Criar cadastro"
                     color="primary"
                     :size="'lg'"
+                    :loading="loadingRef"
                     :disable="!(formDataRef.email?.length > 5 && formDataRef.password?.length >= 8)"
                     @click="handleRegisterUser"
-                  />
+                  >
+                    <template v-slot:loading>
+                      <q-spinner-puff color="white" size="1em" />
+                    </template>
+                  </q-btn>
                 </div>
 
                 <div
@@ -226,12 +236,18 @@ export default {
     const router = useRouter();
     const $q = useQuasar();
 
+    const loadingRef = ref(false);
+
     function handleRegisterUser() {
+      loadingRef.value = true;
+
       registerUser(
         formDataRef.value.name,
         formDataRef.value.email,
         formDataRef.value.password,
         () => {
+          loadingRef.value = false;
+
           $q.notify({ message: "Cadastro efetuado com sucesso." });
           router.push("/setup");
         },
@@ -242,19 +258,26 @@ export default {
     }
 
     function handleSignInUserWithEmailAndPassword() {
+      loadingRef.value = true;
+
       signInUserWithEmailAndPassword(
         formDataRef.value.email,
         formDataRef.value.password,
         async () => {
-          const isUserConfigured = await getIsUserConfigured((error) => {
-            signOutUser();
-            $q.notify({ message: error });
-            return null;
-          });
+          const response = await getIsUserConfigured();
 
-          const redirectToRoute = isUserConfigured ? "/" : "/setup";
-          $q.notify({ message: "Log-in efetuado com sucesso." });
-          router.push(redirectToRoute);
+          loadingRef.value = false;
+
+          if (response.success) {
+            const { isUserConfigured } = response.data;
+            const redirectToRoute = isUserConfigured ? "/" : "/setup";
+            $q.notify({ message: "Log-in efetuado com sucesso." });
+            router.push(redirectToRoute);
+          }
+          else {
+            $q.notify({ message: error });
+            signOutUser();
+          }
         },
         (error) => {
           $q.notify({ message: error });
@@ -269,6 +292,7 @@ export default {
       handleChangeTab,
       registerStep,
       formDataRef,
+      loadingRef,
       handleRegisterUser,
       handleSignInUserWithEmailAndPassword,
     };

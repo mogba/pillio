@@ -5,15 +5,20 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export const useSessionStore = defineStore("sessionStore", () => {
   // const userCredentialRef = ref(null);
+  const initialSetupRef = ref(LocalStorage.getItem("initialSetup") || {});
   const firebaseUserRef = ref(LocalStorage.getItem("firebaseUser") || {});
   const userRef = ref(LocalStorage.getItem("user") || {});
   const notificationTopicsRef = ref(LocalStorage.getItem("notificationTopics") || []);
 
-  watch([userRef, firebaseUserRef, notificationTopicsRef], ([user, firebaseUser, notificationTopics]) => {
-    LocalStorage.set("user", user);
-    LocalStorage.set("firebaseUser", firebaseUser);
-    LocalStorage.set("notificationTopics", notificationTopics);
-  });
+  watch(
+    [initialSetupRef, firebaseUserRef, userRef, notificationTopicsRef],
+    ([initialSetup, firebaseUser, user, notificationTopics]) => {
+      LocalStorage.set("initialSetup", initialSetup);
+      LocalStorage.set("firebaseUser", firebaseUser);
+      LocalStorage.set("user", user);
+      LocalStorage.set("notificationTopics", notificationTopics);
+    },
+  );
 
   const auth = getAuth();
 
@@ -28,9 +33,10 @@ export const useSessionStore = defineStore("sessionStore", () => {
 
   return {
     // userCredential: userCredentialRef,
-    isUserAuthenticated,
+    initialSetup: initialSetupRef,
     firebaseUser: firebaseUserRef,
     user: userRef,
     notificationTopics: notificationTopicsRef,
+    isUserAuthenticated,
   };
 });
