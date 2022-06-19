@@ -1,27 +1,27 @@
 <template>
   <q-list>
     <div
-      v-for="(link, index) in linksList"
-      :key="link.title"
+      v-for="(menu, index) in menusListRef"
+      :key="menu.title"
     >
       <q-expansion-item
-        v-if="link.expandable"
+        v-if="menu.expandable && menu.children?.data.length"
         expand-separator
-        :default-opened="link.defaultOpened"
-        :disable="link.disable"
+        :default-opened="menu.defaultOpened"
+        :disable="menu.disable"
       >
         <template v-slot:header>
           <q-item-section avatar>
-            <q-icon :name="link.icon" size="md" color="primary" />
+            <q-icon :name="menu.icon" size="md" color="primary" />
           </q-item-section>
 
           <q-item-section>
             <q-item-label>
-              {{ link.title }}
+              {{ menu.title }}
             </q-item-label>
-            
+
             <q-item-label caption>
-              {{ link.caption }}
+              {{ menu.caption }}
             </q-item-label>
           </q-item-section>
         </template>
@@ -32,10 +32,10 @@
         >
           <q-item
             :inset-level="1"
-            v-for="child in link.children.data"
+            v-for="child in menu.children.data"
             :key="child.id"
             :to="{
-              name: link.children.routeName,
+              name: menu.children.routeName,
               params: {
                 id: child.id,
                 name: child.name,
@@ -43,7 +43,7 @@
             }"
           >
             <q-item-section avatar>
-              <q-icon name="face" size="md" color="primary" />
+              <q-icon :name="menu.children.icon" size="md" color="primary" />
             </q-item-section>
 
             <q-item-section>
@@ -58,32 +58,32 @@
         clickable
         tag="a"
         target="_self"
-        :href="link.link"
-        :disable="link.disable"
-        @click="link.action"
+        :href="menu.link"
+        :disable="menu.disable"
+        @click="menu.action"
       >
-        <q-item-section v-if="link.icon" avatar>
-          <q-icon :name="link.icon" size="md" color="primary" />
+        <q-item-section v-if="menu.icon" avatar>
+          <q-icon :name="menu.icon" size="md" color="primary" />
         </q-item-section>
 
         <q-item-section>
           <q-item-label>
-            {{ link.title }}
+            {{ menu.title }}
           </q-item-label>
 
           <q-item-label caption>
-            {{ link.caption }}
+            {{ menu.caption }}
           </q-item-label>
         </q-item-section>
       </q-item>
 
-      <q-separator :key="'sep' + index"  v-if="link.separator" />
+      <q-separator :key="'sep' + index"  v-if="menu.separator" />
     </div>
   </q-list>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { signOutUser } from "src/services/firebase";
@@ -99,11 +99,17 @@ import { useSessionStore } from "src/stores";
 export default {
   name: "MenuLinks",
   setup() {
-    const router = useRouter();
     const $q = useQuasar();
+    const router = useRouter();
     const sessionStore = useSessionStore();
-    
+
     const elderliesRef = ref(sessionStore.user?.elderlies || []);
+    const menusListRef = ref(getMenuLinks());
+
+    watch(sessionStore.user, user => {
+      elderliesRef.value = user.elderlies;
+      menusListRef.value = getMenuLinks();
+    }, { deep: true });
 
     function handleSignOut() {
       signOutUser(() => {
@@ -113,54 +119,56 @@ export default {
       });
     }
 
-    const linksList = [
-      {
-        title: "Alarmes",
-        caption: "Quando deve ser tomado o próximo remédio?",
-        icon: "access_alarm",
-        link: "#/",
-        expandable: true,
-        defaultOpened: true,
-        children: {
-          routeName: "alarms",
-          data: elderliesRef.value,
+    function getMenuLinks() {
+      return [
+        {
+          title: "Alarmes",
+          caption: "Quando deve ser tomado o próximo remédio?",
+          icon: "access_alarm",
+          link: "#/",
+          expandable: true,
+          defaultOpened: true,
+          children: {
+            routeName: "alarms",
+            data: elderliesRef.value,
+            icon: "face",
+          },
         },
-      },
-      {
-        title: "Adicionar alarme",
-        caption: "Adicionar um alarme para um remédio",
-        icon: "add_alarm",
-        link: "#/add-alarm",
-      },
-      {
-        title: "Histórico de alarmes",
-        caption: "Visualizar histórico de alarmes",
-        icon: "history",
-        link: "#/alarm-history",
-        expandable: true,
-        defaultOpened: false,
-        children: {
-          routeName: "alarm-history",
-          data: elderliesRef.value,
+        {
+          title: "Adicionar alarme",
+          caption: "Adicionar um alarme para um remédio",
+          icon: "add_alarm",
+          link: "#/add-alarm",
         },
-        separator: true,
-      },
-      {
-        title: "Configurações",
-        caption: "Configurar pessoas ou dispositivos Pilli-o Dispenser",
-        icon: "manage_accounts",
-        link: "#/settings",
-        disable: true,
-      },
-      {
-        title: "Sair",
-        icon: "logout",
-        action: handleSignOut
-      },
-    ];
+        {
+          title: "Histórico de alarmes",
+          caption: "Visualizar histórico de alarmes",
+          icon: "history",
+          expandable: true,
+          defaultOpened: false,
+          children: {
+            routeName: "alarm-history",
+            data: elderliesRef.value,
+            icon: "face",
+          },
+          separator: true,
+        },
+        {
+          title: "Configurações",
+          caption: "Configurar pessoas ou Dispensers",
+          icon: "manage_accounts",
+          link: "#/settings",
+        },
+        {
+          title: "Sair",
+          icon: "logout",
+          action: handleSignOut
+        },
+      ]
+    }
 
     return {
-      linksList,
+      menusListRef,
     };
   },
 };

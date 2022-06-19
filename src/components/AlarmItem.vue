@@ -1,22 +1,22 @@
 <template>
-    <q-item-section avatar>
-      <q-icon name="medication" size="md" color="grey" />
-    </q-item-section>
+  <q-item-section avatar>
+    <q-icon name="medication" size="md" color="grey" />
+  </q-item-section>
 
-    <q-item-section>
-      <q-item-label
-        style="overflow: hidden; text-overflow: ellipsis;"
-      >
-        {{ alarmRef.medicineName }}
-      </q-item-label>
-      <q-item-label caption>
-        {{ treatmentStartMessage(alarmRef) }}
-      </q-item-label>
-      <q-item-label caption>
-        {{ repetitionIntervalMessage(alarmRef) }}
-      </q-item-label>
-    </q-item-section>
-    <slot />
+  <q-item-section>
+    <q-item-label
+      style="overflow: hidden; text-overflow: ellipsis;"
+    >
+      {{ alarmRef.medicineName }}
+    </q-item-label>
+    <q-item-label caption>
+      {{ treatmentStartMessage(alarmRef) }}
+    </q-item-label>
+    <q-item-label caption>
+      {{ repetitionIntervalMessage(alarmRef) }}
+    </q-item-label>
+  </q-item-section>
+  <slot />
 </template>
 
 <script>

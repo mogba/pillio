@@ -1,6 +1,10 @@
 import { mqttClient } from "src/boot/mqtt.boot";
 
-function subscribe(topic, messageCallback, subscribeErrorCallback) {
+export const publish = (topic, message) => {
+  mqttClient.publish(topic, JSON.stringify(message));
+};
+
+export const subscribe = (topic, messageCallback, subscribeErrorCallback) => {
   mqttClient.subscribe(topic, (err, granted) => {
     if (err) {
       console.log(`Erro ao conectar ao tópico MQTT '${topic}':`, err);
@@ -23,15 +27,10 @@ function subscribe(topic, messageCallback, subscribeErrorCallback) {
   });
 }
 
-function unsubscribe(topic) {
+export const unsubscribe = topic => {
   mqttClient.unsubscribe(topic, err => {
     if (err) {
       console.log(`Erro ao desconectar do tópico MQTT '${topic}':`, err);
     }
   });
 }
-
-export {
-  subscribe,
-  unsubscribe,
-};

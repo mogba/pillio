@@ -10,12 +10,15 @@ export const useSessionStore = defineStore("sessionStore", () => {
   const userRef = ref(LocalStorage.getItem("user") || {});
   const notificationTopicsRef = ref(LocalStorage.getItem("notificationTopics") || []);
 
+  watch(userRef, user => {
+    LocalStorage.set("user", user);
+  }, { deep: true });
+
   watch(
-    [initialSetupRef, firebaseUserRef, userRef, notificationTopicsRef],
-    ([initialSetup, firebaseUser, user, notificationTopics]) => {
+    [initialSetupRef, firebaseUserRef, notificationTopicsRef],
+    ([initialSetup, firebaseUser, notificationTopics]) => {
       LocalStorage.set("initialSetup", initialSetup);
       LocalStorage.set("firebaseUser", firebaseUser);
-      LocalStorage.set("user", user);
       LocalStorage.set("notificationTopics", notificationTopics);
     },
   );

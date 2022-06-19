@@ -139,6 +139,24 @@
                 />
 
                 <div
+                  class="full-width"
+                  style="height: 56px;"
+                >
+                  <q-btn
+                    no-caps
+                    class="full-width"
+                    style="height: 100%; width: 100%"
+                    label="Voltar à tela de login"
+                    color="secondary"
+                    :size="'lg'"
+                    @click="() => {
+                      registerStep = 1;
+                      selectedTab = TABS.login;
+                    }"
+                  />
+                </div>
+
+                <div
                   class="full-width q-mt-lg"
                   style="height: 56px;"
                 >
@@ -157,24 +175,6 @@
                       <q-spinner-puff color="white" size="1em" />
                     </template>
                   </q-btn>
-                </div>
-
-                <div
-                  class="full-width"
-                  style="height: 56px;"
-                >
-                  <q-btn
-                    no-caps
-                    class="full-width"
-                    style="height: 100%; width: 100%"
-                    label="Voltar à tela de login"
-                    color="secondary"
-                    :size="'lg'"
-                    @click="() => {
-                      registerStep = 1;
-                      selectedTab = TABS.login;
-                    }"
-                  />
                 </div>
               </q-card-section>
             </div>

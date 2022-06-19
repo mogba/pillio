@@ -8,3 +8,4 @@ export default store(() => {
 
 export * from "./modules/session.store";
 export * from "./modules/alarm.store";
+export * from "./modules/settings.store";

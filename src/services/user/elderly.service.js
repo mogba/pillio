@@ -4,7 +4,7 @@ import { useSessionStore } from "src/stores";
 
 const sessionStore = useSessionStore();
 
-async function createElderlyUser(dispenserIdCode) {
+export const createElderlyUser = async (dispenserIdCode) => {
   try {
     const user = {
       firebaseUserUid: sessionStore.firebaseUser.uid,
@@ -17,13 +17,28 @@ async function createElderlyUser(dispenserIdCode) {
 
     return { success: true, message: "Configurações salvas." };
   } catch (error) {
-    const message = `Erro ao salvar configurações: ${error}`;
+    const message = `Erro ao salvar configurações: ${error.message}`;
     console.log(message);
     return { error: true, message };
   }
 }
 
-async function getAlarmsByElderly(elderlyId) {
+export const updateElderly = async (elderly) => {
+  try {
+    const elderlyId = elderly.id;
+    delete elderly.id;
+
+    await api.put(`/idosos/update/${elderlyId}`, elderly);
+  
+    return { success: true, message: "Configurações salvas." };
+  } catch (error) {
+    const message = `Erro ao salvar configurações: ${error.message}`;
+    console.log(message);
+    return { error: true, message };
+  }
+};
+
+export const getAlarmsByElderly = async (elderlyId) => {
   try {
     const response = await api.get(`idosos/findallbyidoso/${elderlyId}`);
     const elderly = (response.data || [])[0] || {};
@@ -53,13 +68,8 @@ async function getAlarmsByElderly(elderlyId) {
 
     return { success: true, message: "Alarmes carregados.", data: alarms };
   } catch (error) {
-    const message = `Erro ao buscar alarmes: ${error}`;
+    const message = `Erro ao buscar alarmes: ${error.message}`;
     console.log(message);
     return { error: true, message };
   }
 }
-
-export {
-  createElderlyUser,
-  getAlarmsByElderly,
-};

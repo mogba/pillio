@@ -15,8 +15,8 @@
           v-model="alarmRef.medicineName"
           clearable
           :rules="[
-            val => !!val || 'O nome deve ser informado',
-            val => (val?.trim().length || 0) >= 3 || 'O nome deve possuir mais que 3 caraceteres',
+            val => !!val?.trim() || 'O nome deve ser informado',
+            val => (val?.trim().length || 0) >= 3 || 'O nome deve possuir mais que 3 caracteres',
           ]"
         >
           <template>

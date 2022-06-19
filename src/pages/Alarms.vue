@@ -79,7 +79,7 @@
             label="Excluir"
             color="negative"
             :size="'lg'"
-            @click="() => showAlarmDeleteConfirmationDialog = true"
+            @click="() => showDeleteConfirmationDialog = true"
           />
         </div>
         </div>
@@ -91,12 +91,12 @@
         :offset="[18, 18]"
       >
         <q-fab 
-            label-position="left" 
-            icon="more_vert" 
-            direction="up" 
-            vertical-actions-align="right" 
-            color="purple"
-          >
+          label-position="left" 
+          icon="more_vert" 
+          direction="up" 
+          vertical-actions-align="right" 
+          color="purple"
+        >
           <router-link 
             style="text-decoration: none;"
             :to="{
@@ -124,13 +124,16 @@
       </q-page-sticky>
     </div>
 
-    <q-dialog v-model="showAlarmDeleteConfirmationDialog">
+    <q-dialog v-model="showDeleteConfirmationDialog">
       <q-card
         style="width: 700px; max-width: 80vw;"
         v-if="alarmsRef.filter(x => x.toDelete)?.length > 0"
       >
         <q-card-section class="q-mx-sm">
-          <div class="text-h6 text-body">Os seguintes alarmes serão excluídos. Lembre-se de remover os remédios do Dispenser.</div>
+          <div class="text-h6 text-body">
+            Os seguintes alarmes serão excluídos. 
+            Lembre-se de remover os remédios do Dispenser.
+          </div>
         </q-card-section>
 
         <q-card-section>
@@ -223,7 +226,7 @@ export default {
     }
 
     const isDeleteMode = ref(false);
-    const showAlarmDeleteConfirmationDialog = ref(false);
+    const showDeleteConfirmationDialog = ref(false);
 
     function handleChangeDeleteMode() {
       isDeleteMode.value = !isDeleteMode.value;
@@ -257,7 +260,7 @@ export default {
       elderlyRef,
       alarmsRef,
       isDeleteMode,
-      showAlarmDeleteConfirmationDialog,
+      showDeleteConfirmationDialog,
       handleEnableDisableAlarm,
       handleChangeDeleteMode,
       handleDeleteAlarms,

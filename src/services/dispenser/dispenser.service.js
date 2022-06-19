@@ -1,7 +1,7 @@
 import { sortBy } from "lodash";
 import { api } from "src/boot/axios.boot";
 
-async function getDispenserSlotOptions(elderlyId) {
+export const getDispenserSlotOptions = async (elderlyId) => {
   try {
     const response = await api.get(`machines/getCompartimentos/${elderlyId}`);
 
@@ -21,12 +21,23 @@ async function getDispenserSlotOptions(elderlyId) {
       },
     };
   } catch (error) {
-    const message = `Erro ao buscar configurações do Dispenser: ${error}`;
+    const message = `Erro ao buscar configurações do Dispenser: ${error.message}`;
     console.log(message);
     return { error: true, message };
   }
-}
+};
 
-export {
-  getDispenserSlotOptions,
+export const updateDispenser = async (dispenser) => {
+  try {
+    await api.put(
+      `machines/update/${dispenser.id}`,
+      dispenser,
+    );
+
+    return { success: true, message: "Configurações salvas." };
+  } catch (error) {
+    const message = `Erro ao salvar configurações: ${error.message}`;
+    console.log(message);
+    return { error: true, message };
+  }
 };

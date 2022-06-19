@@ -1,7 +1,7 @@
 import { api } from "src/boot/axios.boot";
 import { useSessionStore } from "src/stores";
 
-async function getIsUserConfigured() {
+export const getIsUserConfigured = async () => {
   try {
     const sessionStore = useSessionStore();
     const firebaseUserUid = sessionStore.firebaseUser.uid;
@@ -39,24 +39,38 @@ async function getIsUserConfigured() {
     console.log(message);
     return { error: true, message };
   }
-}
+};
 
-async function updatePushNotificationToken(pushNotificationToken) {
+export const getSettingsByElderly = async (elderlyId) => {
   try {
-    const sessionStore = useSessionStore();
-    const user = sessionStore.user;
-    const role = user.role === "responsible" ? "responsavel" : "idoso";
-
-    await api.put(`config/registrar-notificacao/${user.id}`, {
-      funcaoUsuario: role,
-      pushNotificationToken,
+    const response = await api.post("config/get-configuracoes-idoso", {
+      idIdoso: elderlyId,
     });
-  } catch (error) {
-    console.log("Erro ao salvar preferências de notificações:", error.message);
-  }
-}
 
-export {
-  getIsUserConfigured,
-  updatePushNotificationToken,
+    const settings = response.data.configuracoes;
+
+    return {
+      success: true,
+      data: {
+        elderly: {
+          id: settings.id,
+          name: settings.nome,
+          email: settings.login,
+          password: settings.codigoAcesso,
+          phoneNumber: settings.telefone,
+        },
+        dispenser: {
+          id: settings.maquinas.id,
+          dispenserIdCode: settings.maquinas.codigoMaquina,
+          dispenserSlotsQuantity: settings.maquinas.qtdeCompartimentos,
+          connectedWifiNetworkName: settings.maquinas.nomeRedeWifiConectada,
+        },
+      },
+    };
+  }
+  catch (error) {
+    const message = `Erro ao buscar configurações: ${error.message}`;
+    console.log(message);
+    return { error: true, message };
+  }
 };

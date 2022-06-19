@@ -41,7 +41,7 @@
                   style="height: 100%; width: 100%"
                   label="Avançar"
                   color="primary"
-                  :size="'lg'"
+                  size="lg"
                   :disable="!selectedUserRoleRef"
                   @click="() => {
                     setConfigurationStep(
@@ -71,40 +71,46 @@
                 v-model="newElderlyRef.name"
                 :rules="[
                   val => !!val?.trim() || 'O nome deve ser informado',
-                  val => (val?.trim().length || 0) >= 3 || 'O nome deve possuir mais que 3 caraceteres',
+                  val => (val?.trim().length || 0) >= 3 || 'O nome deve possuir mais que 3 caracteres',
                 ]"
               />
               <InputText
                 class="q-mt-lg"
                 label="E-mail"
                 v-model="newElderlyRef.email"
-                :rules="[val => val?.length > 5 || 'O e-mail deve ser informado']"
+                :rules="[
+                  val => !!val?.trim() || 'O e-mail deve ser informado',
+                  val => val?.length > 5 || 'O e-mail deve ser informado',
+                ]"
               />
               <InputText
+                style="padding-bottom: 20px;"
                 class="q-mt-lg"
                 label="Telefone da pessoa"
                 mask="(##) #####-####"
                 fill-mask
                 v-model="newElderlyRef.phoneNumber"
-                :rules="[val => (val?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8 || 'O telefone deve ser informado']"
               />
+              <!-- :rules="[val => (val?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8 || 'O telefone deve ser informado']" -->
             </div>
-
+            <!--
+              :disable="!(
+                (newElderlyRef.name?.trim().length || 0) >= 3 &&
+                (newElderlyRef.email?.trim().length || 0) > 5 &&
+                (newElderlyRef.phoneNumber?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8
+              )"
+            -->
             <div class="row q-pt-xl q-col-gutter-lg content-center justify-center">
               <div class="col-xs-12 col-md-6">
                 <q-btn
                   no-caps
+                  flat
                   class="full-width"
-                  label="Avançar"
+                  label="Voltar"
                   color="primary"
-                  :size="'lg'"
-                  :disable="!(
-                    (newElderlyRef.name?.trim().length || 0) >= 3 &&
-                    (newElderlyRef.email?.trim().length || 0) > 5 &&
-                    (newElderlyRef.phoneNumber?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8
-                  )"
+                  size="lg"
                   @click="() => {
-                    setConfigurationStep(3);
+                    setConfigurationStep(1);
                   }"
                 />
               </div>
@@ -112,11 +118,15 @@
                 <q-btn
                   no-caps
                   class="full-width"
-                  label="Voltar"
-                  color="secondary"
-                  :size="'lg'"
+                  label="Avançar"
+                  color="primary"
+                  size="lg"
+                  :disable="!(
+                    (newElderlyRef.name?.trim().length || 0) >= 3 &&
+                    (newElderlyRef.email?.trim().length || 0) > 5
+                  )"
                   @click="() => {
-                    setConfigurationStep(1);
+                    setConfigurationStep(3);
                   }"
                 />
               </div>
@@ -127,11 +137,15 @@
             v-else-if="configurationStepRef === 3"
             class="full-width q-px-md"
           >
-            <div class="text-h6 text-body text-center q-pb-md q-px-md">
-              É necessário configurar o Dispenser que armazenará os remédios.
-              <br>
-              Você deve escanear o QR Code contido na etiqueta do dispositivo
-              ou digitar seu código alfanumérico correspondente no campo abaixo.
+            <div class="text-h6 text-body q-px-md">
+              <p>
+                É necessário configurar o Dispenser que armazenará os remédios.
+              </p>
+
+              <p>
+                Você deve escanear o QR Code contido na etiqueta do dispositivo
+                ou digitar seu código alfanumérico correspondente no campo abaixo.
+              </p>
             </div>
 
             <div
@@ -171,13 +185,17 @@
               <div class="col-xs-12 col-md-6">
                 <q-btn
                   no-caps
+                  flat
                   class="full-width"
-                  label="Avançar"
+                  label="Voltar"
                   color="primary"
-                  :size="'lg'"
-                  :disable="!dispenserIdCodeRef"
+                  size="lg"
                   @click="() => {
-                    setConfigurationStep(4);
+                    setConfigurationStep(
+                      selectedUserRoleRef === USER_ROLE.responsible
+                      ? 2
+                      : 1
+                    );
                   }"
                 />
               </div>
@@ -185,15 +203,12 @@
                 <q-btn
                   no-caps
                   class="full-width"
-                  label="Voltar"
-                  color="secondary"
-                  :size="'lg'"
+                  label="Avançar"
+                  color="primary"
+                  size="lg"
+                  :disable="!dispenserIdCodeRef"
                   @click="() => {
-                    setConfigurationStep(
-                      selectedUserRoleRef === USER_ROLE.responsible
-                      ? 2
-                      : 1
-                    );
+                    setConfigurationStep(4);
                   }"
                 />
               </div>
@@ -241,7 +256,7 @@
                     <br>
                     <div>
                       Após configurar o Dispenser, acesse 
-                      as configurações de wi-fi deu seu 
+                      as configurações de wi-fi de seu 
                       dispositivo e conecte-o novamente 
                       à internet.
                     </div>
@@ -254,12 +269,13 @@
               <div class="col-xs-12 col-md-6">
                 <q-btn
                   no-caps
+                  flat
                   class="full-width"
-                  label="Avançar"
+                  label="Voltar"
                   color="primary"
-                  :size="'lg'"
+                  size="lg"
                   @click="() => {
-                    setConfigurationStep(5, configurationStep5Callback);
+                    setConfigurationStep(3);
                   }"
                 />
               </div>
@@ -267,11 +283,11 @@
                 <q-btn
                   no-caps
                   class="full-width"
-                  label="Voltar"
-                  color="secondary"
-                  :size="'lg'"
+                  label="Avançar"
+                  color="primary"
+                  size="lg"
                   @click="() => {
-                    setConfigurationStep(3);
+                    setConfigurationStep(5, configurationStep5Callback);
                   }"
                 />
               </div>
@@ -346,12 +362,13 @@
               <div class="col-xs-12 col-md-6">
                 <q-btn
                   no-caps
+                  flat
                   class="full-width"
-                  label="Avançar"
+                  label="Voltar"
                   color="primary"
-                  :size="'lg'"
+                  size="lg"
                   @click="() => {
-                    configurationStepRef = 6;
+                    configurationStepRef = 4;
                   }"
                 />
               </div>
@@ -359,11 +376,11 @@
                 <q-btn
                   no-caps
                   class="full-width"
-                  label="Voltar"
-                  color="secondary"
-                  :size="'lg'"
+                  label="Avançar"
+                  color="primary"
+                  size="lg"
                   @click="() => {
-                    configurationStepRef = 4;
+                    configurationStepRef = 6;
                   }"
                 />
               </div>
@@ -414,13 +431,13 @@
               <div class="col-xs-12 col-md-6">
                 <q-btn
                   no-caps
+                  flat
                   class="full-width"
-                  label="Avançar"
+                  label="Voltar"
                   color="primary"
-                  :size="'lg'"
-                  :disable="mqttDispenserConnectionStateRef !== DISPENSER_CONNECTION_STATE.connected"
+                  size="lg"
                   @click="() => {
-                    setConfigurationStep(6, configurationStep6Callback);
+                    setConfigurationStep(4);
                   }"
                 />
               </div>
@@ -428,11 +445,12 @@
                 <q-btn
                   no-caps
                   class="full-width"
-                  label="Voltar"
-                  color="secondary"
-                  :size="'lg'"
+                  label="Avançar"
+                  color="primary"
+                  size="lg"
+                  :disable="mqttDispenserConnectionStateRef !== DISPENSER_CONNECTION_STATE.connected"
                   @click="() => {
-                    setConfigurationStep(4);
+                    setConfigurationStep(6, configurationStep6Callback);
                   }"
                 />
               </div>
@@ -458,11 +476,18 @@
               <div class="col-xs-12 col-md-6">
                 <q-btn
                   no-caps
+                  flat
                   class="full-width"
-                  label="Começar"
+                  label="Voltar"
                   color="primary"
-                  :size="'lg'"
-                  to="/"
+                  size="lg"
+                  :disable="
+                    configurationStepRef === 6 &&
+                    mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.connected
+                  "
+                  @click="() => {
+                    setConfigurationStep(5);
+                  }"
                 />
               </div>
 
@@ -482,16 +507,10 @@
                 <q-btn
                   no-caps
                   class="full-width"
-                  label="Voltar"
-                  color="secondary"
+                  label="Começar"
+                  color="primary"
                   :size="'lg'"
-                  :disable="
-                    configurationStepRef === 6 &&
-                    mqttDispenserConnectionStateRef === DISPENSER_CONNECTION_STATE.connected
-                  "
-                  @click="() => {
-                    setConfigurationStep(5);
-                  }"
+                  to="/"
                 />
               </div>
             </div>
