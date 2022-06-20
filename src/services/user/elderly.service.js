@@ -1,27 +1,21 @@
 import { sortBy } from "lodash";
 import { api } from "src/boot/axios.boot";
-import { useSessionStore } from "src/stores";
 
-const sessionStore = useSessionStore();
-
-export const createElderlyUser = async (dispenserIdCode) => {
+export const createElderlyUser = async (user) => {
   try {
-    const user = {
-      firebaseUserUid: sessionStore.firebaseUser.uid,
-      login: sessionStore.firebaseUser.email,
-      nome: sessionStore.firebaseUser.displayName,
-      codigoMaquina: dispenserIdCode,
+    const response = await api.post("/idosos/create", user);
+    const createdUserId = response.data?.id;
+    return {
+      success: true,
+      message: "Configurações salvas.",
+      data: { createdUserId },
     };
-
-    await api.post("/idosos/create", user);
-
-    return { success: true, message: "Configurações salvas." };
   } catch (error) {
     const message = `Erro ao salvar configurações: ${error.message}`;
     console.log(message);
     return { error: true, message };
   }
-}
+};
 
 export const updateElderly = async (elderly) => {
   try {
@@ -33,6 +27,18 @@ export const updateElderly = async (elderly) => {
     return { success: true, message: "Configurações salvas." };
   } catch (error) {
     const message = `Erro ao salvar configurações: ${error.message}`;
+    console.log(message);
+    return { error: true, message };
+  }
+};
+
+export const deleteElderlies = async (elderlyIds) => {
+  try {
+    await api.post(`/idosos/delete`, { idIdosos: elderlyIds });
+
+    return { success: true, message: "Configurações excluídas." };
+  } catch (error) {
+    const message = `Erro ao excluir configurações: ${error.message}`;
     console.log(message);
     return { error: true, message };
   }
@@ -72,4 +78,4 @@ export const getAlarmsByElderly = async (elderlyId) => {
     console.log(message);
     return { error: true, message };
   }
-}
+};

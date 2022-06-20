@@ -27,6 +27,26 @@ export const getDispenserSlotOptions = async (elderlyId) => {
   }
 };
 
+export const createDispenser = async (elderlyId, dispenser) => {
+  try {
+    delete dispenser.id;
+
+    const response = await api.post("machines/create", { idIdoso: elderlyId, dispenser });
+
+    const createdDispenserId = response.data?.id;
+
+    return {
+      success: true,
+      message: "Configurações salvas.",
+      data: { createdDispenserId },
+    };
+  } catch (error) {
+    const message = `Erro ao salvar configurações: ${error.message}`;
+    console.log(message);
+    return { error: true, message };
+  }
+};
+
 export const updateDispenser = async (dispenser) => {
   try {
     await api.put(

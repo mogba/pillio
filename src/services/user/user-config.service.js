@@ -1,3 +1,4 @@
+import { orderBy } from "lodash";
 import { api } from "src/boot/axios.boot";
 import { useSessionStore } from "src/stores";
 
@@ -12,13 +13,18 @@ export const getIsUserConfigured = async () => {
 
     if (userConfig.id) {
       const role = userConfig.funcao === "responsavel" ? "responsible" : "elderly";
-      const elderlies = userConfig.funcao === "responsavel"
-        ? (userConfig.idosos || []).map(elderly => ({
-            id: elderly.id,
-            name: elderly.nome,
-            email: elderly.login,
-          }))
-        : [];
+
+      let elderlies = [];
+      
+      if (userConfig.funcao === "responsavel") {
+        elderlies = (userConfig.idosos || []).map(elderly => ({
+          id: elderly.id,
+          name: elderly.nome,
+          email: elderly.login,
+        }));
+
+        elderlies = orderBy(elderlies, ["name"], ["asc"]);
+      }
 
       sessionStore.user = {
         id: userConfig.id,
@@ -60,6 +66,7 @@ export const getSettingsByElderly = async (elderlyId) => {
           phoneNumber: settings.telefone,
         },
         dispenser: {
+          elderlyId: settings.id,
           id: settings.maquinas.id,
           dispenserIdCode: settings.maquinas.codigoMaquina,
           dispenserSlotsQuantity: settings.maquinas.qtdeCompartimentos,

@@ -53,27 +53,40 @@ export function registerUser(displayName, email, password, successCallback, erro
     });
 }
 
-export async function registerSecondaryUser(displayName, email, successCallback) {
+export async function registerSecondaryUser(displayName, email, password) {
   try {
-    const password = generatePassword();
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-    updateProfile(userCredential.user, { displayName });
+    await updateProfile(userCredential.user, { displayName });
 
-    return {
-      firebaseUserUid: userCredential.user.uid,
-      name: displayName,
-      email,
-      password,
+    return { 
+      success: true,
+      data: {
+        firebaseUserUid: userCredential.user.uid,
+        name: displayName,
+        email,
+        password,
+      },
     };
   } catch (error) {
-    console.log("Erro ao cadastrar usuário:", error);
-  }
-}
+    let message = "";
 
-function generatePassword(length = 6) {
-  const options = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  for (var p = ""; p.length < length; p += options.charAt(Math.random() * 62 | 0));
-  return p;
+    switch (error.code) {
+      case "auth/invalid-email":
+        message = "Informe um e-mail válido.";
+        break;
+
+      case "auth/email-already-in-use":
+        message = "O e-mail informado já está em uso.";
+        break;
+
+      default:
+        message = `Erro ao cadastrar usuário: ${error.message}`;
+        break
+    }
+
+    console.log(message);
+    return { error: true, message };
+  }
 }
 
 export function signInUserWithEmailAndPassword(email, password, successCallback, errorCallback) {

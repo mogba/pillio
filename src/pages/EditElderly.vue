@@ -76,7 +76,16 @@
         </div>
 
         <q-card class="full-width" flat bordered>
-          <div class="row q-gutter-lg q-pa-lg full-width">
+          <div
+            v-if="!isUpdate"
+            class="row q-gutter-lg q-pa-lg full-width"
+          >
+            <div class="text-h6 text-body content-center full-width">
+              A configuração do Dispenser será habilitada após o salvamento
+            </div>
+          </div>
+
+          <div v-else class="row q-gutter-lg q-pa-lg full-width">
             <div class="flex justify-between content-center full-width">
               <div class="text-h6 text-body">
                 Dispenser
@@ -84,7 +93,7 @@
 
               <q-btn
                 no-caps
-                label="Reconfigurar"
+                :label="hasDispenser ? 'Reconfigurar' : 'Configurar'"
                 color="secondary"
                 size="md"
                 @click="() => showDispenserSetupDialog = true"
@@ -146,7 +155,10 @@
                 elderlyRef.password.length >= 8
               )
             )"
-            @click="handleSaveSettings"
+            @click="() => isUpdate
+              ? handleUpdateSettings()
+              : handleCreateSettings()
+            "
           >
             <template v-slot:loading>
               <q-spinner-puff color="white" size="1em" />
@@ -159,18 +171,22 @@
     <DispenserSetupDialog
       v-model:showDialog="showDispenserSetupDialog"
       v-model:dispenser="dispenserRef"
+      @finish="updateSessionElderliesData"
     />
   </q-page>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { onBeforeRouteLeave } from "vue-router";
 import InputText from "src/components/InputText.vue";
 import InputPassword from "src/components/InputPassword.vue";
 import DispenserSetupDialog from "src/components/DispenserSetupDialog.vue";
-import { updateElderly } from "src/services/user/elderly.service";
+import { registerSecondaryUser } from "src/services/firebase";
+import { getElderliesByResponsible } from "src/services/user/responsible.service";
+import { createElderlyUser, updateElderly } from "src/services/user/elderly.service";
 import { getSettingsByElderly } from "src/services/user/user-config.service";
 import { useSessionStore, useSettingsStore } from "src/stores";
 
@@ -183,6 +199,7 @@ const props = defineProps({
 });
 
 const $q = useQuasar();
+const router = useRouter();
 const sessionStore = useSessionStore();
 const settingsStore = useSettingsStore();
 
@@ -198,6 +215,9 @@ const showDispenserSetupDialog = ref(
 
 const elderlyRef = ref(props.elderly);
 const dispenserRef = ref({});
+
+const isUpdate = computed(() => !!elderlyRef.value.id);
+const hasDispenser = computed(() => !!dispenserRef.value.dispenserIdCode);
 
 if (!elderlyRef.value.id) {
   Object.assign(elderlyRef.value, settingsStore.elderly);
@@ -219,7 +239,56 @@ async function loadSettings() {
 
 const loadingRef = ref(false);
 
-async function handleSaveSettings() {
+async function handleCreateSettings() {
+  loadingRef.value = true;
+
+  const registerUserResponse = await registerSecondaryUser(
+    elderlyRef.value.name,
+    elderlyRef.value.email,
+    elderlyRef.value.password,
+  );
+
+  if (!registerUserResponse.success) {
+    $q.notify({ message: registerUserResponse.message });
+    loadingRef.value = false;
+    return;
+  }
+
+  // Dispenser é configurado depois do idoso
+  const elderly = {
+    nome: elderlyRef.value.name,
+    login: elderlyRef.value.email,
+    codigoAcesso: elderlyRef.value.password,
+    telefone: elderlyRef.value.phoneNumber,
+    firebaseUserUid: registerUserResponse.data.firebaseUserUid,
+    codigoMaquina: null,
+    idResp: sessionStore.user.id,
+  };
+
+  const createElderlyResponse = await createElderlyUser(elderly);
+
+  if (!createElderlyResponse.success) {
+    $q.notify({ message: createElderlyResponse.message });
+    loadingRef.value = false;
+    return;
+  }
+
+  elderlyRef.value.id = createElderlyResponse.data.createdUserId;
+  settingsStore.elderly = elderlyRef.value;
+
+  $q.notify({ message: createElderlyResponse.message });
+  loadingRef.value = false;
+
+  router.push({
+    name: "edit-elderly",
+    params: {
+      id: elderlyRef.value.id,
+      name: elderlyRef.value.name,
+    },
+  });
+}
+
+async function handleUpdateSettings() {
   loadingRef.value = true;
 
   const elderly = {
@@ -230,26 +299,38 @@ async function handleSaveSettings() {
     telefone: elderlyRef.value.phoneNumber,
   };
 
-  const response = await updateElderly(elderly);
+  const updateElderlyResponse = await updateElderly(elderly);
 
-  if (response.success) {
-    settingsStore.elderly = elderlyRef.value;
-
-    if (sessionStore.user.role === "responsible") {
-      const elderlies = sessionStore.user.elderlies;
-      sessionStore.user.elderlies = elderlies.map(elderly => (
-        elderly.id == elderlyRef.value.id
-        ? {
-          id: elderlyRef.value.id,
-          name: elderlyRef.value.name,
-          email: elderlyRef.value.email,
-        }
-        : elderly
-      ));
-    }
+  if (!updateElderlyResponse.success) {
+    $q.notify({ message: updateElderlyResponse.message });
+    loadingRef.value = false;
+    return;
   }
 
+  settingsStore.elderly = elderlyRef.value;
+    
+  if (sessionStore.user.role === "responsible") {
+    const updateSessionElderliesResponse = await updateSessionElderliesData();
+
+    if (!updateSessionElderliesResponse.success) {
+      $q.notify({ message: updateSessionElderliesResponse.message });
+      loadingRef.value = false;
+      return;
+    }
+  }
+  
+  $q.notify({ message: updateElderlyResponse.message });
   loadingRef.value = false;
-  $q.notify({ message: response.message });
+}
+
+async function updateSessionElderliesData() {
+  const response = await getElderliesByResponsible();
+
+  if (response.success && response.data?.length) {
+    sessionStore.user.elderlies = response.data.filter(elderly =>
+      elderly.hasDispenser);
+  }
+
+  return response;
 }
 </script>

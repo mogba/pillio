@@ -6,7 +6,7 @@ let api;
 
 export default boot((_) => {
   api = axios.create(axiosConfig);
-  
+
   // api.interceptors.response.use(
   //   () => {},
   //   (error) => {

@@ -258,7 +258,7 @@ import { debounce } from "lodash";
 import { computed, ref, watch } from "vue";
 import { useQuasar } from "quasar";
 import QrCodeScannerDialog from "src/components/QrCodeScannerDialog.vue";
-import { updateDispenser } from "src/services/dispenser/dispenser.service";
+import { createDispenser, updateDispenser } from "src/services/dispenser/dispenser.service";
 import { publish, subscribe, unsubscribe } from "src/services/mqtt";
 import { useSettingsStore } from "src/stores";
 
@@ -275,6 +275,7 @@ const props = defineProps({
   },
   dispenser: {
     default: {},
+    elderlyId: Number,
     id: Number,
     dispenserIdCode: String,
     dispenserSlotsQuantity: Number,
@@ -282,7 +283,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:showDialog", "update:dispenser"]);
+const emit = defineEmits([
+  "update:showDialog",
+  "update:dispenser",
+  "finish",
+]);
 
 const $q = useQuasar();
 const settingsStore = useSettingsStore();
@@ -300,6 +305,7 @@ const dispenserComputed = computed({
 })
 
 const newDispenserRef = ref({
+  elderlyId: props.dispenser.elderlyId,
   id: props.dispenser.id,
   dispenserIdCode: props.dispenser.dispenserIdCode,
   connectedWifiNetworkName: props.dispenser.connectedWifiNetworkName,
@@ -312,6 +318,7 @@ const mqttDispenserConnTopicRef = ref("");
 function onHideDialog() {
   settingsStore.dispenserSetup = {};
   newDispenserRef.value = {
+    elderlyId: props.dispenser.elderlyId,
     id: props.dispenser.id,
     dispenserIdCode: props.dispenser.dispenserIdCode,
   };
@@ -320,26 +327,26 @@ function onHideDialog() {
   mqttDispenserConnectionStateRef.value = DISPENSER_CONNECTION_STATE.pending;
   mqttDispenserReconfigTopicRef.value = "";
   mqttDispenserConnTopicRef.value = "";
+
+  emit("finish");
 }
 
 watch(configurationStepRef, configStep => {
   if (configStep > 1) {
+    settingsStore.dispenserSetup.elderlyId = newDispenserRef.value.elderlyId;
     settingsStore.dispenserSetup.id = newDispenserRef.value.id;
     settingsStore.dispenserSetup.dispenserIdCode = newDispenserRef.value.dispenserIdCode;
     settingsStore.dispenserSetup.configurationStep = configurationStepRef.value;
   }
 });
 
-if (
-  (settingsStore.dispenserSetup?.configurationStep || 1) > 1 &&
-  (settingsStore.dispenserSetup?.configurationStep || 1) < 4
-) {
+if ([2, 3].includes(settingsStore.dispenserSetup?.configurationStep || 1)) {
   const connState = settingsStore.dispenserSetup.dispenserConnectionState;
 
   newDispenserRef.value = settingsStore.dispenserSetup;
   mqttDispenserConnectionStateRef.value = connState;
   configurationStepRef.value =
-    connState === DISPENSER_CONNECTION_STATE.connected ? 4 : 2;
+    connState === DISPENSER_CONNECTION_STATE.connected ? 3 : 2;
 }
 
 function configurationStep2Callback() {
@@ -379,6 +386,7 @@ function handleDispenserConnectionCheck() {
           : DISPENSER_CONNECTION_STATE.error;
 
         settingsStore.dispenserSetup = {
+          elderlyId: newDispenserRef.value.elderlyId,
           id: newDispenserRef.value.id,
           dispenserIdCode: newDispenserRef.value.dispenserIdCode,
           connectedWifiNetworkName: networkName,
@@ -408,7 +416,8 @@ const configurationStep3Callback = debounce(() => {
 }, 5000, { leading: true, trailing: false });
 
 async function configurationStep4Callback() {
-  const succeededUpdateDispenser = {
+  const successData = {
+    elderlyId: settingsStore.dispenserSetup.elderlyId,
     id: settingsStore.dispenserSetup.id,
     dispenserIdCode: settingsStore.dispenserSetup.dispenserIdCode,
     dispenserSlotsQuantity: settingsStore.dispenserSetup.dispenserSlotsQuantity,
@@ -421,12 +430,24 @@ async function configurationStep4Callback() {
     nomeRedeWifiConectada: settingsStore.dispenserSetup.connectedWifiNetworkName,
   };
 
-  const { success, message } = await updateDispenser(dispenser);
-  $q.notify({ message });
+  let response;
+  
+  if (!settingsStore.dispenserSetup.id) {
+    response = await createDispenser(
+      newDispenserRef.value.elderlyId,
+      dispenser,
+    );
+  }
+  else {
+    response = await updateDispenser(dispenser);
+  }
 
-  if (success) {
-    dispenserComputed.value = succeededUpdateDispenser;
-    // Atualizar os topicos aos quais o mqttClient esta inscrito.
+  $q.notify({ message: response.message });
+
+  if (response.success) {
+    successData.id = response.data.createdDispenserId;
+    dispenserComputed.value = successData;
+    settingsStore.dispenser = successData;
   }
 }
 

@@ -39,7 +39,8 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { clone } from "lodash";
+import { ref, watch } from "vue";
 import MenuLinks from "components/MenuLinks.vue";
 import { useSessionStore } from "src/stores";
 import { mqttClient } from "src/boot/mqtt.boot";
@@ -51,32 +52,42 @@ export default {
   },
   setup() {
     const sessionStore = useSessionStore();
-    const user = sessionStore.user;
+    let oldUser;
 
-    function subscribeNotificationTopics() {
-      if (!user?.id) {
-        console.log("Tópicos MQTT para notificações não foram conectados, pois os dados do usuário ainda não estavam disponíveis.");
-        return;
+    watch(sessionStore.user, user => {
+      updateNotificationTopics(user);
+    }, { deep: true });
+
+    function updateNotificationTopics(newUser) {
+      const isUserResponsible = newUser.role === "responsible";
+
+      const oldElderlies = isUserResponsible ? (oldUser?.elderlies || []).map(o => o.id) : oldUser?.id ? [oldUser.id] : [];
+      const newElderlies = isUserResponsible ? (newUser?.elderlies || []).map(n => n.id) : newUser?.id ? [newUser.id] : [];
+
+      const removedElderlies = oldElderlies.filter(o => !newElderlies.includes(o));
+      const addedElderlies = newElderlies.filter(n => !oldElderlies.includes(n));
+
+      const topics = ids => ids.map(id => `api/elderly/${id}/alarm/notification/notake`);
+
+      if (removedElderlies.length) {
+        mqttClient.unsubscribe(topics(removedElderlies));
+        console.log("Tópicos MQTT para notificações desconectados", removedElderlies);
       }
 
-      const isUserResponsible = user.role === "responsible";
-      const elderlyIds = isUserResponsible
-        ? user.elderlies.map(elderly => elderly.id)
-        : [user.id];
+      if (addedElderlies.length) {
+        mqttClient.subscribe(topics(addedElderlies));
+        console.log("Tópicos MQTT para notificações conectados", newElderlies);
+      }
 
-      const topics = elderlyIds.map(id => (
-        `api/elderly/${id}/alarm/notification/notake`
-      ));
-
-      mqttClient.subscribe(topics);
-      console.log("Tópicos MQTT para notificações conectados");
-
-      sessionStore.notificationTopics = topics;
+      if (removedElderlies.length || addedElderlies.length) {
+        sessionStore.notificationTopics = topics(newElderlies);
+        oldUser = clone(newUser);
+      }
     }
 
     Notification.requestPermission();
 
-    subscribeNotificationTopics();
+    updateNotificationTopics(sessionStore.user);
 
     const leftDrawerOpen = ref(false);
 

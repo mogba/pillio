@@ -579,6 +579,7 @@ import { debounce } from "lodash";
 import QrScanner from "qr-scanner";
 import { useQuasar } from "quasar";
 import InputText from "src/components/InputText.vue";
+import { generatePassword } from "src/helpers/user.helper";
 import { subscribe, unsubscribe } from "src/services/mqtt";
 import { registerSecondaryUser, signOutUser } from "src/services/firebase";
 import { createResponsibleUser } from "src/services/user/responsible.service";
@@ -722,9 +723,13 @@ export default {
       let response;
 
       if (selectedUserRoleRef.value === USER_ROLE.responsible) {
+        // Quando responsável é usuário principal
+        const password = generatePassword();
+
         const newElderlyData = await registerSecondaryUser(
           newElderlyRef.value.name,
           newElderlyRef.value.email,
+          password,
         );
 
         const elderlies = [{
@@ -739,7 +744,18 @@ export default {
         response = await createResponsibleUser(elderlies);
       }
       else {
-        response = await createElderlyUser(dispenserIdCodeRef.value);
+        // Quando idoso é usuário principal
+        const elderly = {
+          nome: sessionStore.firebaseUser.displayName,
+          login: sessionStore.firebaseUser.email,
+          codigoAcesso: null,
+          telefone: null,
+          firebaseUserUid: sessionStore.firebaseUser.uid,
+          codigoMaquina: dispenserIdCodeRef.value,
+          idResp: null,
+        };
+
+        response = await createElderlyUser(elderly);
       }
 
       if (response.success) {

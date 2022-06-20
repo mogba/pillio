@@ -39,7 +39,29 @@
             },
           }"
         >
-          <SettingsItem :elderly="elderly" />
+          <SettingsItem :elderly="elderly">
+            <div v-if="!elderly.hasDispenser">
+              <q-item-section side>
+                <div v-if="isMobile()">
+                  <q-icon
+                    name="warning"
+                    color="negative"
+                    size="2rem"
+                  />
+                </div>
+                <div v-else>
+                  <q-chip
+                    square
+                    icon-right="warning"
+                    color="negative"
+                    text-color="white"
+                  >
+                    Dispenser não configurado
+                  </q-chip>
+                </div>
+              </q-item-section>
+            </div>
+          </SettingsItem>
         </q-item>
       </div>
     </q-list>
@@ -88,7 +110,13 @@
         >
           <router-link 
             style="text-decoration: none;"
-            to="/add-elderly"
+            :to="{
+              name: 'add-elderly',
+              params: {
+                id: null,
+                name: null,
+              },
+            }"
           >
             <q-fab-action 
               label="Adicionar pessoa"
@@ -157,21 +185,33 @@
 import { ref } from "vue";
 import { useQuasar } from "quasar";
 import SettingsItem from "src/components/SettingsItem.vue";
+import { isMobile } from "src/helpers/media.helper";
+import { getElderliesByResponsible } from "src/services/user/responsible.service";
+import { deleteElderlies } from "src/services/user/elderly.service";
 import { useSessionStore } from "src/stores";
 
 const $q = useQuasar();
 const sessionStore = useSessionStore();
 
-let elderlies = (sessionStore.user?.elderlies || []).map(elderly => ({
-  id: elderly.id,
-  name: elderly.name,
-  toDelete: false,
-}));
-
-const elderliesRef = ref(elderlies);
-
 const isDeleteMode = ref(false);
 const showDeleteConfirmationDialog = ref(false);
+
+const elderliesRef = ref([]);
+
+await loadElderlies();
+
+async function loadElderlies() {
+  const response = await getElderliesByResponsible();
+
+  const elderlies = response.data?.length
+    ? response.data
+    : sessionStore.user?.elderlies || [];
+
+  elderliesRef.value = elderlies.map(elderly => ({
+    ...elderly,
+    toDelete: false,
+  }));
+}
 
 function handleChangeDeleteMode() {
   isDeleteMode.value = !isDeleteMode.value;
@@ -187,10 +227,10 @@ async function handleDeleteElderly() {
     .map(x => x.id);
 
   if (idElderliesToDelete?.length) {
-    const response = await deleteAlarms(idElderliesToDelete);
+    const response = await deleteElderlies(idElderliesToDelete);
     $q.notify({ message: response.message });
 
-    await loadAlarms();
+    await loadElderlies();
   }
 
   handleChangeDeleteMode();

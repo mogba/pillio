@@ -1,9 +1,10 @@
+import { orderBy } from "lodash";
 import { api } from "src/boot/axios.boot";
 import { useSessionStore } from "src/stores";
 
 const sessionStore = useSessionStore();
 
-async function createResponsibleUser(responsibleElderlies) {
+export const createResponsibleUser = async (responsibleElderlies) => {
   try {
     const user = {
       firebaseUserUid: sessionStore.firebaseUser.uid,
@@ -22,30 +23,25 @@ async function createResponsibleUser(responsibleElderlies) {
   }
 }
 
-// function getElderliesByResponsible() {
-//   let elderlies;
+export const getElderliesByResponsible = async () => {
+  try {
+    const response = await api.get(
+      `/resp/findidosobyresp/${sessionStore.user.id}`,
+    );
 
-//   const firebaseUserUid = sessionStore.firebaseUser.uid;
+    let elderlies = response.data?.map(elderly => ({
+      id: elderly.id,
+      name: elderly.nome,
+      email: elderly.login,
+      hasDispenser: !!elderly.maquinas?.codigoMaquina,
+    }));
 
-//   api.get(`/resp/findidosobyresp/${firebaseUserUid}`)
-//     .then(result => elderlies = result)
-//     .catch(error => console.log("Erro ao buscar dados do usuário:", error));
-
-//   return elderlies;
-// }
-
-// function getAllResponsibleUsers() {
-//   let responsibles;
-
-//   api.get("/resp/all")
-//     .then(result => responsibles = result)
-//     .catch(error => console.log("Erro ao buscar usuários:", error));
-
-//   return responsibles;
-// }
-
-export {
-  createResponsibleUser,
-  // getElderliesByResponsible,
-  // getAllResponsibleUsers,
-};
+    elderlies = orderBy(elderlies, ["hasDispenser", "name"], ["desc", "asc"]);
+  
+    return { success: true, data: elderlies };
+  } catch (error) {
+    const message = `Erro ao buscar configurações: ${error.message}`;
+    console.log(message);
+    return { error: true, message };
+  }
+}

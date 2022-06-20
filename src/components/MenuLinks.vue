@@ -107,8 +107,10 @@ export default {
     const menusListRef = ref(getMenuLinks());
 
     watch(sessionStore.user, user => {
-      elderliesRef.value = user.elderlies;
-      menusListRef.value = getMenuLinks();
+      if (user?.elderlies?.length) {
+        elderliesRef.value = user.elderlies;
+        menusListRef.value = getMenuLinks();
+      }
     }, { deep: true });
 
     function handleSignOut() {

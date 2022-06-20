@@ -52,8 +52,10 @@ const routes = [
         component: () => import("pages/Settings.vue").then(c => suspenseHack(c)),
       },
       {
+        name: "add-elderly",
         path: "add-elderly",
-        component: () => import("pages/AddElderly.vue").then(c => suspenseHack(c)),
+        component: () => import("pages/EditElderly.vue").then(c => suspenseHack(c)),
+        props: router => handleProp(router, "elderly"),
       },
       {
         name: "edit-elderly",
