@@ -280,6 +280,7 @@ export default {
           }
         },
         (error) => {
+          loadingRef.value = false;
           $q.notify({ message: error });
         },
       );

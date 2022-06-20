@@ -202,15 +202,28 @@ await loadElderlies();
 
 async function loadElderlies() {
   const response = await getElderliesByResponsible();
+  let elderlies;
 
-  const elderlies = response.data?.length
-    ? response.data
-    : sessionStore.user?.elderlies || [];
+  if (response.data?.length) {
+    elderlies = response.data;
+
+    if (sessionStore.user.role === "responsible") {
+      updateSessionElderliesData(response.data);
+    }
+  }
+  else {
+    elderlies = sessionStore.user?.elderlies || [];
+  }
 
   elderliesRef.value = elderlies.map(elderly => ({
     ...elderly,
     toDelete: false,
   }));
+}
+
+function updateSessionElderliesData(elderlies) {
+  sessionStore.user.elderlies = elderlies.filter(elderly =>
+    elderly.hasDispenser);
 }
 
 function handleChangeDeleteMode() {
