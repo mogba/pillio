@@ -15,6 +15,7 @@
             label="Nome"
             v-model="elderlyRef.name"
             clearable
+            :readonly="!isUserResponsible"
             :rules="[
               val => !!val?.trim() || 'O nome deve ser informado',
               val => val?.trim().length >= 3 || 'O nome deve possuir mais que 3 caracteres',
@@ -32,6 +33,7 @@
             label="Telefone"
             v-model="elderlyRef.phoneNumber"
             clearable
+            :readonly="!isUserResponsible"
             mask="(##) #####-####"
             fill-mask
           >
@@ -47,6 +49,7 @@
             label="E-mail"
             v-model="elderlyRef.email"
             clearable
+            :readonly="!isUserResponsible"
             :rules="[
               val => !!val?.trim() || 'O e-mail deve ser informado',
               val => val?.trim().length > 5 || 'O e-mail deve ser informado',
@@ -58,7 +61,12 @@
           </q-input>
 
           <InputPassword
-            label="Código de acesso"
+            v-if="isUserResponsible || !hasResponsible"
+            :label="(
+              isUserResponsible
+                ? 'Código de acesso'
+                : 'Alterar senha'
+            )"
             v-model="elderlyRef.password"
             :rules="[
               val => !!val?.trim() || 'A senha deve ser informada',
@@ -75,7 +83,12 @@
           />
         </div>
 
-        <q-card class="full-width" flat bordered>
+        <q-card
+          v-if="isUserResponsible || !hasResponsible"
+          class="full-width"
+          flat
+          bordered
+        >
           <div
             v-if="!isUpdate"
             class="row q-gutter-lg q-pa-lg full-width"
@@ -119,7 +132,10 @@
         </q-card>
       </div>
 
-      <div class="row q-px-lg q-pt-lg q-col-gutter-lg">
+      <div
+        v-if="isUserResponsible"
+        class="row q-px-lg q-pt-lg q-col-gutter-lg"
+      >
         <div class="col-xs-12 col-md-6">
           <q-btn
             no-caps
@@ -128,7 +144,7 @@
             label="Cancelar"
             color="primary"
             size="lg"
-            to="/settings"
+            to="/elderlies"
           />
         </div>
         <div class="col-xs-12 col-md-6">
@@ -202,6 +218,7 @@ const $q = useQuasar();
 const router = useRouter();
 const sessionStore = useSessionStore();
 const settingsStore = useSettingsStore();
+const isUserResponsible = sessionStore.user.role === "responsible";
 
 onBeforeRouteLeave(() => {
   settingsStore.elderly = {};
@@ -213,10 +230,11 @@ const showDispenserSetupDialog = ref(
   (settingsStore.dispenserSetup?.configurationStep || 1) > 1
 );
 
-const elderlyRef = ref(props.elderly);
+const elderlyRef = ref(isUserResponsible ? props.elderly : sessionStore.user);
 const dispenserRef = ref({});
 
 const isUpdate = computed(() => !!elderlyRef.value.id);
+const hasResponsible = computed(() => elderlyRef.value.hasResponsible);
 const hasDispenser = computed(() => !!dispenserRef.value.dispenserIdCode);
 
 if (!elderlyRef.value.id) {
@@ -273,6 +291,7 @@ async function handleCreateSettings() {
     return;
   }
 
+  elderlyRef.value.hasResponsible = true;
   elderlyRef.value.id = createElderlyResponse.data.createdUserId;
   settingsStore.elderly = elderlyRef.value;
 
@@ -309,7 +328,7 @@ async function handleUpdateSettings() {
 
   settingsStore.elderly = elderlyRef.value;
     
-  if (sessionStore.user.role === "responsible") {
+  if (isUserResponsible) {
     const updateSessionElderliesResponse = await updateSessionElderliesData();
 
     if (!updateSessionElderliesResponse.success) {

@@ -2,7 +2,11 @@
   <q-page class="q-pa-md">
     <q-card-section>
       <div class="text-h4">
-        Histórico de alarmes {{ elderlyRef && elderlyRef.name ? `de ${elderlyRef.name}` : "" }}
+        {{
+          isUserResponsible && elderlyRef?.name
+            ? `Histórico de alarmes de ${elderlyRef.name}`
+            : "Histórico de alarmes"
+        }}
       </div>
     </q-card-section>
 
@@ -13,8 +17,6 @@
         v-for="alarm in alarmsRef"
         :key="alarm.id"
       >
-      <!-- @before-show="async () => await loadTriggers(alarm.id, triggersTable)"
-        @after-hide="() => handleHideTriggersTable(triggersTable)" -->
         <template v-slot:header>
           <AlarmHistoryItem
             :alarm="alarm"
@@ -63,7 +65,6 @@
           </AlarmHistoryItem>
         </template>
 
-          <!-- v-if="showTriggersTablesRef.includes(triggersTable)" -->
         <div
           class="q-pa-sm"
         >
@@ -191,18 +192,28 @@ export default {
   async setup(props) {
     const $q = useQuasar();
     const sessionStore = useSessionStore();
-    
-    const showTriggersTablesRef = ref([]);
+    const isUserResponsible = sessionStore.user.role === "responsible";
 
-    const elderlyRef = ref({
-      id: Number(props.elderly.id),
-      name: props.elderly.name,
-    });
+    const elderlyRef = ref({});
+
+    if (!isUserResponsible)
+      elderlyRef.value = sessionStore.user;
+    else
+      elderlyRef.value = {
+        id: Number(props.elderly.id),
+        name: props.elderly.name,
+      };
 
     const alarmsRef = ref([]);
 
     onBeforeRouteUpdate(async (to, from) => {
-      elderlyRef.value = { id: Number(to.params.id), name: to.params.name };
+      if (!isUserResponsible)
+        elderlyRef.value = sessionStore.user;
+      else
+        elderlyRef.value = {
+          id: Number(to.params.id),
+          name: to.params.name,
+        };
 
       await loadTriggers();
     });
@@ -224,11 +235,6 @@ export default {
       }
     }
 
-    const handleHideTriggersTable = debounce((triggersTableToHide) => {
-      const index = showTriggersTablesRef.value.indexOf(triggersTableToHide);
-      showTriggersTablesRef.value = showTriggersTablesRef.value.splice(index, 1);
-    }, 500, { leading: false, trailing: true });
-    
     function shouldShowPendingState(alarm) {
       let lastTrigger;
 
@@ -247,14 +253,13 @@ export default {
     }
 
     return {
+      isUserResponsible,
       isMobile,
       triggerMedicineStatusStyle,
       TRIGGER_MEDICINE_STATUS,
       shouldShowPendingState,
-      showTriggersTablesRef,
       alarmTriggersGridColumns,
       mapAlarmTriggersIntoGridRows,
-      handleHideTriggersTable,
       alarmsRef,
       elderlyRef,
     };

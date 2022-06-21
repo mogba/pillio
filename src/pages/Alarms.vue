@@ -2,7 +2,11 @@
   <q-page class="q-pa-md">
     <q-card-section>
       <div class="text-h4">
-        Alarmes {{ elderlyRef && elderlyRef.name ? `de ${elderlyRef.name}` : "" }}
+        {{
+          isUserResponsible && elderlyRef?.name
+            ? `Alarmes de ${elderlyRef.name}`
+            : "Alarmes"
+        }}
       </div>
     </q-card-section>
     
@@ -84,7 +88,7 @@
         </div>
         </div>
       </q-page-sticky>
-      
+
       <q-page-sticky
         v-else
         position="bottom-right"
@@ -193,17 +197,28 @@ export default {
   async setup(props) {
     const $q = useQuasar();
     const sessionStore = useSessionStore();
+    const isUserResponsible = sessionStore.user.role === "responsible";
 
-    const elderlyRef = ref({
-      id: Number(props.elderly.id),
-      name: props.elderly.name,
-    });
+    const elderlyRef = ref({});
+
+    if (!isUserResponsible)
+      elderlyRef.value = sessionStore.user;
+    else
+      elderlyRef.value = {
+        id: Number(props.elderly.id),
+        name: props.elderly.name,
+      };
 
     const alarmsRef = ref([]);
 
     onBeforeRouteUpdate(async (to, from) => {
-      const newElderly = { id: Number(to.params.id), name: to.params.name };
-      elderlyRef.value = newElderly;
+      if (!isUserResponsible)
+        elderlyRef.value = sessionStore.user;
+      else
+        elderlyRef.value = {
+          id: Number(to.params.id),
+          name: to.params.name,
+        };
 
       await loadAlarms();
     });
@@ -257,6 +272,7 @@ export default {
     }
 
     return {
+      isUserResponsible,
       elderlyRef,
       alarmsRef,
       isDeleteMode,
