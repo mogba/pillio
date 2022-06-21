@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <q-card-section>
       <div class="text-h4">
-        Configurações
+        Configurações de pessoas
       </div>
     </q-card-section>
 
@@ -15,14 +15,14 @@
           :key="elderly.id"
           @click="() => elderly.toDelete = !elderly.toDelete"
         >
-          <SettingsItem :elderly="elderly">
+          <ElderlyItem :elderly="elderly">
             <q-item-section side>
               <q-checkbox
                 v-model="elderly.toDelete"
                 val="{{ elderly.toDelete }}"
               />
             </q-item-section>
-          </SettingsItem>
+          </ElderlyItem>
         </q-item>
       </div>
       <div v-else>
@@ -39,7 +39,7 @@
             },
           }"
         >
-          <SettingsItem :elderly="elderly">
+          <ElderlyItem :elderly="elderly">
             <div v-if="!elderly.hasDispenser">
               <q-item-section side>
                 <div v-if="isMobile()">
@@ -61,7 +61,7 @@
                 </div>
               </q-item-section>
             </div>
-          </SettingsItem>
+          </ElderlyItem>
         </q-item>
       </div>
     </q-list>
@@ -154,7 +154,7 @@
               v-for="elderly in elderliesRef.filter(x => x.toDelete)"
               :key="elderly.id"
             >
-              <SettingsItem :elderly="elderly" />
+              <ElderlyItem :elderly="elderly" />
             </q-item>
           </q-list>
         </q-card-section>
@@ -184,7 +184,7 @@
 <script setup>
 import { ref } from "vue";
 import { useQuasar } from "quasar";
-import SettingsItem from "src/components/SettingsItem.vue";
+import ElderlyItem from "src/components/ElderlyItem.vue";
 import { isMobile } from "src/helpers/media.helper";
 import { getElderliesByResponsible } from "src/services/user/responsible.service";
 import { deleteElderlies } from "src/services/user/elderly.service";

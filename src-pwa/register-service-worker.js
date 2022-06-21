@@ -13,7 +13,7 @@ register(process.env.SERVICE_WORKER_FILE, {
     if (!_mqttClient) {
       _mqttClient = mqttClient;
     }
-    
+
     if (_mqttClient) {
       const sessionStore = useSessionStore();
 
@@ -31,7 +31,7 @@ register(process.env.SERVICE_WORKER_FILE, {
           const body = isUserResponsible
             ? `${message.nomeIdoso} não tomou o remédio ${message.nomeRemedio} às ${message.horaDisparo}`
             : `${message.nomeIdoso}, você não tomou o remédio ${message.nomeRemedio} às ${message.horaDisparo}`;
-  
+
           const options = {
             body,
             icon: "/favicon.ico",

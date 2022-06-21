@@ -2,7 +2,11 @@
   <q-page class="q-pa-md">
     <q-card-section>
       <div class="text-h4">
-        Editar alarme {{ alarmRef.elderlyName ? `para ${alarmRef.elderlyName}` : "" }}
+        {{
+          isUserResponsible && alarmRef.elderlyName
+            ? `Editar alarme de ${alarmRef.elderlyName}`
+            : "Editar alarme"
+        }}
       </div>
     </q-card-section>
 
@@ -232,7 +236,7 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { onBeforeRouteLeave } from "vue-router";
 import InputSelectMultiple from "src/components/InputSelectMultiple.vue";
-import { useAlarmStore } from "src/stores";
+import { useAlarmStore, useSessionStore } from "src/stores";
 import { updateAlarm } from "src/services/alarm/alarm.service";
 import { getDispenserSlotOptions } from "src/services/dispenser/dispenser.service";
 import { mapDispenserSlotOptions } from "src/helpers/dispenser.helper";
@@ -256,7 +260,9 @@ const props = defineProps({
 
 const $q = useQuasar();
 const router = useRouter();
+const sessionStore = useSessionStore();
 const alarmStore = useAlarmStore();
+const isUserResponsible = sessionStore.user.role === "responsible";
 
 onBeforeRouteLeave(() => {
   alarmStore.alarm = null;

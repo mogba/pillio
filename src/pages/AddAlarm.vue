@@ -9,6 +9,7 @@
     <q-card-section>
       <div class="row q-col-gutter-sm">
         <q-select
+          v-if="isUserResponsible"
           class="col-xs-12 col-md-12"
           standout="bg-primary text-white"
           popup-content-class="rounded-borders limit-visible-area scroll"
@@ -248,7 +249,6 @@ import { useAlarmStore, useSessionStore } from "src/stores";
 import { createAlarm } from "src/services/alarm/alarm.service";
 import { getDispenserSlotOptions } from "src/services/dispenser/dispenser.service";
 import { mapDispenserSlotOptions } from "src/helpers/dispenser.helper";
-// import { mqttClient } from "src/boot/mqtt.boot";
 
 const props = defineProps({
   elderly: {
@@ -261,6 +261,7 @@ const $q = useQuasar();
 const router = useRouter();
 const alarmStore = useAlarmStore();
 const sessionStore = useSessionStore();
+const isUserResponsible = sessionStore.user.role === "responsible";
 
 onBeforeRouteLeave(() => {
   alarmStore.alarm = null;
@@ -293,12 +294,14 @@ const usedDispenserSlotsRef = ref(usedDispenserSlotsValue.map(slot =>
 const dispenserSlotSelectOptionsRef = ref([]);
 
 const elderlyRef = ref(
-  props.elderly?.id
-  ? props.elderly
-  : typeof alarmStore.elderly === "object" &&
-  alarmStore.elderly !== null
-  ? alarmStore.elderly
-  : {}
+  !isUserResponsible
+    ? sessionStore.user
+    : props.elderly?.id
+    ? props.elderly
+    : (typeof alarmStore.elderly === "object" &&
+    alarmStore.elderly !== null)
+    ? alarmStore.elderly
+    : {}
 );
 
 const selectedElderlyRef = ref(
@@ -362,12 +365,6 @@ async function updateDispenserSlotSelectOptions() {
     dispenserSlots = dispenser.dispenserSlots;
   }
   else {
-    await getDispenserSlotOptions(elderlyRef.value.id)
-    await getDispenserSlotOptions(elderlyRef.value.id)
-    await getDispenserSlotOptions(elderlyRef.value.id)
-    await getDispenserSlotOptions(elderlyRef.value.id)
-    await getDispenserSlotOptions(elderlyRef.value.id)
-    await getDispenserSlotOptions(elderlyRef.value.id)
     const response = await getDispenserSlotOptions(elderlyRef.value.id);
 
     if (response.success) {
@@ -421,29 +418,6 @@ async function handleSaveAlarm() {
   loadingRef.value = false;
   $q.notify({ message: response.message });
 }
-
-// setTimeout(() => {
-//   const user = sessionStore.user;
-
-//   console.log("setTimeout executou funcao")
-
-//   if (!user?.id) {
-//     return;
-//   }
-
-//   const isUserResponsible = user.role === "responsible";
-//   const elderlyIds = isUserResponsible
-//     ? user.elderlies.map(elderly => elderly.id)
-//     : [user.id];
-
-//   const expectedTopics = elderlyIds.map(id => (
-//     `api/elderly/${id}/alarm/notification/notake`
-//   ));
-
-//   const firstTopic = expectedTopics[0];
-
-//   mqttClient.publish(firstTopic, JSON.stringify({ deuCerto: true }));
-// }, 10000);
 </script>
 
 <style>
