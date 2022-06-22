@@ -400,6 +400,8 @@ function handleDispenserConnectionCheck() {
       }
     );
 
+    publish(`dispenser/verificacao/${dispenserIdCode}`, JSON.stringify({ podeMandarMensagem: true }));
+
     const setDispenserConnectionErrorAfter1Min = debounce(() => {
       if (mqttDispenserConnectionStateRef.value === DISPENSER_CONNECTION_STATE.pending) {
         mqttDispenserConnectionStateRef.value = DISPENSER_CONNECTION_STATE.error;

@@ -580,7 +580,7 @@ import QrScanner from "qr-scanner";
 import { useQuasar } from "quasar";
 import InputText from "src/components/InputText.vue";
 import { generatePassword } from "src/helpers/user.helper";
-import { subscribe, unsubscribe } from "src/services/mqtt";
+import { publish, subscribe, unsubscribe } from "src/services/mqtt";
 import { registerSecondaryUser, signOutUser } from "src/services/firebase";
 import { createResponsibleUser } from "src/services/user/responsible.service";
 import { getIsUserConfigured } from "src/services/user/user-config.service";
@@ -703,6 +703,8 @@ export default {
             mqttDispenserConnectionStateRef.value = DISPENSER_CONNECTION_STATE.error;
           }
         );
+
+        publish(`dispenser/verificacao/${dispenserIdCode}`, JSON.stringify({ podeMandarMensagem: true }));
 
         const setDispenserConnectionErrorAfter1Min = debounce(() => {
           if (mqttDispenserConnectionStateRef.value === DISPENSER_CONNECTION_STATE.pending) {
