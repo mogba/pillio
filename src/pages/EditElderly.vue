@@ -10,6 +10,20 @@
       <div>
         <div class="row q-col-gutter-sm q-pb-sm">
           <q-input
+            v-if="!isUserResponsible && hasResponsible"
+            style="padding-bottom: 20px;"
+            class="col-xs-12 col-xl-12"
+            standout="bg-primary text-white" 
+            label="Responsável"
+            v-model="elderlyRef.responsibleName"
+            readonly
+          >
+            <template>
+              <div class="self-center full-width no-outline" tabindex="0"></div>
+            </template>
+          </q-input>
+
+          <q-input
             class="col-xs-12 col-xl-12"
             standout="bg-primary text-white" 
             label="Nome"
@@ -61,24 +75,21 @@
           </q-input>
 
           <InputPassword
-            v-if="isUserResponsible || !hasResponsible"
-            :label="(
-              isUserResponsible
-                ? 'Código de acesso'
-                : 'Alterar senha'
-            )"
+            v-if="isUserResponsible"
+            class="full-width"
+            label="Código de acesso"
             v-model="elderlyRef.password"
             :rules="[
-              val => !!val?.trim() || 'A senha deve ser informada',
+              val => !!val?.trim() || 'O código de acesso deve ser informado',
               val => (
                 (
                   (val !== undefined && val !== null) &&
                   val.trim().length > 0 &&
                   (val.charAt(0).trim().length > 0 && val.charAt(val.length - 1).trim().length > 0)
                 ) ||
-                'A senha não pode começar ou terminar com espaços'
+                'O código de acesso não pode começar ou terminar com espaços'
               ),
-              val => val?.trim().length >= 8 || 'A senha deve possuir no mínimo 8 caracteres',
+              val => val?.trim().length >= 8 || 'O código de acesso deve possuir no mínimo 8 caracteres',
             ]"
           />
         </div>

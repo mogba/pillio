@@ -76,7 +76,7 @@
                       style="height: 100%; width: 100%"
                       label="Entrar"
                       color="primary"
-                      :size="'lg'"
+                      size="lg"
                       :loading="loadingRef"
                       :disable="!(formDataRef.email?.length > 5 && formDataRef.password?.length >= 8)"
                       @click="handleSignInUserWithEmailAndPassword"
@@ -107,7 +107,7 @@
                       style="height: 100%; width: 100%"
                       label="Iniciar cadastro"
                       color="primary"
-                      :size="'lg'"
+                      size="lg"
                       :disable="!(formDataRef.name?.length >= 3)"
                       @click="registerStep += 1"
                     />
@@ -144,11 +144,12 @@
                 >
                   <q-btn
                     no-caps
+                    flat
                     class="full-width"
                     style="height: 100%; width: 100%"
                     label="Voltar à tela de login"
-                    color="secondary"
-                    :size="'lg'"
+                    color="primary"
+                    size="lg"
                     @click="() => {
                       registerStep = 1;
                       selectedTab = TABS.login;
@@ -166,7 +167,7 @@
                     style="height: 100%; width: 100%"
                     label="Criar cadastro"
                     color="primary"
-                    :size="'lg'"
+                    size="lg"
                     :loading="loadingRef"
                     :disable="!(formDataRef.email?.length > 5 && formDataRef.password?.length >= 8)"
                     @click="handleRegisterUser"

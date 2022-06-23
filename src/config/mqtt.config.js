@@ -7,7 +7,7 @@ const connectUrl = `wss://${host}:${port}`;
 const mqttConfig = {
   connectUrl,
   options: {
-    clientId: `mqtt_${(v4())}`,
+    clientId: `PILLIO_WEBCLIENT_${(v4())}`,
     clean: true,
     connectTimeout: 4000,
     username: "admin",

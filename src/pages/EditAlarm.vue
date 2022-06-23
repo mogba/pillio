@@ -155,12 +155,11 @@
       </div>
 
       <div
-        class="row full-width justify-center q-col-gutter-md q-px-lg q-mt-lg"
+        class="row full-width justify-center q-col-gutter-md q-px-lg q-mt-md"
       >
         <div class="col-md-6">
+          <p><strong>Quantas doses serão tomadas?</strong></p>
           <p>
-            <strong>Quantas doses serão tomadas?</strong>
-            <br>
             Este número equivale a quantidade de 
             vezes que o alarme vai tocar, e cada dose do medicamento deve 
             ocupar um compartimento do Dispenser.
@@ -171,9 +170,8 @@
           </p>
         </div>
         <div class="col-md-6">
+          <p><strong>O que é uma dose?</strong></p>
           <p>
-            <strong>O que é uma dose?</strong>
-            <br>
             Uma dose pode conter mais de um comprimido.
             <br>Por exemplo: Se é 
             necessário tomar 2 comprimidos por vez, então cada dose terá 

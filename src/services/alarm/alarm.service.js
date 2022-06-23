@@ -35,7 +35,7 @@ async function updateAlarm(alarm) {
     const startDateStrings = alarm.startDate.split("/"); // DD/MM/YYYY
     const startDate = new Date(`${startDateStrings[2]}/${startDateStrings[1]}-${startDateStrings[0]}`);
 
-    const isActive = alarm.isActive ? 1 : 0;
+    const isActive = alarm.isActive === "true" || alarm.isActive === true ? 1 : 0;
 
     const usedDispenserSlots = sortBy(alarm.usedDispenserSlots).join(",");
 

@@ -60,6 +60,7 @@ export const getSettingsByElderly = async (elderlyId) => {
       data: {
         elderly: {
           hasResponsible: !!settings.idResp,
+          responsibleName: settings.nomeResponsavel,
           id: settings.id,
           name: settings.nome,
           email: settings.login,

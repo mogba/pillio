@@ -16,13 +16,15 @@
             class="full-width q-px-md"
           >
             <div class="text-h6 text-body text-center q-px-md">
-              Olá{{ userNameRef?.length ? `, ${userNameRef}` : ""}}!
-              <br>
-              <br>
-              Você vai administrar seus 
-              próprios remédios ou será 
-              responsável pelos remédios 
-              de outra pessoa?
+              <p>
+                Olá{{ userNameRef?.length ? `, ${userNameRef}` : ""}}!
+              </p>
+              <p>
+                Você vai administrar seus 
+                próprios remédios ou será 
+                responsável pelos remédios 
+                de outra pessoa?
+              </p>
             </div>
 
             <div class="row q-px-lg q-pt-lg q-pb-sm q-gutter-lg content-center justify-center" style="font-size: 19px;">
@@ -60,20 +62,37 @@
             class="full-width q-px-md"
           >
             <div class="text-h6 text-body text-center q-px-md">
-              Precisamos cadastrar a pessoa para
-              quem você administrará os remédios.
+              <p>
+                Precisamos cadastrar os dados da pessoa para
+                quem você administrará os remédios.
+              </p>
+              <p>
+                Será gerado também um login para 
+                que essa pessoa possa acessar o 
+                sistema como usuário secundário 
+                e acompanhar seus tratamentos.
+              </p>
             </div>
 
             <div class="column q-pt-md">
               <InputText
                 class="q-mt-lg"
-                label="Nome da pessoa"
+                label="Nome"
                 v-model="newElderlyRef.name"
                 :rules="[
                   val => !!val?.trim() || 'O nome deve ser informado',
                   val => (val?.trim().length || 0) >= 3 || 'O nome deve possuir mais que 3 caracteres',
                 ]"
               />
+              <InputText
+                style="padding-bottom: 20px;"
+                class="q-mt-lg"
+                label="Telefone"
+                mask="(##) #####-####"
+                fill-mask
+                v-model="newElderlyRef.phoneNumber"
+              />
+              <!-- :rules="[val => (val?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8 || 'O telefone deve ser informado']" -->
               <InputText
                 class="q-mt-lg"
                 label="E-mail"
@@ -83,15 +102,23 @@
                   val => val?.length > 5 || 'O e-mail deve ser informado',
                 ]"
               />
-              <InputText
-                style="padding-bottom: 20px;"
+              <InputPassword
                 class="q-mt-lg"
-                label="Telefone da pessoa"
-                mask="(##) #####-####"
-                fill-mask
-                v-model="newElderlyRef.phoneNumber"
+                label="Código de acesso"
+                v-model="newElderlyRef.password"
+                :rules="[
+                  val => !!val?.trim() || 'O código de acesso deve ser informado',
+                  val => (
+                    (
+                      (val !== undefined && val !== null) &&
+                      val.trim().length > 0 &&
+                      (val.charAt(0).trim().length > 0 && val.charAt(val.length - 1).trim().length > 0)
+                    ) ||
+                    'O código de acesso não pode começar ou terminar com espaços'
+                  ),
+                  val => val?.trim().length >= 8 || 'O código de acesso deve possuir no mínimo 8 caracteres',
+                ]"
               />
-              <!-- :rules="[val => (val?.split(' ').join('').split('(').join('').split(')').join('').split('-').join('').split('_').join('').length || 0) >= 8 || 'O telefone deve ser informado']" -->
             </div>
             <!--
               :disable="!(
@@ -123,7 +150,19 @@
                   size="lg"
                   :disable="!(
                     (newElderlyRef.name?.trim().length || 0) >= 3 &&
-                    (newElderlyRef.email?.trim().length || 0) > 5
+                    (newElderlyRef.email?.trim().length || 0) > 5 &&
+                    (
+                      newElderlyRef.password &&
+                      (
+                        (newElderlyRef.password !== undefined && newElderlyRef.password !== null) &&
+                        newElderlyRef.password.trim().length > 0 &&
+                        (
+                          newElderlyRef.password.charAt(0).trim().length > 0 &&
+                          newElderlyRef.password.charAt(newElderlyRef.password.length - 1).trim().length > 0
+                        )
+                      ) &&
+                      newElderlyRef.password.length >= 8
+                    )
                   )"
                   @click="() => {
                     setConfigurationStep(3);
@@ -579,6 +618,7 @@ import { debounce } from "lodash";
 import QrScanner from "qr-scanner";
 import { useQuasar } from "quasar";
 import InputText from "src/components/InputText.vue";
+import InputPassword from "src/components/InputPassword.vue";
 import { generatePassword } from "src/helpers/user.helper";
 import { publish, subscribe, unsubscribe } from "src/services/mqtt";
 import { registerSecondaryUser, signOutUser } from "src/services/firebase";
@@ -608,6 +648,7 @@ function resetNewElderlyData() {
     name: "",
     email: "",
     phoneNumber: "",
+    password: "",
   };
 }
 
@@ -615,6 +656,7 @@ export default {
   name: "InitialSetup",
   components: {
     InputText,
+    InputPassword,
   },
   props: {
     user: {
@@ -653,20 +695,23 @@ export default {
       selectedUserRoleRef.value = initialSetup.userRole;
       newElderlyRef.value = {
         name: initialSetup.elderlies[0].name,
-        email: initialSetup.elderlies[0].email,
         phoneNumber: initialSetup.elderlies[0].phoneNumber,
+        email: initialSetup.elderlies[0].email,
+        password: initialSetup.elderlies[0].password,
+        dispenserSlotsQuantity: initialSetup.elderlies[0].dispenserSlotsQuantity,
+        connectedWifiNetworkName: initialSetup.elderlies[0].connectedWifiNetworkName,
       };
       dispenserIdCodeRef.value = initialSetup.elderlies[0].dispenserIdCode;
       mqttDispenserConnectionStateRef.value = initialSetup.dispenserConnectionState;
 
-      const isUserConfigured = await getIsUserConfigured();
-      configurationStepRef.value = isUserConfigured ? 6 : 5;
+      const response = await getIsUserConfigured();
+      configurationStepRef.value = response?.data?.isUserConfigured ? 6 : 5;
     }
 
     function handleDispenserConnectionCheck() {
       const dispenserIdCode = (dispenserIdCodeRef.value || "").trim();
       const changedDispenserCode = dispenserIdCode.length &&
-        !mqttDispenserTopicRef.value.includes(dispenserIdCode);
+        !mqttDispenserTopicRef?.value?.includes(dispenserIdCode);
 
       if (changedDispenserCode) {
         if (mqttDispenserTopicRef.value) {
@@ -688,13 +733,19 @@ export default {
               ? DISPENSER_CONNECTION_STATE.connected
               : DISPENSER_CONNECTION_STATE.error;
 
+            newElderlyRef.value.connectedWifiNetworkName = networkName;
+            newElderlyRef.value.dispenserSlotsQuantity = 15;
+
             sessionStore.initialSetup = {
               userRole: selectedUserRoleRef.value,
               elderlies: [{
                 name: newElderlyRef.value.name,
-                email: newElderlyRef.value.email,
                 phoneNumber: newElderlyRef.value.phoneNumber,
+                email: newElderlyRef.value.email,
+                password: newElderlyRef.value.password,
                 dispenserIdCode: dispenserIdCodeRef.value,
+                connectedWifiNetworkName: newElderlyRef.value.connectedWifiNetworkName,
+                dispenserSlotsQuantity: newElderlyRef.value.dispenserSlotsQuantity,
               }],
               dispenserConnectionState: mqttDispenserConnectionStateRef.value,
             };
@@ -726,21 +777,23 @@ export default {
 
       if (selectedUserRoleRef.value === USER_ROLE.responsible) {
         // Quando responsável é usuário principal
-        const password = generatePassword();
+        // const password = generatePassword();
 
         const newElderlyData = await registerSecondaryUser(
           newElderlyRef.value.name,
           newElderlyRef.value.email,
-          password,
+          newElderlyRef.value.password,
         );
 
         const elderlies = [{
           nome: newElderlyRef.value.name,
-          login: newElderlyRef.value.email,
           telefone: newElderlyRef.value.phoneNumber,
+          login: newElderlyRef.value.email,
+          codigoAcesso: newElderlyRef.value.password,
           codigoMaquina: dispenserIdCodeRef.value,
-          firebaseUserUid: newElderlyData.firebaseUserUid,
-          codigoAcesso: newElderlyData.password,
+          firebaseUserUid: newElderlyData.data.firebaseUserUid,
+          qtdeCompartimentos: newElderlyRef.value.dispenserSlotsQuantity,
+          nomeRedeWifiConectada: newElderlyRef.value.connectedWifiNetworkName,
         }];
 
         response = await createResponsibleUser(elderlies);
@@ -749,11 +802,13 @@ export default {
         // Quando idoso é usuário principal
         const elderly = {
           nome: sessionStore.firebaseUser.displayName,
+          telefone: null,
           login: sessionStore.firebaseUser.email,
           codigoAcesso: null,
-          telefone: null,
           firebaseUserUid: sessionStore.firebaseUser.uid,
           codigoMaquina: dispenserIdCodeRef.value,
+          qtdeCompartimentos: newElderlyRef.value.dispenserSlotsQuantity,
+          nomeRedeWifiConectada: newElderlyRef.value.connectedWifiNetworkName,
           idResp: null,
         };
 

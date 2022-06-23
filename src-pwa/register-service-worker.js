@@ -18,12 +18,13 @@ register(process.env.SERVICE_WORKER_FILE, {
       const sessionStore = useSessionStore();
 
       _mqttClient.on("message", (topic, payload) => {
-        const topics = sessionStore.notificationTopics;
-        const user = sessionStore.user;
-        const isUserResponsible = user.role === "responsible";
+        const topics = sessionStore?.notificationTopics;
 
-        if (topics.includes(topic)) {
+        if (topics?.includes(topic)) {
           console.log("Mensagem MQTT com tópico", topic);
+
+          const user = sessionStore?.user;
+          const isUserResponsible = user?.role === "responsible";
 
           const message = JSON.parse(payload?.toString() || "{}");
 

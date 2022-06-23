@@ -55,7 +55,7 @@ function mapDispenserSlotOptions(
   unavailableDispenserSlots,
   dispenserSlotsUsedByAlarm = [],
 ) {
-  let options = dispenserSlots.map(slotValue => ({
+  let options = dispenserSlots?.map(slotValue => ({
     ...(
       unavailableDispenserSlots.includes(slotValue) &&
       !dispenserSlotsUsedByAlarm.includes(slotValue)

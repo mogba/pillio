@@ -28,9 +28,12 @@ function removeUserCredential() {
 export function registerUser(displayName, email, password, successCallback, errorCallback) {
   createUserWithEmailAndPassword(auth, email, password)
     .then(userCredential => {
+
       updateProfile(userCredential.user, { displayName })
         .catch(error => console.log("Erro ao salvar o nome do usuário:", error));
-      
+
+      userCredential.user.displayName = displayName;
+
       saveFirebaseUserState(userCredential);
       successCallback();
     })
