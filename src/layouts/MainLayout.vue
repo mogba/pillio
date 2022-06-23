@@ -67,16 +67,26 @@ export default {
       const removedElderlies = oldElderlies.filter(o => !newElderlies.includes(o));
       const addedElderlies = newElderlies.filter(n => !oldElderlies.includes(n));
 
-      const topics = ids => ids.map(id => `api/elderly/${id}/alarm/notification/notake`);
+      const topics = ids => {
+        const topicsList = ids?.map(id => `api/elderly/${id}/alarm/notification/notake`) || [];
+
+        if (!isUserResponsible) {
+          topicsList.push(`api/elderly/${newUser.id}/alarm/notification`);
+        }
+
+        return topicsList;
+      };
 
       if (removedElderlies.length) {
-        mqttClient.unsubscribe(topics(removedElderlies));
-        console.log("Tópicos MQTT para notificações desconectados", removedElderlies);
+        const topicsUnsubscribe = topics(removedElderlies);
+        mqttClient.unsubscribe(topicsUnsubscribe);
+        console.log("Tópicos MQTT para notificações desconectados", topicsUnsubscribe);
       }
 
       if (addedElderlies.length) {
-        mqttClient.subscribe(topics(addedElderlies));
-        console.log("Tópicos MQTT para notificações conectados", newElderlies);
+        const topicsSubscribe = topics(addedElderlies);
+        mqttClient.subscribe(topicsSubscribe);
+        console.log("Tópicos MQTT para notificações conectados", topicsSubscribe);
       }
 
       if (removedElderlies.length || addedElderlies.length) {
