@@ -447,7 +447,7 @@ async function configurationStep4Callback() {
   $q.notify({ message: response.message });
 
   if (response.success) {
-    successData.id = response.data.createdDispenserId;
+    successData.id = response.data?.createdDispenserId || newDispenserRef.value.id;
     dispenserComputed.value = successData;
     settingsStore.dispenser = successData;
   }

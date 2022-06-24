@@ -26,17 +26,29 @@ register(process.env.SERVICE_WORKER_FILE, {
           const user = sessionStore?.user;
           const isUserResponsible = user?.role === "responsible";
 
+          let title;
+          let body;
+
           const message = JSON.parse(payload?.toString() || "{}");
-
-          const title = "Não tomou o remédio";
-
+  
           const triggerTimeArray = message.horaDisparo?.split(":") || [];
           const triggerTime = [triggerTimeArray[0] || "99", triggerTimeArray[1] || "99"].join(":");
 
-          let body = isUserResponsible
-            ? `${message.nomeIdoso} não tomou o remédio ${message.nomeRemedio} de ${triggerTime}H.`
-            : `${message.nomeIdoso}, você não tomou o remédio ${message.nomeRemedio} de ${triggerTime}H.`;
-          
+          if (topic?.includes("notake")) {
+            title = "Não tomou o remédio ❌";
+  
+            body = isUserResponsible
+              ? `${message.nomeIdoso} não tomou o remédio ${message.nomeRemedio} de ${triggerTime}H.`
+              : `${message.nomeIdoso}, você não tomou o remédio ${message.nomeRemedio} de ${triggerTime}H.`;
+          }
+          else {
+            title = "Hora de tomar o remédio 🕓";
+            
+            body = isUserResponsible
+              ? `Está na hora de ${message.nomeIdoso} tomar o remédio ${message.nomeRemedio} de ${triggerTime}H.`
+              : `${message.nomeIdoso}, está na hora de tomar o remédio ${message.nomeRemedio} de ${triggerTime}H.`;
+          }
+
           if (message.QtdeTomar) {
             body += `\nQuantidade de comprimidos: ${message.QtdeTomar}`;
           }
