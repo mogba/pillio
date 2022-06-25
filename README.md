@@ -22,7 +22,7 @@ A platform where the caregiver of the elderly and its elderly people can record 
 
 This application works together with an automated pills dispenser, built with embedded systems.
 
-The dispenser has 15 usable slots to place medications. It also has a lid with a mechanism to register when an elderly person removes the medication from a slot.
+The dispenser has 15 usable slots to place medications. It also has a lid with a mechanism that registers when an elderly person removes the medication from the device.
 
 <p align="center">
   <img
