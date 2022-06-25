@@ -32,7 +32,7 @@ The dispenser has 15 usable slots to place medications. It also has a lid with a
   >
 </p>
 
-This front-end application is part of a project where I worked with three other people: [Adryan](https://github.com/AdryanR), Paloma and [Ricardo](https://github.com/ricardo-14).
+This front-end application is part of a project where I worked with three other people: [Adryan](https://github.com/AdryanR), [Paloma](https://github.com/Paloma-Marian) and [Ricardo](https://github.com/ricardo-14).
 
 ## Install the dependencies
 
