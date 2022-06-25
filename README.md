@@ -26,7 +26,7 @@ The dispenser has 15 usable slots to place medications. It also has a lid with a
 
 <p align="center">
   <img
-    width="30%"
+    width="45%"
     alt="Dispenser prototype with circular shape"
     src="https://user-images.githubusercontent.com/56984939/175790549-d4c8776e-41c4-46e5-bc72-2e3f99bc8b58.png"
   >
