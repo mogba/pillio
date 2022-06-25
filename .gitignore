@@ -34,5 +34,5 @@ yarn-error.log*
 *.sln
 
 # SSL certificates
-# certs
-# *.pem
+certs
+*.pem
