@@ -18,7 +18,7 @@ npm install
 
 3. Run
 
-   `mkdir -p certs && mkcert -cert-file ./certs/localhost-key.pem -key-file ./certs/localhost.pem localhost`
+   `mkdir -p certs && mkcert -cert-file ./certs/localhost.pem -key-file ./certs/localhost-key.pem localhost`
 
 ### Start the app in development mode
 
