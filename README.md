@@ -2,7 +2,7 @@
 
 Pilli-o is a platform where care takers and care recipients can track drug treatments. It is a multi platform progressive web application (PWA) which can be accessed from the browser or by installing it as an application in the computer or smartphone.
 
-<p align="center">Editing the alarm for a drug treatment in a smartphone</p>
+<p>Editing the alarm for a drug treatment in a smartphone</p>
 <div
   style="
     display: flex;
@@ -13,23 +13,23 @@ Pilli-o is a platform where care takers and care recipients can track drug treat
   "
 >
   <img
-    style="max-height: 600px;"
+    width="30%"
     alt="Lateral menu with options for alarms management and settings"
     src="https://user-images.githubusercontent.com/56984939/175789879-7a5b88ee-ef67-45d5-9a8e-725dedd27fea.png"
   >
   <img
-    style="max-height: 600px;"
+    width="30%"
     alt="Home page"
     src="https://user-images.githubusercontent.com/56984939/175789890-57a6b942-bfe5-49fc-9fce-2063fb71211b.png"
   >
   <img
-    style="max-height: 600px;"
+    width="30%"
     alt="Alarm edit page with fields such as drug name, when the treatment starts, doses and dispenser settings"
     src="https://user-images.githubusercontent.com/56984939/175789908-1a444535-4eae-4da8-bb2e-7659db9ba412.png"
   >
 </div>
 
-<p align="center">The dispenser has 15 usable slots to place medications. It also has a lid with a mechanism that registers when a care recipient removes the medication from the device.</p>
+<p>The dispenser has 15 usable slots to place medications. It also has a lid with a mechanism that registers when a care recipient removes the medication from the device.</p>
 <div
   style="
     display: flex;
@@ -39,7 +39,7 @@ Pilli-o is a platform where care takers and care recipients can track drug treat
   "
 >
   <img
-    style="max-height: 550px;"
+    width="45%"
     alt="Lateral menu with options for alarms management and settings"
     alt="Dispenser prototype with circular shape"
     src="https://user-images.githubusercontent.com/56984939/175790549-d4c8776e-41c4-46e5-bc72-2e3f99bc8b58.png"
