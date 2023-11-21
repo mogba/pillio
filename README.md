@@ -1,77 +1,75 @@
 # Pilli-o (pillio)
 
-A platform where the caregiver of the elderly and its elderly people can record and track alarms for drug treatments.
+Pilli-o is a platform where care takers and care recipients can track drug treatments. It is a multi platform progressive web application (PWA) which can be accessed from the browser or by installing it as an application in the computer or smartphone.
 
-<p align="center">
+<p align="center">Editing the alarm for a drug treatment in a smartphone</p>
+<div
+  style="
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+  "
+>
   <img
-    width="30%"
-    alt="sistema-menu"
+    style="max-height: 600px;"
+    alt="Lateral menu with options for alarms management and settings"
     src="https://user-images.githubusercontent.com/56984939/175789879-7a5b88ee-ef67-45d5-9a8e-725dedd27fea.png"
   >
   <img
-    width="30%"
-    alt="sistema-home"
+    style="max-height: 600px;"
+    alt="Home page"
     src="https://user-images.githubusercontent.com/56984939/175789890-57a6b942-bfe5-49fc-9fce-2063fb71211b.png"
   >
   <img
-    width="30%"
-    alt="app-edit-alarm"
+    style="max-height: 600px;"
+    alt="Alarm edit page with fields such as drug name, when the treatment starts, doses and dispenser settings"
     src="https://user-images.githubusercontent.com/56984939/175789908-1a444535-4eae-4da8-bb2e-7659db9ba412.png"
   >
-</p>
+</div>
 
-This application works together with an automated pills dispenser, built with embedded systems.
-
-The dispenser has 15 usable slots to place medications. It also has a lid with a mechanism that registers when an elderly person removes the medication from the device.
-
-<p align="center">
+<p align="center">The dispenser has 15 usable slots to place medications. It also has a lid with a mechanism that registers when a care recipient removes the medication from the device.</p>
+<div
+  style="
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+  "
+>
   <img
-    width="45%"
+    style="max-height: 550px;"
+    alt="Lateral menu with options for alarms management and settings"
     alt="Dispenser prototype with circular shape"
     src="https://user-images.githubusercontent.com/56984939/175790549-d4c8776e-41c4-46e5-bc72-2e3f99bc8b58.png"
   >
-</p>
+</div>
 
-This front-end application is part of a project where I worked with three other people: [Adryan](https://github.com/AdryanR), [Paloma](https://github.com/Paloma-Marian) and [Ricardo](https://github.com/ricardo-14).
+The back end and the pill dispenser were built by three other people that worked with me in this project: [Adryan](https://github.com/AdryanR), [Paloma](https://github.com/Paloma-Marian) and [Ricardo](https://github.com/ricardo-14).
 
-## Install the dependencies
+Some of the technologies used to build this project:
 
-```bash
-npm install
-```
+- JavaScript
+- Vue
+- Pinia store
+- Quasar
+- Capacitor
+- Firebase auth
+- Service workers for push notifications
+- MQTT for real-time communication with the pill dispenser
+- The pill dispenser was built with an Arduino ESP32 with wifi and bluetooth support
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+Some of the features of this project:
 
-```bash
-quasar dev
-```
+- Register and track drug treatments by time and number of doses
+- Care takers can track treatments for multiple care recipients
+- Care recipients can have multiple on-going treatments at the same time
+- Care recipients can access the system to track their own treatments
+- Integration with device resources, such as camera and wifi
 
-### Lint the files
+See the following links for more information.
 
-```bash
-npm run lint
-```
+### [In-depth Project Presentation](/docs/project-presentation.md)
 
-### Format the files
-
-```bash
-npm run format
-```
-
-### Build the app for production
-
-```bash
-quasar build
-```
-
-### Example: Build the app for Android (.apk generation on Android Studio)
-
-```bash
-quasar build -m capacitor -T android --skip-pkg --ide
-```
-
-See [Build commands](https://quasar.dev/quasar-cli-vite/developing-capacitor-apps/build-commands).
-
-### Customize the configuration
-
-See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
+### [Setup Development](/docs/setup-development.md)
