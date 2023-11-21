@@ -1,10 +1,7 @@
 <template>
   <div>
-    <div class="q-pa-md row q-gutter-md" style="min-height: 500px;">
-      <div
-        class="row absolute-center full-width"
-        style="max-width: 1000px;"
-      >
+    <div class="q-pa-md row q-gutter-md" style="min-height: 500px">
+      <div class="row absolute-center full-width" style="max-width: 1000px">
         <q-card-section
           class="col-0 col-md-6 flex justify-center content-center"
         >
@@ -12,15 +9,11 @@
             class="responsive"
             src="~/assets/undraw_medical_care_movn.svg"
             alt="Uma médica e uma enfermeira em torno de um frasco com remédios"
-          >
+          />
         </q-card-section>
 
-        <q-card-section
-          class="col-12 col-md-6 right-side-card-form"
-        >
-          <div class="app-name text-h4 q-mt-md">
-            Pilli-o
-          </div>
+        <q-card-section class="col-12 col-md-6 right-side-card-form">
+          <div class="app-name text-h4 q-mt-md">Pilli-o</div>
 
           <div class="column absolute-center full-width">
             <div v-if="registerStep === 1">
@@ -45,9 +38,7 @@
                 </q-tabs>
               </q-card-section>
 
-              <q-card-section
-                class="full-width q-px-xl"
-              >
+              <q-card-section class="full-width q-px-xl">
                 <div
                   v-if="selectedTab === TABS.login"
                   class="full-width q-gutter-y-sm"
@@ -55,21 +46,22 @@
                   <InputText
                     label="E-mail"
                     v-model="formDataRef.email"
-                    :rules="[val => val?.length > 5 || 'O e-mail deve ser informado']"
+                    :rules="[
+                      (val) => val?.length > 5 || 'O e-mail deve ser informado',
+                    ]"
                   />
                   <InputPassword
                     label="Senha"
                     v-model="formDataRef.password"
                     :rules="[
-                      val => !!val || 'A senha deve ser informada',
-                      val => val.length >= 8 || 'A senha deve possuir no mínimo 8 caracteres'
+                      (val) => !!val || 'A senha deve ser informada',
+                      (val) =>
+                        val.length >= 8 ||
+                        'A senha deve possuir no mínimo 8 caracteres',
                     ]"
                   />
 
-                  <div
-                    class="full-width q-mt-lg"
-                    style="height: 56px;"
-                  >
+                  <div class="full-width q-mt-lg" style="height: 56px">
                     <q-btn
                       no-caps
                       class="full-width"
@@ -78,7 +70,12 @@
                       color="primary"
                       size="lg"
                       :loading="loadingRef"
-                      :disable="!(formDataRef.email?.length > 5 && formDataRef.password?.length >= 8)"
+                      :disable="
+                        !(
+                          formDataRef.email?.length > 5 &&
+                          formDataRef.password?.length >= 8
+                        )
+                      "
                       @click="handleSignInUserWithEmailAndPassword"
                     >
                       <template v-slot:loading>
@@ -87,20 +84,14 @@
                     </q-btn>
                   </div>
                 </div>
-                <div
-                  v-else
-                  class="full-width q-gutter-y-sm"
-                >
+                <div v-else class="full-width q-gutter-y-sm">
                   <InputText
                     label="Como você se chama?"
                     v-model="formDataRef.name"
-                    :rules="[val => val?.length >= 3 || 'Informe seu nome']"
+                    :rules="[(val) => val?.length >= 3 || 'Informe seu nome']"
                   />
-                
-                  <div
-                    class="full-width q-mt-lg"
-                    style="height: 56px;"
-                  >
+
+                  <div class="full-width q-mt-lg" style="height: 56px">
                     <q-btn
                       no-caps
                       class="full-width"
@@ -117,31 +108,30 @@
             </div>
 
             <div v-else>
-              <q-card-section
-                class="full-width q-px-xl q-gutter-y-sm q-mt-lg"
-              >
+              <q-card-section class="full-width q-px-xl q-gutter-y-sm q-mt-lg">
                 <div class="text-h6 text-center q-mb-md">
                   Informe um e-mail e senha para cadastrar
                 </div>
-              
+
                 <InputText
                   label="E-mail"
                   v-model="formDataRef.email"
-                  :rules="[val => val?.length > 5 || 'O e-mail deve ser informado']"
+                  :rules="[
+                    (val) => val?.length > 5 || 'O e-mail deve ser informado',
+                  ]"
                 />
                 <InputPassword
                   label="Senha"
                   v-model="formDataRef.password"
                   :rules="[
-                    val => !!val || 'A senha deve ser informada',
-                    val => val.length >= 8 || 'A senha deve possuir no mínimo 8 caracteres'
+                    (val) => !!val || 'A senha deve ser informada',
+                    (val) =>
+                      val.length >= 8 ||
+                      'A senha deve possuir no mínimo 8 caracteres',
                   ]"
                 />
 
-                <div
-                  class="full-width"
-                  style="height: 56px;"
-                >
+                <div class="full-width" style="height: 56px">
                   <q-btn
                     no-caps
                     flat
@@ -150,17 +140,16 @@
                     label="Voltar à tela de login"
                     color="primary"
                     size="lg"
-                    @click="() => {
-                      registerStep = 1;
-                      selectedTab = TABS.login;
-                    }"
+                    @click="
+                      () => {
+                        registerStep = 1;
+                        selectedTab = TABS.login;
+                      }
+                    "
                   />
                 </div>
 
-                <div
-                  class="full-width q-mt-lg"
-                  style="height: 56px;"
-                >
+                <div class="full-width q-mt-lg" style="height: 56px">
                   <q-btn
                     no-caps
                     class="full-width"
@@ -169,7 +158,12 @@
                     color="primary"
                     size="lg"
                     :loading="loadingRef"
-                    :disable="!(formDataRef.email?.length > 5 && formDataRef.password?.length >= 8)"
+                    :disable="
+                      !(
+                        formDataRef.email?.length > 5 &&
+                        formDataRef.password?.length >= 8
+                      )
+                    "
                     @click="handleRegisterUser"
                   >
                     <template v-slot:loading>
@@ -186,10 +180,13 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+
 import InputText from "src/components/InputText.vue";
 import InputPassword from "src/components/InputPassword.vue";
 import {
@@ -205,8 +202,8 @@ const TABS = Object.freeze({
 });
 
 const tabsDefinition = [
-  { name: TABS.register, label: "Crie seu cadastro" },
-  { name: TABS.login, label: "Faça login" },
+  { name: TABS.register, label: t("message.signUp") },
+  { name: TABS.login, label: t("message.logIn") },
 ];
 
 const registerStep = ref(1);
@@ -223,88 +220,66 @@ function resetFormData() {
 
 function handleChangeTab(tab) {
   if (selectedTab.value !== tab.name) {
-    Object.assign(formDataRef.value, resetFormData())
+    Object.assign(formDataRef.value, resetFormData());
   }
 }
 
-export default {
-  name: "Login",
-  components: {
-    InputText,
-    InputPassword,
-  },
-  setup() {
-    const router = useRouter();
-    const $q = useQuasar();
+const router = useRouter();
+const $q = useQuasar();
 
-    const loadingRef = ref(false);
+const loadingRef = ref(false);
 
-    function handleRegisterUser() {
-      loadingRef.value = true;
+function handleRegisterUser() {
+  loadingRef.value = true;
 
-      registerUser(
-        formDataRef.value.name,
-        formDataRef.value.email,
-        formDataRef.value.password,
-        () => {
-          loadingRef.value = false;
+  registerUser(
+    formDataRef.value.name,
+    formDataRef.value.email,
+    formDataRef.value.password,
+    () => {
+      loadingRef.value = false;
 
-          $q.notify({ message: "Cadastro efetuado com sucesso." });
-          router.push("/setup");
-        },
-        (error) => {
-          $q.notify({ message: error });
-        },
-      );
+      $q.notify({ message: "Cadastro efetuado com sucesso." });
+      router.push("/setup");
+    },
+    (error) => {
+      $q.notify({ message: error });
     }
+  );
+}
 
-    function handleSignInUserWithEmailAndPassword() {
-      loadingRef.value = true;
+function handleSignInUserWithEmailAndPassword() {
+  loadingRef.value = true;
 
-      signInUserWithEmailAndPassword(
-        formDataRef.value.email,
-        formDataRef.value.password,
-        async () => {
-          const response = await getIsUserConfigured();
+  signInUserWithEmailAndPassword(
+    formDataRef.value.email,
+    formDataRef.value.password,
+    async () => {
+      const response = await getIsUserConfigured();
 
-          loadingRef.value = false;
+      loadingRef.value = false;
 
-          if (response.success) {
-            const { isUserConfigured } = response.data;
-            const redirectToRoute = isUserConfigured ? "/" : "/setup";
-            $q.notify({ message: "Log-in efetuado com sucesso." });
-            router.push(redirectToRoute);
-          }
-          else {
-            $q.notify({ message: error });
-            signOutUser();
-          }
-        },
-        (error) => {
-          loadingRef.value = false;
-          $q.notify({ message: error });
-        },
-      );
+      if (response.success) {
+        const { isUserConfigured } = response.data;
+        const redirectToRoute = isUserConfigured ? "/" : "/setup";
+        $q.notify({ message: "Log-in efetuado com sucesso." });
+        router.push(redirectToRoute);
+      } else {
+        $q.notify({ message: error });
+        signOutUser();
+      }
+    },
+    (error) => {
+      loadingRef.value = false;
+      $q.notify({ message: error });
     }
-
-    return {
-      TABS,
-      tabsDefinition,
-      selectedTab,
-      handleChangeTab,
-      registerStep,
-      formDataRef,
-      loadingRef,
-      handleRegisterUser,
-      handleSignInUserWithEmailAndPassword,
-    };
-  },
-};
+  );
+}
 </script>
 
 <style>
 .right-side-card-form {
-  background-color: #EEEEEE;
+  background-color: #eeeeee;
   position: relative;
   border-radius: 5px;
   min-height: 500px;
